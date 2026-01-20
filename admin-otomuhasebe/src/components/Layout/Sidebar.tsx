@@ -54,18 +54,18 @@ export default function Sidebar({ mobileOpen, desktopOpen, onMobileClose, onDesk
     <Box
       sx={{
         height: '100%',
-        background: 'linear-gradient(180deg, #ffffff 0%, #f9fafb 100%)',
+        bgcolor: 'var(--sidebar)',
         display: 'flex',
         flexDirection: 'column',
-        borderRight: '1px solid rgba(0,0,0,0.08)',
+        borderRight: '1px solid var(--sidebar-border)',
       }}
     >
       <Toolbar
         sx={{
           px: 3,
           py: 2.5,
-          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-          color: 'white',
+          background: 'linear-gradient(135deg, rgb(216, 121, 67) 0%, rgb(231, 138, 83) 100%)',
+          color: 'var(--sidebar-primary-foreground)',
           minHeight: '64px !important',
         }}
       >
@@ -129,19 +129,19 @@ export default function Sidebar({ mobileOpen, desktopOpen, onMobileClose, onDesk
                   mb: 0.5,
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                   '&:hover': {
-                    bgcolor: alpha('#6366f1', 0.08),
+                    bgcolor: alpha('rgb(216, 121, 67)', 0.08),
                     transform: 'translateX(4px)',
                   },
                   '&.Mui-selected': {
-                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                    color: 'white',
-                    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                    background: 'linear-gradient(135deg, rgb(216, 121, 67) 0%, rgb(231, 138, 83) 100%)',
+                    color: 'var(--sidebar-primary-foreground)',
+                    boxShadow: '0 4px 12px rgba(216, 121, 67, 0.3)',
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                      background: 'linear-gradient(135deg, rgb(200, 105, 50) 0%, rgb(220, 125, 70) 100%)',
                       transform: 'translateX(4px)',
                     },
                     '& .MuiListItemIcon-root': {
-                      color: 'white',
+                      color: 'var(--sidebar-primary-foreground)',
                     },
                     '& .MuiListItemText-primary': {
                       fontWeight: 600,
@@ -151,7 +151,7 @@ export default function Sidebar({ mobileOpen, desktopOpen, onMobileClose, onDesk
               >
                 <ListItemIcon
                   sx={{
-                    color: isSelected ? 'white' : '#64748b',
+                    color: isSelected ? 'var(--sidebar-primary-foreground)' : 'var(--sidebar-foreground)',
                     minWidth: 40,
                     transition: 'color 0.2s ease',
                   }}
@@ -175,13 +175,13 @@ export default function Sidebar({ mobileOpen, desktopOpen, onMobileClose, onDesk
         sx={{
           p: 2,
           textAlign: 'center',
-          background: alpha('#6366f1', 0.04),
+          background: alpha('rgb(216, 121, 67)', 0.04),
         }}
       >
         <Typography
           variant="caption"
           sx={{
-            color: '#64748b',
+            color: 'var(--muted-foreground)',
             fontSize: '0.75rem',
             fontWeight: 500,
           }}
@@ -224,8 +224,8 @@ export default function Sidebar({ mobileOpen, desktopOpen, onMobileClose, onDesk
           '& .MuiDrawer-paper': {
             boxSizing: 'border-box',
             width: drawerWidth,
-            borderRight: '1px solid rgba(0,0,0,0.08)',
-            boxShadow: '2px 0 8px rgba(0,0,0,0.05)',
+            borderRight: '1px solid var(--sidebar-border)',
+            boxShadow: 'var(--shadow-sm)',
             transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           },
         }}

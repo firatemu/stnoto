@@ -212,7 +212,7 @@ export default function Payments() {
           fontWeight="bold"
           sx={{
             fontSize: { xs: '1.75rem', sm: '2rem' },
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, rgb(216, 121, 67) 0%, rgb(231, 138, 83) 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -224,10 +224,10 @@ export default function Payments() {
           variant="contained" 
           startIcon={<Download size={18} />}
           sx={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, rgb(216, 121, 67) 0%, rgb(231, 138, 83) 100%)',
             color: 'white',
             '&:hover': {
-              background: 'linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%)',
+              background: 'linear-gradient(135deg, rgb(200, 105, 50) 0%, rgb(220, 125, 70) 100%)',
               boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
             },
             textTransform: 'none',
@@ -272,7 +272,7 @@ export default function Payments() {
               variant="h4" 
               fontWeight="bold" 
               sx={{
-                color: card.color === 'success' ? '#00C853' : card.color === 'error' ? '#F44336' : '#FF9800',
+                color: card.color === 'success' ? 'rgb(16, 185, 129)' : card.color === 'error' ? 'rgb(239, 68, 68)' : 'rgb(245, 158, 11)',
                 fontSize: { xs: '1.75rem', sm: '2rem' },
               }}
             >
@@ -302,10 +302,10 @@ export default function Payments() {
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
                 '&:hover fieldset': {
-                  borderColor: '#667eea',
+                  borderColor: 'rgb(216, 121, 67)',
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: '#667eea',
+                  borderColor: 'rgb(216, 121, 67)',
                 },
               },
             }}
@@ -317,10 +317,10 @@ export default function Payments() {
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
                 '&:hover fieldset': {
-                  borderColor: '#667eea',
+                  borderColor: 'rgb(216, 121, 67)',
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: '#667eea',
+                  borderColor: 'rgb(216, 121, 67)',
                 },
               },
             }}

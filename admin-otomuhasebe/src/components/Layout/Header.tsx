@@ -11,8 +11,9 @@ import {
   Badge,
   alpha,
 } from '@mui/material';
-import { Menu as MenuIcon, Bell, LogOut, User, X } from 'lucide-react';
+import { Menu as MenuIcon, Bell, LogOut, User, X, Moon, Sun } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
+import { useThemeStore } from '@/stores/themeStore';
 import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
@@ -23,6 +24,7 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick, mobileOpen, desktopOpen }: HeaderProps) {
   const { user, logout } = useAuthStore();
+  const { isDarkMode, toggleTheme } = useThemeStore();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -46,9 +48,9 @@ export default function Header({ onMenuClick, mobileOpen, desktopOpen }: HeaderP
       elevation={0}
       sx={{
         zIndex: (theme) => theme.zIndex.drawer + 1,
-        background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+        background: 'linear-gradient(135deg, rgb(216, 121, 67) 0%, rgb(231, 138, 83) 100%)',
         color: 'white',
-        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        boxShadow: 'var(--shadow-sm)',
         borderBottom: '1px solid rgba(255,255,255,0.1)',
       }}
     >
@@ -108,6 +110,19 @@ export default function Header({ onMenuClick, mobileOpen, desktopOpen }: HeaderP
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton
+            color="inherit"
+            onClick={toggleTheme}
+            sx={{
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                bgcolor: alpha('#fff', 0.15),
+                transform: 'scale(1.1) rotate(15deg)',
+              },
+            }}
+          >
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </IconButton>
           <IconButton
             color="inherit"
             sx={{
@@ -179,7 +194,7 @@ export default function Header({ onMenuClick, mobileOpen, desktopOpen }: HeaderP
                   py: 1.5,
                   gap: 1.5,
                   '&:hover': {
-                    bgcolor: alpha('#6366f1', 0.1),
+                    bgcolor: alpha('rgb(216, 121, 67)', 0.1),
                   },
                 },
               },
@@ -194,7 +209,7 @@ export default function Header({ onMenuClick, mobileOpen, desktopOpen }: HeaderP
               sx={{
                 color: 'error.main',
                 '&:hover': {
-                  bgcolor: alpha('#f44336', 0.1),
+                  bgcolor: alpha('rgb(239, 68, 68)', 0.1),
                 },
               }}
             >
