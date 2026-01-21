@@ -1231,8 +1231,8 @@ export default function MasrafPage() {
           }}
         >
           <DialogTitle sx={{ color: 'var(--foreground)', borderBottom: '1px solid var(--border)' }}>Kategori Silme Onayı</DialogTitle>
-          <DialogContent>
-            <Typography>
+          <DialogContent sx={{ bgcolor: 'var(--background)' }}>
+            <Typography sx={{ color: 'var(--foreground)' }}>
               Bu kategoriyi silmek istediğinizden emin misiniz?
               <br />
               <strong>Kategori: </strong>{selectedKategori?.kategoriAdi}
@@ -1249,13 +1249,31 @@ export default function MasrafPage() {
               )}
             </Typography>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenKategoriDelete(false)}>İptal</Button>
+          <DialogActions sx={{ bgcolor: 'var(--card)', borderTop: '1px solid var(--border)' }}>
+            <Button 
+              onClick={() => setOpenKategoriDelete(false)}
+              sx={{
+                borderColor: 'var(--border)',
+                color: 'var(--foreground)',
+                '&:hover': {
+                  borderColor: 'var(--primary)',
+                  bgcolor: 'color-mix(in srgb, var(--primary) 10%, transparent)',
+                },
+              }}
+            >
+              İptal
+            </Button>
             <Button
               variant="contained"
-              color="error"
               onClick={handleKategoriDelete}
               disabled={actionLoading || !!selectedKategori?._count?.masraflar}
+              sx={{
+                bgcolor: 'var(--destructive)',
+                color: 'var(--destructive-foreground)',
+                '&:hover': {
+                  bgcolor: 'color-mix(in srgb, var(--destructive) 90%, #000 10%)',
+                },
+              }}
             >
               Sil
             </Button>
