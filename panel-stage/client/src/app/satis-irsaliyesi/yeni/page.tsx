@@ -542,6 +542,7 @@ function YeniSatisIrsaliyesiPageContent() {
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <TextField
                 sx={{ flex: '1 1 200px' }}
+                className="form-control-textfield"
                 label="İrsaliye No"
                 value={formData.irsaliyeNo}
                 onChange={(e) => setFormData(prev => ({ ...prev, irsaliyeNo: e.target.value }))}
@@ -549,6 +550,7 @@ function YeniSatisIrsaliyesiPageContent() {
               />
               <TextField
                 sx={{ flex: '1 1 200px' }}
+                className="form-control-textfield"
                 type="date"
                 label="İrsaliye Tarihi"
                 value={formData.irsaliyeTarihi}
@@ -556,7 +558,7 @@ function YeniSatisIrsaliyesiPageContent() {
                 InputLabelProps={{ shrink: true }}
                 required
               />
-              <FormControl sx={{ flex: '1 1 200px' }} required>
+              <FormControl sx={{ flex: '1 1 200px' }} className="form-control-select" required>
                 <InputLabel>Durum</InputLabel>
                 <Select
                   value={formData.durum}
@@ -596,6 +598,7 @@ function YeniSatisIrsaliyesiPageContent() {
                 renderInput={(params) => (
                   <TextField
                     {...params}
+                    className="form-control-textfield"
                     label="Cari Seçiniz"
                     placeholder="Cari kodu veya ünvanı ile ara..."
                     required
@@ -722,6 +725,7 @@ function YeniSatisIrsaliyesiPageContent() {
                               renderInput={(params) => (
                                 <TextField
                                   {...params}
+                                  className="form-control-textfield"
                                   placeholder="Stok kodu, adı veya barkod ile ara..."
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter' && !(autocompleteOpenStates[index])) {
@@ -740,6 +744,7 @@ function YeniSatisIrsaliyesiPageContent() {
                               fullWidth
                               type="number"
                               size="small"
+                              className="form-control-textfield"
                               value={kalem.miktar}
                               onChange={(e) => handleKalemChange(index, 'miktar', e.target.value)}
                               onKeyDown={(e) => {
@@ -756,6 +761,7 @@ function YeniSatisIrsaliyesiPageContent() {
                               fullWidth
                               type="number"
                               size="small"
+                              className="form-control-textfield"
                               value={kalem.birimFiyat}
                               onChange={(e) => handleKalemChange(index, 'birimFiyat', e.target.value)}
                               onKeyDown={(e) => {
@@ -772,6 +778,7 @@ function YeniSatisIrsaliyesiPageContent() {
                               fullWidth
                               type="number"
                               size="small"
+                              className="form-control-textfield"
                               value={kalem.kdvOrani}
                               onChange={(e) => handleKalemChange(index, 'kdvOrani', e.target.value)}
                               onKeyDown={(e) => {
@@ -805,6 +812,7 @@ function YeniSatisIrsaliyesiPageContent() {
                               <TextField
                                 fullWidth
                                 size="small"
+                                className="form-control-textfield"
                                 value={kalem.iskontoFormula || ''}
                                 onChange={(e) => {
                                   const value = e.target.value;
@@ -831,6 +839,7 @@ function YeniSatisIrsaliyesiPageContent() {
                                 fullWidth
                                 type="number"
                                 size="small"
+                                className="form-control-textfield"
                                 value={kalem.iskontoOran || ''}
                                 onChange={(e) => handleKalemChange(index, 'iskontoOran', e.target.value)}
                                 inputProps={{
@@ -859,6 +868,7 @@ function YeniSatisIrsaliyesiPageContent() {
                               fullWidth
                               type="number"
                               size="small"
+                              className="form-control-textfield"
                               value={kalem.iskontoTutar || ''}
                               onChange={(e) => handleKalemChange(index, 'iskontoTutar', e.target.value)}
                               disabled={kalem.cokluIskonto}
@@ -914,6 +924,7 @@ function YeniSatisIrsaliyesiPageContent() {
               <TextField
                 type="number"
                 label="Genel İskonto %"
+                className="form-control-textfield"
                 value={formData.genelIskontoOran || ''}
                 onChange={(e) => handleGenelIskontoOranChange(e.target.value)}
                 inputProps={{ min: 0, max: 100, step: 0.01 }}
@@ -936,6 +947,7 @@ function YeniSatisIrsaliyesiPageContent() {
               <TextField
                 type="number"
                 label="Genel İskonto (₺)"
+                className="form-control-textfield"
                 value={formData.genelIskontoTutar || ''}
                 onChange={(e) => handleGenelIskontoTutarChange(e.target.value)}
                 inputProps={{ min: 0, step: 0.01 }}
@@ -964,6 +976,7 @@ function YeniSatisIrsaliyesiPageContent() {
                 multiline
                 rows={2}
                 label="Açıklama / Notlar"
+                className="form-control-textfield"
                 value={formData.aciklama}
                 onChange={(e) => setFormData(prev => ({ ...prev, aciklama: e.target.value }))}
               />

@@ -232,22 +232,9 @@ export default function SatisIrsaliyeleriPage() {
                   handleSearch();
                 }
               }}
+              className="form-control-textfield"
               InputProps={{
                 startAdornment: <Search sx={{ mr: 1, color: 'var(--muted-foreground)' }} />,
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  bgcolor: 'var(--input)',
-                  '& fieldset': {
-                    borderColor: 'var(--border)',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: 'var(--ring)',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'var(--primary)',
-                  },
-                },
               }}
             />
             <Button
@@ -301,36 +288,48 @@ export default function SatisIrsaliyeleriPage() {
                 {irsaliyeler.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
                         İrsaliye bulunamadı
                       </Typography>
                     </TableCell>
                   </TableRow>
                 ) : (
                   irsaliyeler.map((irsaliye) => (
-                    <TableRow key={irsaliye.id} hover>
-                      <TableCell>{irsaliye.irsaliyeNo}</TableCell>
-                      <TableCell>{formatDate(irsaliye.irsaliyeTarihi)}</TableCell>
-                      <TableCell>{irsaliye.cari?.unvan || '-'}</TableCell>
+                    <TableRow 
+                      key={irsaliye.id} 
+                      hover
+                      sx={{
+                        '&:hover': {
+                          bgcolor: 'var(--muted)',
+                        },
+                        borderBottom: '1px solid var(--border)',
+                      }}
+                    >
+                      <TableCell sx={{ color: 'var(--primary)' }}>{irsaliye.irsaliyeNo}</TableCell>
+                      <TableCell sx={{ color: 'var(--foreground)' }}>{formatDate(irsaliye.irsaliyeTarihi)}</TableCell>
+                      <TableCell sx={{ color: 'var(--foreground)' }}>{irsaliye.cari?.unvan || '-'}</TableCell>
                       <TableCell>
                         {irsaliye.kaynakSiparis?.siparisNo ? (
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
                             {irsaliye.kaynakSiparis.siparisNo}
                           </Typography>
                         ) : (
-                          <Typography variant="body2" color="text.disabled">-</Typography>
+                          <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>-</Typography>
                         )}
                       </TableCell>
                       <TableCell>
                         <Chip
                           label={getKaynakTipLabel(irsaliye.kaynakTip)}
                           size="small"
-                          color="default"
+                          sx={{
+                            borderColor: 'var(--border)',
+                            color: 'var(--foreground)',
+                          }}
                           variant="outlined"
                         />
                       </TableCell>
-                      <TableCell align="right">{formatCurrency(irsaliye.toplamTutar)}</TableCell>
-                      <TableCell align="right">{formatCurrency(irsaliye.kdvTutar)}</TableCell>
+                      <TableCell align="right" sx={{ color: 'var(--foreground)' }}>{formatCurrency(irsaliye.toplamTutar)}</TableCell>
+                      <TableCell align="right" sx={{ color: 'var(--foreground)' }}>{formatCurrency(irsaliye.kdvTutar)}</TableCell>
                       <TableCell align="right">
                         <Typography 
                           variant="body2" 
@@ -346,7 +345,18 @@ export default function SatisIrsaliyeleriPage() {
                         <Chip
                           label={getDurumLabel(irsaliye.durum)}
                           size="small"
-                          color={getDurumColor(irsaliye.durum) as any}
+                          sx={{
+                            bgcolor: irsaliye.durum === 'FATURALANDI' 
+                              ? 'color-mix(in srgb, var(--chart-2) 15%, transparent)' 
+                              : 'color-mix(in srgb, var(--chart-3) 15%, transparent)',
+                            color: irsaliye.durum === 'FATURALANDI' 
+                              ? 'var(--chart-2)' 
+                              : 'var(--chart-3)',
+                            borderColor: irsaliye.durum === 'FATURALANDI' 
+                              ? 'var(--chart-2)' 
+                              : 'var(--chart-3)',
+                          }}
+                          variant="outlined"
                         />
                       </TableCell>
                       <TableCell align="center">
@@ -380,6 +390,12 @@ export default function SatisIrsaliyeleriPage() {
                           <IconButton
                             size="small"
                             onClick={(e) => handleMenuOpen(e, irsaliye)}
+                            sx={{
+                              color: 'var(--muted-foreground)',
+                              '&:hover': { 
+                                bgcolor: 'color-mix(in srgb, var(--muted-foreground) 10%, transparent)',
+                              },
+                            }}
                           >
                             <MoreVert fontSize="small" />
                           </IconButton>
