@@ -857,6 +857,7 @@ function YeniSatisFaturasiPageContent() {
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <TextField
               sx={{ flex: '1 1 200px' }}
+              className="form-control-textfield"
               label="Fatura No"
               value={formData.faturaNo}
               onChange={(e) => setFormData(prev => ({ ...prev, faturaNo: e.target.value }))}
@@ -864,6 +865,7 @@ function YeniSatisFaturasiPageContent() {
             />
             <TextField
               sx={{ flex: '1 1 200px' }}
+              className="form-control-textfield"
               type="date"
               label="Tarih"
               value={formData.tarih}
@@ -873,13 +875,14 @@ function YeniSatisFaturasiPageContent() {
             />
             <TextField
               sx={{ flex: '1 1 200px' }}
+              className="form-control-textfield"
               type="date"
               label="Vade"
               value={formData.vade}
               onChange={(e) => setFormData(prev => ({ ...prev, vade: e.target.value }))}
               InputLabelProps={{ shrink: true }}
             />
-            <FormControl sx={{ flex: '1 1 200px' }} required>
+            <FormControl sx={{ flex: '1 1 200px' }} className="form-control-select" required>
               <InputLabel>Durum</InputLabel>
               <Select
                 value={formData.durum}
@@ -918,10 +921,10 @@ function YeniSatisFaturasiPageContent() {
                 return (
                   <Box component="li" key={key} {...otherProps}>
                     <Box>
-                      <Typography variant="body1" fontWeight="600">
+                      <Typography variant="body1" fontWeight="600" sx={{ color: 'var(--foreground)' }}>
                         {option.unvan}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
                         {option.cariKodu} - {option.tip === 'MUSTERI' ? 'Müşteri' : 'Tedarikçi'}
                       </Typography>
                     </Box>
@@ -931,6 +934,7 @@ function YeniSatisFaturasiPageContent() {
               renderInput={(params) => (
                 <TextField
                   {...params}
+                  className="form-control-textfield"
                   label="Cari Seçiniz"
                   placeholder="Cari kodu veya ünvanı ile ara..."
                   required
@@ -1023,6 +1027,7 @@ function YeniSatisFaturasiPageContent() {
                 maxHeight: 400,
                 borderRadius: 'var(--radius)',
                 borderColor: 'var(--border)',
+                bgcolor: 'var(--card)',
               }}
             >
               <Table stickyHeader size="small">
@@ -1043,14 +1048,23 @@ function YeniSatisFaturasiPageContent() {
                   {formData.kalemler.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
                           Henüz kalem eklenmedi. Yukarıdaki butonu kullanarak kalem ekleyin.
                         </Typography>
                       </TableCell>
                     </TableRow>
                   ) : (
                     formData.kalemler.map((kalem, index) => (
-                      <TableRow key={index}>
+                      <TableRow 
+                        key={index}
+                        sx={{
+                          bgcolor: 'var(--background)',
+                          '&:hover': {
+                            bgcolor: 'var(--muted) !important',
+                          },
+                          borderBottom: '1px solid var(--border)',
+                        }}
+                      >
                         <TableCell>
                           <Autocomplete
                             size="small"
@@ -1100,6 +1114,7 @@ function YeniSatisFaturasiPageContent() {
                             renderInput={(params) => (
                               <TextField
                                 {...params}
+                                className="form-control-textfield"
                                 placeholder="Stok kodu, adı veya barkod ile ara..."
                                 onKeyDown={(e) => {
                                   // Dropdown açık değilse ve Enter tuşuna basıldıysa yeni kalem ekle
@@ -1119,6 +1134,7 @@ function YeniSatisFaturasiPageContent() {
                             fullWidth
                             type="number"
                             size="small"
+                            className="form-control-textfield"
                             value={kalem.miktar}
                             onChange={(e) => handleKalemChange(index, 'miktar', e.target.value)}
                             onKeyDown={(e) => {
@@ -1135,6 +1151,7 @@ function YeniSatisFaturasiPageContent() {
                             fullWidth
                             type="number"
                             size="small"
+                            className="form-control-textfield"
                             value={kalem.birimFiyat}
                             onChange={(e) => handleKalemChange(index, 'birimFiyat', e.target.value)}
                             onKeyDown={(e) => {
@@ -1151,6 +1168,7 @@ function YeniSatisFaturasiPageContent() {
                             fullWidth
                             type="number"
                             size="small"
+                            className="form-control-textfield"
                             value={kalem.kdvOrani}
                             onChange={(e) => handleKalemChange(index, 'kdvOrani', e.target.value)}
                             onKeyDown={(e) => {
@@ -1168,9 +1186,11 @@ function YeniSatisFaturasiPageContent() {
                             onClick={() => handleKalemChange(index, 'cokluIskonto', !kalem.cokluIskonto)}
                             title={kalem.cokluIskonto ? 'Çoklu İskonto: Açık (10+5 formatı)' : 'Çoklu İskonto: Kapalı (Tek oran)'}
                             sx={{
-                              color: kalem.cokluIskonto ? '#10b981' : '#9ca3af',
+                              color: kalem.cokluIskonto ? 'var(--chart-2)' : 'var(--muted-foreground)',
                               '&:hover': {
-                                bgcolor: kalem.cokluIskonto ? '#ecfdf5' : '#f3f4f6',
+                                bgcolor: kalem.cokluIskonto 
+                                  ? 'color-mix(in srgb, var(--chart-2) 10%, transparent)' 
+                                  : 'var(--muted)',
                               }
                             }}
                           >
@@ -1182,6 +1202,7 @@ function YeniSatisFaturasiPageContent() {
                             <TextField
                               fullWidth
                               size="small"
+                              className="form-control-textfield"
                               value={kalem.iskontoFormula || ''}
                               onChange={(e) => {
                                 const value = e.target.value;
@@ -1196,7 +1217,7 @@ function YeniSatisFaturasiPageContent() {
                                 '& .MuiInputBase-input': {
                                   fontFamily: 'monospace',
                                   fontWeight: 600,
-                                  color: '#10b981',
+                                  color: 'var(--chart-2)',
                                 },
                                 '& .MuiFormHelperText-root': {
                                   fontSize: '0.65rem',
@@ -1209,6 +1230,7 @@ function YeniSatisFaturasiPageContent() {
                               fullWidth
                               type="number"
                               size="small"
+                              className="form-control-textfield"
                               value={kalem.iskontoOran || ''}
                               onChange={(e) => handleKalemChange(index, 'iskontoOran', e.target.value)}
                               inputProps={{
@@ -1237,6 +1259,7 @@ function YeniSatisFaturasiPageContent() {
                             fullWidth
                             type="number"
                             size="small"
+                            className="form-control-textfield"
                             value={kalem.iskontoTutar || ''}
                             onChange={(e) => handleKalemChange(index, 'iskontoTutar', e.target.value)}
                             disabled={kalem.cokluIskonto}
@@ -1292,6 +1315,7 @@ function YeniSatisFaturasiPageContent() {
             <TextField
               type="number"
               label="Genel İskonto %"
+              className="form-control-textfield"
               value={formData.genelIskontoOran || ''}
               onChange={(e) => handleGenelIskontoOranChange(e.target.value)}
               inputProps={{ min: 0, max: 100, step: 0.01 }}
@@ -1314,6 +1338,7 @@ function YeniSatisFaturasiPageContent() {
             <TextField
               type="number"
               label="Genel İskonto (₺)"
+              className="form-control-textfield"
               value={formData.genelIskontoTutar || ''}
               onChange={(e) => handleGenelIskontoTutarChange(e.target.value)}
               inputProps={{ min: 0, step: 0.01 }}
@@ -1341,6 +1366,7 @@ function YeniSatisFaturasiPageContent() {
               fullWidth
               multiline
               rows={2}
+              className="form-control-textfield"
               label="Açıklama / Notlar"
               value={formData.aciklama}
               onChange={(e) => setFormData(prev => ({ ...prev, aciklama: e.target.value }))}
@@ -1370,32 +1396,32 @@ function YeniSatisFaturasiPageContent() {
             <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
               <Box sx={{ flex: '1 1 300px' }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body1">Ara Toplam:</Typography>
-                    <Typography variant="body1" fontWeight="600">{formatCurrency(totals.araToplam)}</Typography>
+                    <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>Ara Toplam:</Typography>
+                    <Typography variant="body1" fontWeight="600" sx={{ color: 'var(--foreground)' }}>{formatCurrency(totals.araToplam)}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body1">Kalem İndirimleri:</Typography>
-                    <Typography variant="body1" fontWeight="600" color={totals.toplamKalemIskontosu > 0 ? "error" : "inherit"}>
+                    <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>Kalem İndirimleri:</Typography>
+                    <Typography variant="body1" fontWeight="600" sx={{ color: totals.toplamKalemIskontosu > 0 ? 'var(--destructive)' : 'var(--foreground)' }}>
                       {totals.toplamKalemIskontosu > 0 ? '- ' : ''}{formatCurrency(totals.toplamKalemIskontosu)}
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body1">Genel İskonto:</Typography>
-                    <Typography variant="body1" fontWeight="600" color={totals.genelIskonto > 0 ? "error" : "inherit"}>
+                    <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>Genel İskonto:</Typography>
+                    <Typography variant="body1" fontWeight="600" sx={{ color: totals.genelIskonto > 0 ? 'var(--destructive)' : 'var(--foreground)' }}>
                       {totals.genelIskonto > 0 ? '- ' : ''}{formatCurrency(totals.genelIskonto)}
                     </Typography>
                   </Box>
                 </Box>
                 <Box sx={{ flex: '1 1 300px' }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body1" fontWeight="bold">Toplam İndirim:</Typography>
-                    <Typography variant="body1" fontWeight="bold" color={totals.toplamIskonto > 0 ? "error" : "inherit"}>
+                    <Typography variant="body1" fontWeight="bold" sx={{ color: 'var(--foreground)' }}>Toplam İndirim:</Typography>
+                    <Typography variant="body1" fontWeight="bold" sx={{ color: totals.toplamIskonto > 0 ? 'var(--destructive)' : 'var(--foreground)' }}>
                       {totals.toplamIskonto > 0 ? '- ' : ''}{formatCurrency(totals.toplamIskonto)}
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body1">KDV Toplamı:</Typography>
-                    <Typography variant="body1" fontWeight="600">{formatCurrency(totals.toplamKdv)}</Typography>
+                    <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>KDV Toplamı:</Typography>
+                    <Typography variant="body1" fontWeight="600" sx={{ color: 'var(--foreground)' }}>{formatCurrency(totals.toplamKdv)}</Typography>
                   </Box>
                   <Divider sx={{ my: 1, borderColor: 'var(--border)' }} />
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
