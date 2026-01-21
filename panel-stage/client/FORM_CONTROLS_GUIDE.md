@@ -295,6 +295,8 @@ Tablolarda form elemanları için:
 
 Tüm Material-UI tablolar için otomatik uygulanan global stiller:
 
+**NOT:** Bu stiller `globals.css` dosyasında tanımlıdır ve otomatik uygulanır.
+
 ```css
 /* Tablo Container */
 .MuiTableContainer-root {
@@ -338,6 +340,67 @@ Tüm Material-UI tablolar için otomatik uygulanan global stiller:
 </TableContainer>
 ```
 
+## 🎭 Global Dialog Styles
+
+Tüm Material-UI dialog'lar için otomatik uygulanan global stiller:
+
+**NOT:** Bu stiller `globals.css` dosyasında tanımlıdır ve otomatik uygulanır.
+
+```css
+/* Dialog Paper */
+.MuiDialog-paper {
+  background-color: var(--card);
+  background-image: none;
+  color: var(--card-foreground);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+/* Dialog Content */
+.MuiDialogContent-root {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Dialog Title */
+.MuiDialogTitle-root {
+  color: var(--foreground);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Dialog Actions */
+.MuiDialogActions-root {
+  border-top: 1px solid var(--border);
+  background-color: var(--card);
+}
+```
+
+**Kullanım:**
+```tsx
+// Hiçbir ek PaperProps gerekmez, otomatik uygulanır
+<Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+  <DialogTitle>Başlık</DialogTitle>
+  <DialogContent>
+    {/* Form elemanları */}
+    <TextField className="form-control-textfield" ... />
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleClose}>İptal</Button>
+    <Button variant="contained">Kaydet</Button>
+  </DialogActions>
+</Dialog>
+```
+
+**Özel Başlık Rengi için:**
+```tsx
+<DialogTitle sx={{ 
+  bgcolor: 'var(--primary)', 
+  color: 'var(--primary-foreground)' 
+}}>
+  Özel Renkli Başlık
+</DialogTitle>
+```
+
 ## 🔧 Troubleshooting
 
 **Sorun:** Dark mode'da helper text görünmüyor
@@ -355,11 +418,16 @@ Tüm Material-UI tablolar için otomatik uygulanan global stiller:
 **Sorun:** Tablo arka planı farklı renkte
 **Çözüm:** Global table CSS'leri otomatik uygulanır, ekstra stil gerekmez
 
+**Sorun:** Dialog arka planı dark mode'da görünmüyor
+**Çözüm:** Global dialog CSS'leri otomatik uygulanır, PaperProps gerekmez
+
 ---
 
 **Son Güncelleme:** 2026-01-21
-**Versiyon:** 1.2.0
+**Versiyon:** 1.3.0
 **Changelog:**
+- v1.3.0: Global dialog CSS stilleri eklendi (otomatik uygulanır)
+- v1.3.0: Dialog paper, content, title, actions stilleri CSS'e taşındı
 - v1.2.0: Global table CSS stilleri eklendi (otomatik uygulanır)
 - v1.2.0: Tablo arka plan ve hover durumları CSS'e taşındı
 - v1.1.0: Helper text ve placeholder stilleri eklendi
