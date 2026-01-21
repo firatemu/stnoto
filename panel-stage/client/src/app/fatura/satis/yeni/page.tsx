@@ -1033,15 +1033,15 @@ function YeniSatisFaturasiPageContent() {
               <Table stickyHeader size="small">
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'var(--muted)' }}>
-                    <TableCell width="25%" sx={{ fontWeight: 700, color: 'var(--foreground)' }}>Stok</TableCell>
-                    <TableCell width="8%" sx={{ fontWeight: 700, color: 'var(--foreground)' }}>Miktar</TableCell>
-                    <TableCell width="10%" sx={{ fontWeight: 700, color: 'var(--foreground)' }}>Birim Fiyat</TableCell>
-                    <TableCell width="8%" sx={{ fontWeight: 700, color: 'var(--foreground)' }}>KDV %</TableCell>
-                    <TableCell width="3%" sx={{ fontWeight: 700, color: 'var(--foreground)' }} title="Çoklu İskonto">Ç.İ.</TableCell>
-                    <TableCell width="10%" sx={{ fontWeight: 700, color: 'var(--foreground)' }}>İsk. Oran %</TableCell>
-                    <TableCell width="12%" sx={{ fontWeight: 700, color: 'var(--foreground)' }}>İsk. Tutar</TableCell>
-                    <TableCell width="12%" align="right" sx={{ fontWeight: 700, color: 'var(--foreground)' }}>Toplam</TableCell>
-                    <TableCell width="5%" align="center" sx={{ fontWeight: 700, color: 'var(--foreground)' }}>Sil</TableCell>
+                    <TableCell width="25%" sx={{ fontWeight: 700, color: 'var(--foreground) !important' }}>Stok</TableCell>
+                    <TableCell width="8%" sx={{ fontWeight: 700, color: 'var(--foreground) !important' }}>Miktar</TableCell>
+                    <TableCell width="10%" sx={{ fontWeight: 700, color: 'var(--foreground) !important' }}>Birim Fiyat</TableCell>
+                    <TableCell width="8%" sx={{ fontWeight: 700, color: 'var(--foreground) !important' }}>KDV %</TableCell>
+                    <TableCell width="3%" sx={{ fontWeight: 700, color: 'var(--foreground) !important' }} title="Çoklu İskonto">Ç.İ.</TableCell>
+                    <TableCell width="10%" sx={{ fontWeight: 700, color: 'var(--foreground) !important' }}>İsk. Oran %</TableCell>
+                    <TableCell width="12%" sx={{ fontWeight: 700, color: 'var(--foreground) !important' }}>İsk. Tutar</TableCell>
+                    <TableCell width="12%" align="right" sx={{ fontWeight: 700, color: 'var(--foreground) !important' }}>Toplam</TableCell>
+                    <TableCell width="5%" align="center" sx={{ fontWeight: 700, color: 'var(--foreground) !important' }}>Sil</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
