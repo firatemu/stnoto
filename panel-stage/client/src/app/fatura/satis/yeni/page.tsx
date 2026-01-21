@@ -1378,9 +1378,11 @@ function YeniSatisFaturasiPageContent() {
             variant="outlined" 
             sx={{ 
               p: 3, 
-              bgcolor: 'color-mix(in srgb, var(--muted) 50%, transparent)',
+              bgcolor: 'var(--card)',
               borderRadius: 'var(--radius)',
               borderColor: 'var(--border)',
+              borderWidth: '1px',
+              boxShadow: 'var(--shadow-sm)',
             }}
           >
             <Typography 
@@ -1389,47 +1391,55 @@ function YeniSatisFaturasiPageContent() {
                 fontWeight: 700,
                 color: 'var(--foreground)',
                 mb: 2,
+                letterSpacing: '-0.01em',
               }}
             >
               Fatura Özeti
             </Typography>
+            <Divider sx={{ mb: 2, borderColor: 'var(--border)' }} />
             <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
               <Box sx={{ flex: '1 1 300px' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>Ara Toplam:</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+                    <Typography variant="body1" sx={{ color: 'var(--muted-foreground)' }}>Ara Toplam:</Typography>
                     <Typography variant="body1" fontWeight="600" sx={{ color: 'var(--foreground)' }}>{formatCurrency(totals.araToplam)}</Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>Kalem İndirimleri:</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+                    <Typography variant="body1" sx={{ color: 'var(--muted-foreground)' }}>Kalem İndirimleri:</Typography>
                     <Typography variant="body1" fontWeight="600" sx={{ color: totals.toplamKalemIskontosu > 0 ? 'var(--destructive)' : 'var(--foreground)' }}>
                       {totals.toplamKalemIskontosu > 0 ? '- ' : ''}{formatCurrency(totals.toplamKalemIskontosu)}
                     </Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>Genel İskonto:</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+                    <Typography variant="body1" sx={{ color: 'var(--muted-foreground)' }}>Genel İskonto:</Typography>
                     <Typography variant="body1" fontWeight="600" sx={{ color: totals.genelIskonto > 0 ? 'var(--destructive)' : 'var(--foreground)' }}>
                       {totals.genelIskonto > 0 ? '- ' : ''}{formatCurrency(totals.genelIskonto)}
                     </Typography>
                   </Box>
                 </Box>
                 <Box sx={{ flex: '1 1 300px' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
                     <Typography variant="body1" fontWeight="bold" sx={{ color: 'var(--foreground)' }}>Toplam İndirim:</Typography>
                     <Typography variant="body1" fontWeight="bold" sx={{ color: totals.toplamIskonto > 0 ? 'var(--destructive)' : 'var(--foreground)' }}>
                       {totals.toplamIskonto > 0 ? '- ' : ''}{formatCurrency(totals.toplamIskonto)}
                     </Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>KDV Toplamı:</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
+                    <Typography variant="body1" sx={{ color: 'var(--muted-foreground)' }}>KDV Toplamı:</Typography>
                     <Typography variant="body1" fontWeight="600" sx={{ color: 'var(--foreground)' }}>{formatCurrency(totals.toplamKdv)}</Typography>
                   </Box>
-                  <Divider sx={{ my: 1, borderColor: 'var(--border)' }} />
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Divider sx={{ my: 2, borderColor: 'var(--border)' }} />
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    pt: 1,
+                    pb: 0.5,
+                  }}>
                     <Typography 
                       variant="h6" 
                       sx={{ 
                         fontWeight: 700,
                         color: 'var(--foreground)',
+                        letterSpacing: '-0.01em',
                       }}
                     >
                       Genel Toplam:
@@ -1439,6 +1449,7 @@ function YeniSatisFaturasiPageContent() {
                       sx={{
                         fontWeight: 700,
                         color: 'var(--primary)',
+                        letterSpacing: '-0.01em',
                       }}
                     >
                       {formatCurrency(totals.genelToplam)}
