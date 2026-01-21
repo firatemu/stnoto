@@ -82,16 +82,52 @@ Material-UI TextField bileşenleri için kullanılır.
 />
 ```
 
+**Helper Text ve Placeholder:**
+
+```tsx
+<TextField
+  fullWidth
+  label="Barkod"
+  className="form-control-textfield"
+  placeholder="Örn: 8690123456789"
+  helperText="Ürün barkod numarası"
+  value={barkod}
+  onChange={handleChange}
+/>
+```
+
+**Autocomplete ile kullanım:**
+
+```tsx
+<Autocomplete
+  fullWidth
+  options={options}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      className="form-control-textfield"
+      label="Seçim yapın"
+      placeholder="Ara..."
+    />
+  )}
+/>
+```
+
 ## 🎨 Kullanılan CSS Variables
 
 Tüm class'lar aşağıdaki CSS değişkenlerini kullanır:
 
 - `--input`: Input arka plan rengi
 - `--border`: Border rengi
-- `--ring`: Focus border rengi
-- `--foreground`: Metin rengi
-- `--muted-foreground`: İkincil metin rengi (label)
+- `--ring`: Focus border rengi (hover/focus)
+- `--foreground`: Metin rengi (input text)
+- `--muted-foreground`: İkincil metin rengi (label, helper text, placeholder)
 - `--font-sans`: Font ailesi (AR One Sans)
+
+**Otomatik Uygulanan Stiller:**
+- Helper text renkleri dark mode'da otomatik ayarlanır
+- Placeholder opacity: 0.7 ile görünürlük sağlanır
+- Disabled state'de text rengi korunur (opacity ile soluklaştırılır)
 
 ## 🌙 Dark Mode Desteği
 
@@ -168,10 +204,113 @@ Değişiklik yapmak için bu dosyayı düzenleyin ve tüm sayfalar otomatik olar
 
 Bu class'ların kullanıldığı örnek sayfalar:
 
-- `/stok/malzeme-listesi` - Malzeme Listesi
-- (Diğer sayfalar eklenecek)
+- `/stok/malzeme-listesi` - Malzeme Listesi (liste + dialog)
+- `/satis-irsaliyesi` - Satış İrsaliyeleri Listesi
+- `/satis-irsaliyesi/yeni` - Yeni Satış İrsaliyesi
+
+## 🎯 CSS Implementasyon Detayları
+
+### Helper Text ve Placeholder Stilleri
+
+**Helper Text:**
+```css
+.form-control-textfield .MuiFormHelperText-root {
+  color: var(--muted-foreground) !important;
+}
+
+.form-control-select .MuiFormHelperText-root {
+  color: var(--muted-foreground) !important;
+}
+```
+
+**Placeholder:**
+```css
+.form-control-textfield .MuiInputBase-input::placeholder {
+  color: var(--muted-foreground) !important;
+  opacity: 0.7;
+}
+```
+
+### Dialog Kullanımı
+
+Dialog içinde kullanırken background ayarlaması:
+
+```tsx
+<Dialog
+  open={open}
+  onClose={onClose}
+  PaperProps={{
+    sx: { 
+      bgcolor: 'var(--card)',
+      backgroundImage: 'none'
+    }
+  }}
+>
+  <DialogContent sx={{ bgcolor: 'var(--background)' }}>
+    {/* Form elemanları */}
+    <TextField className="form-control-textfield" ... />
+    <FormControl className="form-control-select">...</FormControl>
+  </DialogContent>
+</Dialog>
+```
+
+### Tablo İçinde Kullanım
+
+Tablolarda form elemanları için:
+
+```tsx
+<TableContainer component={Paper} sx={{ bgcolor: 'var(--card)' }}>
+  <Table>
+    <TableHead>
+      <TableRow sx={{ bgcolor: 'var(--muted)' }}>
+        <TableCell sx={{ color: 'var(--foreground)', fontWeight: 700 }}>
+          Başlık
+        </TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      <TableRow sx={{ 
+        '&:hover': { bgcolor: 'var(--muted)' },
+        borderBottom: '1px solid var(--border)'
+      }}>
+        <TableCell sx={{ color: 'var(--foreground)' }}>
+          <TextField className="form-control-textfield" size="small" />
+        </TableCell>
+      </TableRow>
+    </TableBody>
+  </Table>
+</TableContainer>
+```
+
+## 💡 Best Practices
+
+1. **Her zaman class kullanın**: Tekrar eden inline styles yerine bu class'ları kullanın
+2. **Helper text ekleyin**: Kullanıcı deneyimi için açıklayıcı metinler ekleyin
+3. **Placeholder kullanın**: Örnek değerler gösterin
+4. **Disabled state**: Disabled olduğunda helper text ile açıklama yapın
+5. **Dialog background**: Dialog'larda mutlaka background renklerini ayarlayın
+6. **Tablo renkleri**: Tablolarda tüm text renkleri CSS variable kullanmalı
+
+## 🔧 Troubleshooting
+
+**Sorun:** Dark mode'da helper text görünmüyor
+**Çözüm:** `!important` kullanıldığından emin olun veya global CSS'i kontrol edin
+
+**Sorun:** Placeholder çok koyu görünüyor
+**Çözüm:** `opacity: 0.7` ayarlandığından emin olun
+
+**Sorun:** Disabled state'de text görünmüyor
+**Çözüm:** `form-control-select` class'ı disabled özel styling içerir, kullanın
+
+**Sorun:** Dialog arka planı yanlış renkte
+**Çözüm:** `PaperProps` ve `DialogContent` sx prop'larını ayarlayın
 
 ---
 
 **Son Güncelleme:** 2026-01-21
-**Versiyon:** 1.0.0
+**Versiyon:** 1.1.0
+**Changelog:**
+- v1.1.0: Helper text ve placeholder stilleri eklendi
+- v1.1.0: Dialog ve tablo kullanım örnekleri eklendi
+- v1.1.0: Best practices ve troubleshooting bölümleri eklendi
+- v1.0.0: İlk versiyon
