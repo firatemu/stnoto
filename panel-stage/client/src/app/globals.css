@@ -124,6 +124,7 @@
   .MuiTableHead-root .MuiTableCell-root {
     background-color: var(--muted);
     font-weight: 700;
+    color: var(--foreground) !important;
   }
   
   .MuiTableBody-root .MuiTableRow-root {
