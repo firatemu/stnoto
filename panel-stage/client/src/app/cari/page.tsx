@@ -653,6 +653,8 @@ export default function CariPage() {
           sx: {
             borderRadius: 'var(--radius)',
             border: '1px solid var(--border)',
+            bgcolor: 'var(--card)',
+            backgroundImage: 'none',
           },
         }}
       >
@@ -670,7 +672,7 @@ export default function CariPage() {
             <Close />
           </IconButton>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ bgcolor: 'var(--background)' }}>
           <CariForm
             data={formData}
             onChange={handleFormChange}
@@ -720,6 +722,8 @@ export default function CariPage() {
           sx: {
             borderRadius: 'var(--radius)',
             border: '1px solid var(--border)',
+            bgcolor: 'var(--card)',
+            backgroundImage: 'none',
           },
         }}
       >
@@ -737,7 +741,7 @@ export default function CariPage() {
             <Close />
           </IconButton>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ bgcolor: 'var(--background)' }}>
           <CariForm
             data={formData}
             onChange={handleFormChange}
@@ -787,6 +791,8 @@ export default function CariPage() {
           sx: {
             borderRadius: 'var(--radius)',
             border: '1px solid var(--border)',
+            bgcolor: 'var(--card)',
+            backgroundImage: 'none',
           },
         }}
       >
@@ -804,33 +810,37 @@ export default function CariPage() {
             <Close />
           </IconButton>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ bgcolor: 'var(--background)' }}>
           {selectedCari && (
             <Box sx={{ mt: 2 }}>
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 3 }}>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Cari Kodu</Typography>
-                  <Typography variant="body1" fontWeight="600">{selectedCari.cariKodu}</Typography>
+                  <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>Cari Kodu</Typography>
+                  <Typography variant="body1" fontWeight="600" sx={{ color: 'var(--foreground)' }}>{selectedCari.cariKodu}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Ünvan</Typography>
-                  <Typography variant="body1" fontWeight="600">{selectedCari.unvan}</Typography>
+                  <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>Ünvan</Typography>
+                  <Typography variant="body1" fontWeight="600" sx={{ color: 'var(--foreground)' }}>{selectedCari.unvan}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Tip</Typography>
+                  <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>Tip</Typography>
                   <Chip
                     label={selectedCari.tip}
                     size="small"
                     sx={{
-                      bgcolor: selectedCari.tip === 'MUSTERI' ? 'var(--chart-1)' : 'var(--primary)',
-                      color: 'white',
+                      bgcolor: selectedCari.tip === 'MUSTERI' 
+                        ? 'color-mix(in srgb, var(--chart-1) 15%, transparent)' 
+                        : 'color-mix(in srgb, var(--primary) 15%, transparent)',
+                      color: selectedCari.tip === 'MUSTERI' ? 'var(--chart-1)' : 'var(--primary)',
+                      borderColor: selectedCari.tip === 'MUSTERI' ? 'var(--chart-1)' : 'var(--primary)',
                       fontWeight: 600,
                       fontSize: '0.75rem',
                     }}
+                    variant="outlined"
                   />
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Bakiye</Typography>
+                  <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>Bakiye</Typography>
                   <Typography 
                     variant="h6" 
                     sx={{
@@ -844,29 +854,29 @@ export default function CariPage() {
               </Box>
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Vergi No</Typography>
-                  <Typography variant="body1">{selectedCari.vergiNo || '-'}</Typography>
+                  <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>Vergi No</Typography>
+                  <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>{selectedCari.vergiNo || '-'}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Vergi Dairesi</Typography>
-                  <Typography variant="body1">{selectedCari.vergiDairesi || '-'}</Typography>
+                  <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>Vergi Dairesi</Typography>
+                  <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>{selectedCari.vergiDairesi || '-'}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Telefon</Typography>
-                  <Typography variant="body1">{selectedCari.telefon || '-'}</Typography>
+                  <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>Telefon</Typography>
+                  <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>{selectedCari.telefon || '-'}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Email</Typography>
-                  <Typography variant="body1">{selectedCari.email || '-'}</Typography>
+                  <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>Email</Typography>
+                  <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>{selectedCari.email || '-'}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Yetkili</Typography>
-                  <Typography variant="body1">{selectedCari.yetkili || '-'}</Typography>
+                  <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>Yetkili</Typography>
+                  <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>{selectedCari.yetkili || '-'}</Typography>
                 </Box>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary">Adres</Typography>
-                <Typography variant="body1">{selectedCari.adres || '-'}</Typography>
+                <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>Adres</Typography>
+                <Typography variant="body1" sx={{ color: 'var(--foreground)' }}>{selectedCari.adres || '-'}</Typography>
               </Box>
             </Box>
           )}
@@ -884,6 +894,8 @@ export default function CariPage() {
           sx: {
             borderRadius: 'var(--radius)',
             border: '1px solid var(--border)',
+            bgcolor: 'var(--card)',
+            backgroundImage: 'none',
           },
         }}
       >
