@@ -1561,7 +1561,7 @@ export default function MalzemeListesiPage() {
             ) : filteredStoklar.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={12} align="center">
-                  <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+                  <Typography variant="body2" sx={{ py: 3, color: 'var(--muted-foreground)' }}>
                     Stok bulunamadı
                   </Typography>
                 </TableCell>
@@ -1572,12 +1572,13 @@ export default function MalzemeListesiPage() {
                   key={stok.id} 
                   hover 
                   sx={{ 
-                    '&:hover': { bgcolor: '#f9f9f9' },
+                    '&:hover': { bgcolor: 'var(--muted)' },
+                    borderBottom: '1px solid var(--border)',
                   }}
                 >
-                  <TableCell>
+                  <TableCell sx={{ color: 'var(--foreground)' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" fontWeight="600" color="#191970">
+                      <Typography variant="body2" fontWeight="600" sx={{ color: 'var(--primary)' }}>
                         {stok.stokKodu}
                       </Typography>
                       <IconButton
@@ -1585,56 +1586,61 @@ export default function MalzemeListesiPage() {
                         onClick={() => handleOpenEsdegerDialog(stok)}
                         sx={{ 
                           padding: '4px',
+                          color: 'var(--primary)',
                           '&:hover': { 
-                            bgcolor: '#e3f2fd',
+                            bgcolor: 'color-mix(in srgb, var(--primary) 10%, transparent)',
                           },
                         }}
                         title="Eşdeğer ürünleri göster"
                       >
-                        <CompareArrows fontSize="small" color="primary" />
+                        <CompareArrows fontSize="small" />
                       </IconButton>
                     </Box>
                   </TableCell>
-                  <TableCell>{stok.stokAdi}</TableCell>
-                  <TableCell>{stok.marka || '-'}</TableCell>
-                  <TableCell>
+                  <TableCell sx={{ color: 'var(--foreground)' }}>{stok.stokAdi}</TableCell>
+                  <TableCell sx={{ color: 'var(--foreground)' }}>{stok.marka || '-'}</TableCell>
+                  <TableCell sx={{ color: 'var(--foreground)' }}>
                     {stok.raf && stok.raf.trim() !== '' ? (
                       <Chip
                         label={stok.raf}
                         size="small"
-                        color="primary"
                         variant="outlined"
-                        sx={{ fontSize: '0.75rem' }}
+                        sx={{ 
+                          fontSize: '0.75rem',
+                          borderColor: 'var(--primary)',
+                          color: 'var(--primary)',
+                          bgcolor: 'color-mix(in srgb, var(--primary) 10%, transparent)',
+                        }}
                       />
                     ) : (
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
                         Raf atanmamış
                       </Typography>
                     )}
                   </TableCell>
-                  <TableCell>{stok.olcu || '-'}</TableCell>
-                  <TableCell>{stok.oem || '-'}</TableCell>
-                  <TableCell>
+                  <TableCell sx={{ color: 'var(--foreground)' }}>{stok.olcu || '-'}</TableCell>
+                  <TableCell sx={{ color: 'var(--foreground)' }}>{stok.oem || '-'}</TableCell>
+                  <TableCell sx={{ color: 'var(--foreground)' }}>
                     {stok.aracMarka || stok.aracModel || stok.aracMotorHacmi || stok.aracYakitTipi ? (
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                         {stok.aracMarka && (
-                          <Typography variant="caption" fontWeight="600" color="#1976d2">
+                          <Typography variant="caption" fontWeight="600" sx={{ color: 'var(--chart-1)' }}>
                             {stok.aracMarka}
                           </Typography>
                         )}
                         {stok.aracModel && (
-                          <Typography variant="caption" color="text.secondary">
+                          <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
                             {stok.aracModel}
                           </Typography>
                         )}
                         {(stok.aracMotorHacmi || stok.aracYakitTipi) && (
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                          <Typography variant="caption" sx={{ color: 'var(--muted-foreground)', fontSize: '0.7rem' }}>
                             {[stok.aracMotorHacmi, stok.aracYakitTipi].filter(Boolean).join(' / ')}
                           </Typography>
                         )}
                       </Box>
                     ) : (
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" sx={{ color: 'var(--muted-foreground)' }}>
                         -
                       </Typography>
                     )}
@@ -1643,12 +1649,18 @@ export default function MalzemeListesiPage() {
                     <Chip
                       label={stok.miktar || 0}
                       size="small"
-                      color={stok.miktar > 0 ? 'success' : 'error'}
+                      sx={{
+                        bgcolor: stok.miktar > 0 
+                          ? 'color-mix(in srgb, var(--chart-2) 15%, transparent)' 
+                          : 'color-mix(in srgb, var(--destructive) 15%, transparent)',
+                        color: stok.miktar > 0 ? 'var(--chart-2)' : 'var(--destructive)',
+                        fontWeight: 600,
+                      }}
                     />
                   </TableCell>
-                  <TableCell>{stok.birim}</TableCell>
+                  <TableCell sx={{ color: 'var(--foreground)' }}>{stok.birim}</TableCell>
                   <TableCell align="right">
-                    <Typography variant="body2" fontWeight="600">
+                    <Typography variant="body2" fontWeight="600" sx={{ color: 'var(--foreground)' }}>
                       ₺{Number(stok.alisFiyati ?? 0).toLocaleString('tr-TR', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
@@ -1656,7 +1668,7 @@ export default function MalzemeListesiPage() {
                     </Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Typography variant="body2" fontWeight="600">
+                    <Typography variant="body2" fontWeight="600" sx={{ color: 'var(--primary)' }}>
                       ₺{Number(stok.satisFiyati ?? 0).toLocaleString('tr-TR', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
@@ -1699,7 +1711,7 @@ export default function MalzemeListesiPage() {
       </TableContainer>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
           Toplam {filteredStoklar.length} malzeme gösteriliyor
         </Typography>
       </Box>
