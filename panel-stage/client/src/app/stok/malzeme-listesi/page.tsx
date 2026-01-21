@@ -1459,14 +1459,27 @@ export default function MalzemeListesiPage() {
                 '&.Mui-focused fieldset': {
                   borderColor: 'var(--ring)',
                 },
+                '&.Mui-disabled': {
+                  '& fieldset': {
+                    borderColor: 'var(--border)',
+                  },
+                },
               },
               '& .MuiInputLabel-root': {
                 color: 'var(--muted-foreground)',
                 fontFamily: 'var(--font-sans)',
+                '&.Mui-disabled': {
+                  color: 'var(--muted-foreground)',
+                },
               },
               '& .MuiSelect-select': {
                 color: 'var(--foreground)',
                 fontFamily: 'var(--font-sans)',
+                '&.Mui-disabled': {
+                  color: 'var(--foreground)',
+                  WebkitTextFillColor: 'var(--foreground)',
+                  opacity: 0.6,
+                },
               },
             }}>
               <InputLabel>Alt Kategori</InputLabel>
