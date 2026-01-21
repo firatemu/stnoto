@@ -1407,7 +1407,28 @@ export default function MalzemeListesiPage() {
 
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth size="small">
+            <FormControl fullWidth size="small" sx={{
+              '& .MuiOutlinedInput-root': {
+                bgcolor: 'var(--input)',
+                '& fieldset': {
+                  borderColor: 'var(--border)',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'var(--ring)',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'var(--ring)',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: 'var(--muted-foreground)',
+                fontFamily: 'var(--font-sans)',
+              },
+              '& .MuiSelect-select': {
+                color: 'var(--foreground)',
+                fontFamily: 'var(--font-sans)',
+              },
+            }}>
               <InputLabel>Kategori</InputLabel>
               <Select
                 label="Kategori"
@@ -1441,9 +1462,11 @@ export default function MalzemeListesiPage() {
               },
               '& .MuiInputLabel-root': {
                 color: 'var(--muted-foreground)',
+                fontFamily: 'var(--font-sans)',
               },
               '& .MuiSelect-select': {
                 color: 'var(--foreground)',
+                fontFamily: 'var(--font-sans)',
               },
             }}>
               <InputLabel>Alt Kategori</InputLabel>
@@ -1479,9 +1502,11 @@ export default function MalzemeListesiPage() {
               },
               '& .MuiInputLabel-root': {
                 color: 'var(--muted-foreground)',
+                fontFamily: 'var(--font-sans)',
               },
               '& .MuiSelect-select': {
                 color: 'var(--foreground)',
+                fontFamily: 'var(--font-sans)',
               },
             }}>
               <InputLabel>Marka</InputLabel>
@@ -1517,9 +1542,11 @@ export default function MalzemeListesiPage() {
               },
               '& .MuiInputLabel-root': {
                 color: 'var(--muted-foreground)',
+                fontFamily: 'var(--font-sans)',
               },
               '& .MuiSelect-select': {
                 color: 'var(--foreground)',
+                fontFamily: 'var(--font-sans)',
               },
             }}>
               <InputLabel>Stok Durumu</InputLabel>
