@@ -156,6 +156,77 @@
   .dark .MuiDivider-root {
     border-color: var(--border);
   }
+  
+  /* Reusable MUI Component Styles */
+  
+  /* Form Control - Select Dropdown */
+  .form-control-select .MuiOutlinedInput-root {
+    background-color: var(--input);
+    font-family: var(--font-sans);
+  }
+  
+  .form-control-select .MuiOutlinedInput-root fieldset {
+    border-color: var(--border);
+  }
+  
+  .form-control-select .MuiOutlinedInput-root:hover fieldset {
+    border-color: var(--ring);
+  }
+  
+  .form-control-select .MuiOutlinedInput-root.Mui-focused fieldset {
+    border-color: var(--ring);
+  }
+  
+  .form-control-select .MuiOutlinedInput-root.Mui-disabled fieldset {
+    border-color: var(--border);
+  }
+  
+  .form-control-select .MuiInputLabel-root {
+    color: var(--muted-foreground);
+    font-family: var(--font-sans);
+  }
+  
+  .form-control-select .MuiInputLabel-root.Mui-disabled {
+    color: var(--muted-foreground);
+  }
+  
+  .form-control-select .MuiSelect-select {
+    color: var(--foreground);
+    font-family: var(--font-sans);
+  }
+  
+  .form-control-select .MuiSelect-select.Mui-disabled {
+    color: var(--foreground);
+    -webkit-text-fill-color: var(--foreground);
+    opacity: 0.6;
+  }
+  
+  /* Form Control - TextField */
+  .form-control-textfield .MuiOutlinedInput-root {
+    background-color: var(--input);
+  }
+  
+  .form-control-textfield .MuiOutlinedInput-root fieldset {
+    border-color: var(--border);
+  }
+  
+  .form-control-textfield .MuiOutlinedInput-root:hover fieldset {
+    border-color: var(--ring);
+  }
+  
+  .form-control-textfield .MuiOutlinedInput-root.Mui-focused fieldset {
+    border-color: var(--ring);
+  }
+  
+  .form-control-textfield .MuiInputBase-input {
+    color: var(--foreground);
+    font-family: var(--font-sans);
+  }
+  
+  .form-control-textfield .MuiInputLabel-root {
+    color: var(--muted-foreground);
+    font-family: var(--font-sans);
+  }
 }
 
 /* Custom utilities */

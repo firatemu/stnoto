@@ -1356,23 +1356,7 @@ export default function MalzemeListesiPage() {
             fullWidth
             size="small"
             placeholder="Stok kodu, adı, barkod veya OEM kodu ile ara..."
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                bgcolor: 'var(--input)',
-                '& fieldset': {
-                  borderColor: 'var(--border)',
-                },
-                '&:hover fieldset': {
-                  borderColor: 'var(--ring)',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'var(--ring)',
-                },
-              },
-              '& .MuiInputBase-input': {
-                color: 'var(--foreground)',
-              },
-            }}
+            className="form-control-textfield"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyPress={(e) => {
@@ -1407,28 +1391,7 @@ export default function MalzemeListesiPage() {
 
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth size="small" sx={{
-              '& .MuiOutlinedInput-root': {
-                bgcolor: 'var(--input)',
-                '& fieldset': {
-                  borderColor: 'var(--border)',
-                },
-                '&:hover fieldset': {
-                  borderColor: 'var(--ring)',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'var(--ring)',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: 'var(--muted-foreground)',
-                fontFamily: 'var(--font-sans)',
-              },
-              '& .MuiSelect-select': {
-                color: 'var(--foreground)',
-                fontFamily: 'var(--font-sans)',
-              },
-            }}>
+            <FormControl fullWidth size="small" className="form-control-select">
               <InputLabel>Kategori</InputLabel>
               <Select
                 label="Kategori"
@@ -1447,41 +1410,7 @@ export default function MalzemeListesiPage() {
             </FormControl>
           </Grid>
           <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth size="small" disabled={!selectedKategori} sx={{
-              '& .MuiOutlinedInput-root': {
-                bgcolor: 'var(--input)',
-                '& fieldset': {
-                  borderColor: 'var(--border)',
-                },
-                '&:hover fieldset': {
-                  borderColor: 'var(--ring)',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'var(--ring)',
-                },
-                '&.Mui-disabled': {
-                  '& fieldset': {
-                    borderColor: 'var(--border)',
-                  },
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: 'var(--muted-foreground)',
-                fontFamily: 'var(--font-sans)',
-                '&.Mui-disabled': {
-                  color: 'var(--muted-foreground)',
-                },
-              },
-              '& .MuiSelect-select': {
-                color: 'var(--foreground)',
-                fontFamily: 'var(--font-sans)',
-                '&.Mui-disabled': {
-                  color: 'var(--foreground)',
-                  WebkitTextFillColor: 'var(--foreground)',
-                  opacity: 0.6,
-                },
-              },
-            }}>
+            <FormControl fullWidth size="small" disabled={!selectedKategori} className="form-control-select">
               <InputLabel>Alt Kategori</InputLabel>
               <Select
                 label="Alt Kategori"
@@ -1500,28 +1429,7 @@ export default function MalzemeListesiPage() {
             </FormControl>
           </Grid>
           <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth size="small" sx={{
-              '& .MuiOutlinedInput-root': {
-                bgcolor: 'var(--input)',
-                '& fieldset': {
-                  borderColor: 'var(--border)',
-                },
-                '&:hover fieldset': {
-                  borderColor: 'var(--ring)',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'var(--ring)',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: 'var(--muted-foreground)',
-                fontFamily: 'var(--font-sans)',
-              },
-              '& .MuiSelect-select': {
-                color: 'var(--foreground)',
-                fontFamily: 'var(--font-sans)',
-              },
-            }}>
+            <FormControl fullWidth size="small" className="form-control-select">
               <InputLabel>Marka</InputLabel>
               <Select
                 label="Marka"
@@ -1540,28 +1448,7 @@ export default function MalzemeListesiPage() {
             </FormControl>
           </Grid>
           <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth size="small" sx={{
-              '& .MuiOutlinedInput-root': {
-                bgcolor: 'var(--input)',
-                '& fieldset': {
-                  borderColor: 'var(--border)',
-                },
-                '&:hover fieldset': {
-                  borderColor: 'var(--ring)',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'var(--ring)',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: 'var(--muted-foreground)',
-                fontFamily: 'var(--font-sans)',
-              },
-              '& .MuiSelect-select': {
-                color: 'var(--foreground)',
-                fontFamily: 'var(--font-sans)',
-              },
-            }}>
+            <FormControl fullWidth size="small" className="form-control-select">
               <InputLabel>Stok Durumu</InputLabel>
               <Select
                 label="Stok Durumu"
