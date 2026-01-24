@@ -267,7 +267,7 @@ export default function Subscriptions() {
             fontWeight="bold"
             sx={{
               fontSize: { xs: '1.75rem', sm: '2rem' },
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, rgb(216, 121, 67) 0%, rgb(231, 138, 83) 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -279,10 +279,10 @@ export default function Subscriptions() {
             variant="contained"
             startIcon={<Download size={18} />}
             sx={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, rgb(216, 121, 67) 0%, rgb(231, 138, 83) 100%)',
               color: 'white',
               '&:hover': {
-                background: 'linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%)',
+                background: 'linear-gradient(135deg, rgb(200, 105, 50) 0%, rgb(220, 125, 70) 100%)',
                 boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
               },
               textTransform: 'none',
@@ -332,14 +332,14 @@ export default function Subscriptions() {
                     sx={{
                       color:
                         card.color === 'success'
-                          ? '#00C853'
+                          ? 'rgb(16, 185, 129)'
                           : card.color === 'error'
-                          ? '#F44336'
+                          ? 'rgb(239, 68, 68)'
                           : card.color === 'warning'
-                          ? '#FF9800'
+                          ? 'rgb(245, 158, 11)'
                           : card.color === 'info'
-                          ? '#2196F3'
-                          : '#667eea',
+                          ? 'rgb(59, 130, 246)'
+                          : 'rgb(216, 121, 67)',
                       fontSize: { xs: '1.75rem', sm: '2rem' },
                     }}
                   >
@@ -371,10 +371,10 @@ export default function Subscriptions() {
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
                   '&:hover fieldset': {
-                    borderColor: '#667eea',
+                    borderColor: 'rgb(216, 121, 67)',
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: '#667eea',
+                    borderColor: 'rgb(216, 121, 67)',
                   },
                 },
               }}
@@ -388,10 +388,10 @@ export default function Subscriptions() {
                 sx={{
                   borderRadius: 2,
                   '&:hover fieldset': {
-                    borderColor: '#667eea',
+                    borderColor: 'rgb(216, 121, 67)',
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: '#667eea',
+                    borderColor: 'rgb(216, 121, 67)',
                   },
                 }}
               >
@@ -412,10 +412,10 @@ export default function Subscriptions() {
                 sx={{
                   borderRadius: 2,
                   '&:hover fieldset': {
-                    borderColor: '#667eea',
+                    borderColor: 'rgb(216, 121, 67)',
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: '#667eea',
+                    borderColor: 'rgb(216, 121, 67)',
                   },
                 }}
               >

@@ -1,47 +1,56 @@
 import { createTheme, alpha } from '@mui/material/styles';
 
+// Helper function to get CSS variable value
+const getCSSVar = (varName: string) => {
+  if (typeof window !== 'undefined') {
+    return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  }
+  return '';
+};
+
 export const lightTheme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#6366f1',
-      light: '#818cf8',
-      dark: '#4f46e5',
-      contrastText: '#ffffff',
+      main: 'rgb(216, 121, 67)', // --primary
+      light: 'rgb(231, 138, 83)',
+      dark: 'rgb(200, 105, 50)',
+      contrastText: 'rgb(255, 255, 255)', // --primary-foreground
     },
     secondary: {
-      main: '#8b5cf6',
-      light: '#a78bfa',
-      dark: '#7c3aed',
-      contrastText: '#ffffff',
+      main: 'rgb(82, 117, 117)', // --secondary
+      light: 'rgb(95, 135, 135)',
+      dark: 'rgb(70, 100, 100)',
+      contrastText: 'rgb(255, 255, 255)', // --secondary-foreground
     },
     error: {
-      main: '#ef4444',
-      light: '#f87171',
-      dark: '#dc2626',
+      main: 'rgb(239, 68, 68)', // --destructive
+      light: 'rgb(248, 113, 113)',
+      dark: 'rgb(220, 38, 38)',
+      contrastText: 'rgb(250, 250, 250)', // --destructive-foreground
     },
     warning: {
-      main: '#f59e0b',
-      light: '#fbbf24',
-      dark: '#d97706',
+      main: 'rgb(245, 158, 11)',
+      light: 'rgb(251, 191, 36)',
+      dark: 'rgb(217, 119, 6)',
     },
     info: {
-      main: '#3b82f6',
-      light: '#60a5fa',
-      dark: '#2563eb',
+      main: 'rgb(59, 130, 246)',
+      light: 'rgb(96, 165, 250)',
+      dark: 'rgb(37, 99, 235)',
     },
     success: {
-      main: '#10b981',
-      light: '#34d399',
-      dark: '#059669',
+      main: 'rgb(16, 185, 129)',
+      light: 'rgb(52, 211, 153)',
+      dark: 'rgb(5, 150, 105)',
     },
     background: {
-      default: '#f8fafc',
-      paper: '#ffffff',
+      default: 'rgb(255, 255, 255)', // --background
+      paper: 'rgb(255, 255, 255)', // --card
     },
     text: {
-      primary: '#0f172a',
-      secondary: '#64748b',
+      primary: 'rgb(17, 24, 39)', // --foreground
+      secondary: 'rgb(107, 114, 128)', // --muted-foreground
     },
     grey: {
       50: '#f8fafc',
@@ -58,14 +67,16 @@ export const lightTheme = createTheme({
   },
   typography: {
     fontFamily: [
-      'Inter',
+      'AR One Sans',
+      'ui-sans-serif',
+      'sans-serif',
+      'system-ui',
       '-apple-system',
       'BlinkMacSystemFont',
       '"Segoe UI"',
       'Roboto',
       '"Helvetica Neue"',
       'Arial',
-      'sans-serif',
     ].join(','),
     h1: {
       fontSize: '2.5rem',
@@ -113,7 +124,7 @@ export const lightTheme = createTheme({
     },
   },
   shape: {
-    borderRadius: 12,
+    borderRadius: 12, // 0.75rem = 12px from CSS --radius
   },
   shadows: [
     'none',
@@ -154,7 +165,7 @@ export const lightTheme = createTheme({
           boxShadow: 'none',
           transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': {
-            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+            boxShadow: '0 4px 12px rgba(216, 121, 67, 0.3)',
             transform: 'translateY(-1px)',
           },
           '&:active': {
@@ -162,9 +173,9 @@ export const lightTheme = createTheme({
           },
         },
         contained: {
-          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+          background: 'linear-gradient(135deg, rgb(216, 121, 67) 0%, rgb(231, 138, 83) 100%)',
           '&:hover': {
-            background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+            background: 'linear-gradient(135deg, rgb(200, 105, 50) 0%, rgb(220, 125, 70) 100%)',
           },
         },
       },
@@ -209,13 +220,13 @@ export const lightTheme = createTheme({
             transition: 'all 0.2s ease',
             '&:hover': {
               '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#6366f1',
+                borderColor: 'rgb(216, 121, 67)',
               },
             },
             '&.Mui-focused': {
               '& .MuiOutlinedInput-notchedOutline': {
                 borderWidth: 2,
-                borderColor: '#6366f1',
+                borderColor: 'rgb(216, 121, 67)',
               },
             },
           },
@@ -247,7 +258,7 @@ export const lightTheme = createTheme({
           fontSize: '0.9375rem',
           minHeight: 48,
           '&.Mui-selected': {
-            color: '#6366f1',
+            color: 'rgb(216, 121, 67)',
           },
         },
       },
@@ -268,24 +279,30 @@ export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#818cf8',
-      light: '#a5b4fc',
-      dark: '#6366f1',
-      contrastText: '#ffffff',
+      main: 'rgb(231, 138, 83)', // --primary in dark mode
+      light: 'rgb(251, 203, 151)',
+      dark: 'rgb(220, 125, 70)',
+      contrastText: 'rgb(18, 17, 19)', // --primary-foreground in dark mode
     },
     secondary: {
-      main: '#a78bfa',
-      light: '#c4b5fd',
-      dark: '#8b5cf6',
-      contrastText: '#ffffff',
+      main: 'rgb(95, 135, 135)', // --secondary in dark mode
+      light: 'rgb(110, 150, 150)',
+      dark: 'rgb(80, 120, 120)',
+      contrastText: 'rgb(18, 17, 19)', // --secondary-foreground in dark mode
+    },
+    error: {
+      main: 'rgb(95, 135, 135)', // --destructive in dark mode
+      light: 'rgb(110, 150, 150)',
+      dark: 'rgb(80, 120, 120)',
+      contrastText: 'rgb(18, 17, 19)', // --destructive-foreground in dark mode
     },
     background: {
-      default: '#0f172a',
-      paper: '#1e293b',
+      default: 'rgb(18, 17, 19)', // --background in dark mode
+      paper: 'rgb(18, 18, 18)', // --card in dark mode
     },
     text: {
-      primary: '#f1f5f9',
-      secondary: '#94a3b8',
+      primary: 'rgb(193, 193, 193)', // --foreground in dark mode
+      secondary: 'rgb(136, 136, 136)', // --muted-foreground in dark mode
     },
   },
 });

@@ -12,11 +12,11 @@ interface MetricCardProps {
 }
 
 const colorMap = {
-  primary: { main: '#6366f1', light: '#818cf8', bg: 'rgba(99, 102, 241, 0.1)' },
-  success: { main: '#10b981', light: '#34d399', bg: 'rgba(16, 185, 129, 0.1)' },
-  error: { main: '#ef4444', light: '#f87171', bg: 'rgba(239, 68, 68, 0.1)' },
-  warning: { main: '#f59e0b', light: '#fbbf24', bg: 'rgba(245, 158, 11, 0.1)' },
-  info: { main: '#3b82f6', light: '#60a5fa', bg: 'rgba(59, 130, 246, 0.1)' },
+  primary: { main: 'rgb(216, 121, 67)', light: 'rgb(231, 138, 83)', bg: 'rgba(216, 121, 67, 0.1)' },
+  success: { main: 'rgb(16, 185, 129)', light: 'rgb(52, 211, 153)', bg: 'rgba(16, 185, 129, 0.1)' },
+  error: { main: 'rgb(239, 68, 68)', light: 'rgb(248, 113, 113)', bg: 'rgba(239, 68, 68, 0.1)' },
+  warning: { main: 'rgb(245, 158, 11)', light: 'rgb(251, 191, 36)', bg: 'rgba(245, 158, 11, 0.1)' },
+  info: { main: 'rgb(59, 130, 246)', light: 'rgb(96, 165, 250)', bg: 'rgba(59, 130, 246, 0.1)' },
 };
 
 export default function MetricCard({
@@ -78,18 +78,18 @@ export default function MetricCard({
                 px: 1.5,
                 py: 0.5,
                 borderRadius: 2,
-                bgcolor: trend === 'up' ? alpha('#10b981', 0.1) : alpha('#ef4444', 0.1),
+                bgcolor: trend === 'up' ? alpha('rgb(16, 185, 129)', 0.1) : alpha('rgb(239, 68, 68)', 0.1),
               }}
             >
               {trend === 'up' ? (
-                <TrendingUp size={16} color="#10b981" />
+                <TrendingUp size={16} color="rgb(16, 185, 129)" />
               ) : (
-                <TrendingDown size={16} color="#ef4444" />
+                <TrendingDown size={16} color="rgb(239, 68, 68)" />
               )}
               <Typography
                 variant="caption"
                 sx={{
-                  color: trend === 'up' ? '#10b981' : '#ef4444',
+                  color: trend === 'up' ? 'rgb(16, 185, 129)' : 'rgb(239, 68, 68)',
                   fontWeight: 600,
                   fontSize: '0.75rem',
                 }}

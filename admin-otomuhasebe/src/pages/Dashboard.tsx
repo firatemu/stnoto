@@ -32,7 +32,13 @@ import api from '@/lib/axios';
 import MetricCard from '@/components/ui/MetricCard';
 import MainLayout from '@/components/Layout/MainLayout';
 
-const COLORS = ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
+const COLORS = [
+  'rgb(95, 135, 135)',   // --chart-1
+  'rgb(231, 138, 83)',   // --chart-2
+  'rgb(251, 203, 151)',  // --chart-3
+  'rgb(136, 136, 136)',  // --chart-4
+  'rgb(153, 153, 153)',  // --chart-5
+];
 
 export default function Dashboard() {
   const { data: metrics, isLoading, error } = useQuery({
@@ -132,7 +138,7 @@ export default function Dashboard() {
             textAlign: 'center',
             background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%)',
             border: '1px solid',
-            borderColor: alpha('#ef4444', 0.2),
+            borderColor: alpha('rgb(239, 68, 68)', 0.2),
           }}
         >
           <Typography variant="h6" color="error" gutterBottom>
@@ -153,7 +159,7 @@ export default function Dashboard() {
           variant="h4"
           sx={{
             fontWeight: 700,
-            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+            background: 'linear-gradient(135deg, rgb(216, 121, 67) 0%, rgb(231, 138, 83) 100%)',
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -191,10 +197,10 @@ export default function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke={alpha('#000', 0.1)} />
                 <XAxis
                   dataKey="month"
-                  stroke="#64748b"
+                  stroke="var(--muted-foreground)"
                   style={{ fontSize: '0.75rem' }}
                 />
-                <YAxis stroke="#64748b" style={{ fontSize: '0.75rem' }} />
+                <YAxis stroke="var(--muted-foreground)" style={{ fontSize: '0.75rem' }} />
                 <Tooltip
                   contentStyle={{
                     borderRadius: 12,
@@ -206,9 +212,9 @@ export default function Dashboard() {
                 <Line
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#6366f1"
+                  stroke="rgb(216, 121, 67)"
                   strokeWidth={3}
-                  dot={{ fill: '#6366f1', r: 4 }}
+                  dot={{ fill: 'rgb(216, 121, 67)', r: 4 }}
                   activeDot={{ r: 6 }}
                 />
               </LineChart>
@@ -240,7 +246,7 @@ export default function Dashboard() {
                     return `${name || ''} ${percent ? (percent * 100).toFixed(0) : 0}%`;
                   }}
                   outerRadius={80}
-                  fill="#8884d8"
+                  fill="rgb(95, 135, 135)"
                   dataKey="value"
                 >
                   {subscriptionData.map((entry, index) => (
@@ -275,10 +281,10 @@ export default function Dashboard() {
             <CartesianGrid strokeDasharray="3 3" stroke={alpha('#000', 0.1)} />
             <XAxis
               dataKey="month"
-              stroke="#64748b"
+              stroke="var(--muted-foreground)"
               style={{ fontSize: '0.75rem' }}
             />
-            <YAxis stroke="#64748b" style={{ fontSize: '0.75rem' }} />
+            <YAxis stroke="var(--muted-foreground)" style={{ fontSize: '0.75rem' }} />
             <Tooltip
               contentStyle={{
                 borderRadius: 12,
@@ -294,8 +300,8 @@ export default function Dashboard() {
             />
             <defs>
               <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity={1} />
-                <stop offset="100%" stopColor="#34d399" stopOpacity={0.8} />
+                <stop offset="0%" stopColor="rgb(231, 138, 83)" stopOpacity={1} />
+                <stop offset="100%" stopColor="rgb(251, 203, 151)" stopOpacity={0.8} />
               </linearGradient>
             </defs>
           </BarChart>

@@ -102,12 +102,12 @@ export default function DataTable<T extends { id: string }>({
               <TableRow 
                 key={headerGroup.id}
                 sx={{
-                  bgcolor: '#f8f9fa',
+                  bgcolor: 'var(--muted)',
                   '& .MuiTableCell-head': {
                     fontWeight: 600,
                     fontSize: '0.875rem',
-                    color: '#667eea',
-                    borderBottom: '2px solid #e0e0e0',
+                    color: 'var(--primary)',
+                    borderBottom: '2px solid var(--border)',
                   },
                 }}
               >
@@ -136,7 +136,7 @@ export default function DataTable<T extends { id: string }>({
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       {header.column.getCanSort() && (
-                        <ArrowUpDown size={16} style={{ opacity: 0.5, color: '#667eea' }} />
+                        <ArrowUpDown size={16} style={{ opacity: 0.5, color: 'rgb(216, 121, 67)' }} />
                       )}
                     </Box>
                   </TableCell>
@@ -170,7 +170,7 @@ export default function DataTable<T extends { id: string }>({
                       bgcolor: 'rgba(102, 126, 234, 0.05)',
                     },
                     '& .MuiTableCell-body': {
-                      borderBottom: '1px solid #f0f0f0',
+                      borderBottom: '1px solid var(--border)',
                     },
                   }}
                 >
@@ -200,8 +200,8 @@ export default function DataTable<T extends { id: string }>({
           alignItems: 'center', 
           justifyContent: 'space-between', 
           p: 2.5,
-          borderTop: '1px solid #f0f0f0',
-          bgcolor: '#fafafa',
+          borderTop: '1px solid var(--border)',
+          bgcolor: 'var(--muted)',
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -249,17 +249,17 @@ export default function DataTable<T extends { id: string }>({
             sx={{
               padding: '6px 12px',
               borderRadius: '8px',
-              border: '1px solid #e0e0e0',
-              background: 'white',
-              color: '#333',
+              border: '1px solid var(--border)',
+              background: 'var(--background)',
+              color: 'var(--foreground)',
               cursor: 'pointer',
               fontSize: '0.875rem',
               '&:hover': {
-                borderColor: '#667eea',
+                borderColor: 'var(--primary)',
               },
               '&:focus': {
                 outline: 'none',
-                borderColor: '#667eea',
+                borderColor: 'var(--primary)',
               },
             }}
           >

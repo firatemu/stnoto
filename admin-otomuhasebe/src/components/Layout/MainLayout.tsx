@@ -31,7 +31,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       sx={{
         display: 'flex',
         minHeight: '100vh',
-        bgcolor: '#f8fafc',
+        bgcolor: 'var(--background)',
       }}
     >
       <Header 
@@ -54,7 +54,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             xs: '100%',
             md: desktopOpen ? 'calc(100% - 280px)' : '100%'
           },
-          bgcolor: '#f8fafc',
+          bgcolor: 'var(--background)',
           minHeight: '100vh',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           ml: { md: 0 },

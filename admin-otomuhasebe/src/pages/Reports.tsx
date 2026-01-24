@@ -31,7 +31,12 @@ import {
 import MainLayout from '@/components/Layout/MainLayout';
 import api from '@/lib/axios';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = [
+  'rgb(95, 135, 135)',   // --chart-1
+  'rgb(231, 138, 83)',   // --chart-2
+  'rgb(251, 203, 151)',  // --chart-3
+  'rgb(136, 136, 136)',  // --chart-4
+];
 
 export default function Reports() {
   const [tabValue, setTabValue] = useState(0);
@@ -117,7 +122,7 @@ export default function Reports() {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="revenue" stroke="#0066FF" strokeWidth={2} />
+                  <Line type="monotone" dataKey="revenue" stroke="rgb(95, 135, 135)" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </Box>
@@ -135,7 +140,7 @@ export default function Reports() {
                       <XAxis dataKey="month" />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="count" fill="#00C853" />
+                      <Bar dataKey="count" fill="rgb(231, 138, 83)" />
                     </BarChart>
                   </ResponsiveContainer>
                 </Paper>
@@ -173,7 +178,7 @@ export default function Reports() {
                       return `${name || ''} ${percent ? (percent * 100).toFixed(0) : 0}%`;
                     }}
                     outerRadius={120}
-                    fill="#8884d8"
+                    fill="rgb(95, 135, 135)"
                     dataKey="value"
                   >
                     {subscriptionDistribution.map((entry, index) => (
