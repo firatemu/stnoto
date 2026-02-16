@@ -1,5 +1,15 @@
-import React, { useState } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
+import React, { useState, useMemo } from 'react';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  flexRender,
+  ColumnDef,
+  SortingState,
+  ColumnFiltersState,
+} from '@tanstack/react-table';
 import {
   Box,
   Typography,
@@ -22,17 +32,29 @@ import {
   Card,
   CardContent,
   Divider,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Stack,
+  Grid,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import {
   Download,
   MoreVertical,
   Eye,
   X,
   CheckCircle2,
-  CreditCard,
+  ArrowUpDown,
+  Search,
 } from 'lucide-react';
 import MainLayout from '@/components/Layout/MainLayout';
-import DataTable from '@/components/ui/DataTable';
 import StatusChip from '@/components/ui/StatusChip';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import {
@@ -46,6 +68,9 @@ import { formatDateOnly, formatDateTime } from '@/lib/dateUtils';
 import { toast } from 'sonner';
 
 export default function Subscriptions() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [planFilter, setPlanFilter] = useState<string>('ALL');
@@ -56,6 +81,14 @@ export default function Subscriptions() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [detailTab, setDetailTab] = useState(0);
+
+  // Table State
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
   const { data: subscriptionsData, isLoading } = useSubscriptions({
     search,
@@ -70,11 +103,11 @@ export default function Subscriptions() {
   const cancelSubscription = useCancelSubscription();
   const approveTrial = useApproveTrial();
 
-  // Güvenli array kontrolü
-  const subscriptions = Array.isArray(subscriptionsData) ? subscriptionsData : [];
-  let filteredSubscriptions = subscriptions;
+  const subscriptions = useMemo(() => Array.isArray(subscriptionsData) ? subscriptionsData : [], [subscriptionsData]);
+  const filteredSubscriptions = subscriptions; // Filtering handled by backend hook params mostly, or client side if needed
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, subscription: Subscription) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setMenuSubscription(subscription);
   };
@@ -92,7 +125,6 @@ export default function Subscriptions() {
   };
 
   const handleCancelClick = () => {
-    // Dialog içinden çağrıldıysa selectedSubscription'ı menuSubscription olarak set et
     if (selectedSubscription && !menuSubscription) {
       setMenuSubscription(selectedSubscription);
     }
@@ -101,7 +133,6 @@ export default function Subscriptions() {
   };
 
   const handleCancel = async () => {
-    // Dialog içinden veya menüden çağrılabilir
     const subscriptionToCancel = menuSubscription || selectedSubscription;
     if (!subscriptionToCancel) return;
 
@@ -110,7 +141,6 @@ export default function Subscriptions() {
       toast.success('Abonelik iptal edildi');
       setCancelDialogOpen(false);
       setMenuSubscription(null);
-      // Dialog açıksa kapat ve veriyi yenile
       if (selectedSubscription) {
         setDetailModalOpen(false);
         setSelectedSubscription(null);
@@ -121,7 +151,6 @@ export default function Subscriptions() {
   };
 
   const handleApproveClick = () => {
-    // Dialog içinden çağrıldıysa selectedSubscription'ı menuSubscription olarak set et
     if (selectedSubscription && !menuSubscription) {
       setMenuSubscription(selectedSubscription);
     }
@@ -130,7 +159,6 @@ export default function Subscriptions() {
   };
 
   const handleApprove = async () => {
-    // Dialog içinden veya menüden çağrılabilir
     const subscriptionToApprove = menuSubscription || selectedSubscription;
     if (!subscriptionToApprove?.tenantId) return;
 
@@ -139,7 +167,6 @@ export default function Subscriptions() {
       toast.success('Deneme sürümü onaylandı');
       setApproveDialogOpen(false);
       setMenuSubscription(null);
-      // Dialog açıksa kapat ve veriyi yenile
       if (selectedSubscription) {
         setDetailModalOpen(false);
         setSelectedSubscription(null);
@@ -149,41 +176,38 @@ export default function Subscriptions() {
     }
   };
 
-  // Özet kartları - Güvenli array işlemleri
-  const summaryCards = [
+  const summaryCards = useMemo(() => [
     {
       title: 'Aktif Abonelik',
-      value: Array.isArray(filteredSubscriptions) ? filteredSubscriptions.filter((s) => s?.status === 'ACTIVE').length : 0,
-      color: 'success',
+      value: filteredSubscriptions.filter((s) => s?.status === 'ACTIVE').length,
+      color: theme.palette.success.main,
     },
     {
       title: 'Deneme Sürümü',
-      value: Array.isArray(filteredSubscriptions) ? filteredSubscriptions.filter((s) => s?.status === 'TRIAL').length : 0,
-      color: 'info',
+      value: filteredSubscriptions.filter((s) => s?.status === 'TRIAL').length,
+      color: theme.palette.info.main,
     },
     {
       title: 'İptal Bekleyen',
-      value: Array.isArray(filteredSubscriptions) ? filteredSubscriptions.filter((s) => s?.status === 'CANCELED').length : 0,
-      color: 'error',
+      value: filteredSubscriptions.filter((s) => s?.status === 'CANCELED').length,
+      color: theme.palette.error.main,
     },
     {
       title: 'Bekleyen Onay',
-      value: Array.isArray(filteredSubscriptions) ? filteredSubscriptions.filter((s) => s?.status === 'PENDING').length : 0,
-      color: 'warning',
+      value: filteredSubscriptions.filter((s) => s?.status === 'PENDING').length,
+      color: theme.palette.warning.main,
     },
     {
       title: 'Toplam MRR',
-      value: `₺${(Array.isArray(filteredSubscriptions) 
-        ? filteredSubscriptions
-            .filter((s) => s?.status === 'ACTIVE' && s?.plan?.price)
-            .reduce((sum: number, s: Subscription) => sum + (s?.plan?.price || 0), 0)
-        : 0
-      ).toLocaleString('tr-TR')}`,
-      color: 'primary',
+      value: `₺${filteredSubscriptions
+        .filter((s) => s?.status === 'ACTIVE' && s?.plan?.price)
+        .reduce((sum: number, s: Subscription) => sum + (s?.plan?.price || 0), 0)
+        .toLocaleString('tr-TR')}`,
+      color: theme.palette.primary.main,
     },
-  ];
+  ], [filteredSubscriptions, theme]);
 
-  const columns: ColumnDef<Subscription>[] = [
+  const columns: ColumnDef<Subscription>[] = useMemo(() => [
     {
       accessorKey: 'tenant',
       header: 'Kullanıcı',
@@ -231,17 +255,26 @@ export default function Subscriptions() {
     {
       accessorKey: 'startDate',
       header: 'Başlangıç',
-      cell: ({ row }) => formatDateOnly(row.original.startDate),
+      cell: ({ row }) => (
+        <Typography variant="body2">
+          {formatDateOnly(row.original.startDate)}
+        </Typography>
+      ),
     },
     {
       accessorKey: 'endDate',
       header: 'Bitiş / Sonraki Ödeme',
       cell: ({ row }) => {
         const sub = row.original;
+        let date = sub.endDate;
         if (sub.nextBillingDate) {
-          return formatDateOnly(sub.nextBillingDate);
+          date = sub.nextBillingDate;
         }
-        return formatDateOnly(sub.endDate);
+        return (
+          <Typography variant="body2">
+            {formatDateOnly(date)}
+          </Typography>
+        );
       },
     },
     {
@@ -256,21 +289,54 @@ export default function Subscriptions() {
         </IconButton>
       ),
     },
-  ];
+  ], []);
+
+  const table = useReactTable({
+    data: filteredSubscriptions,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    state: {
+      sorting,
+      columnFilters,
+      pagination,
+    },
+    onPaginationChange: setPagination,
+  });
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPagination((prev) => ({ ...prev, pageIndex: newPage }));
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPagination((prev) => ({
+      ...prev,
+      pageSize: parseInt(event.target.value, 10),
+      pageIndex: 0,
+    }));
+  };
 
   return (
     <MainLayout>
-      <Box sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ p: { xs: 2, md: 3 } }}>
+        {/* Header */}
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          justifyContent="space-between"
+          alignItems={{ xs: 'stretch', sm: 'center' }}
+          spacing={2}
+          sx={{ mb: 3 }}
+        >
           <Typography
             variant="h4"
             fontWeight="bold"
             sx={{
-              fontSize: { xs: '1.75rem', sm: '2rem' },
-              background: 'linear-gradient(135deg, rgb(216, 121, 67) 0%, rgb(231, 138, 83) 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              fontSize: { xs: '1.5rem', sm: '2rem' },
+              color: theme.palette.primary.main,
             }}
           >
             Abonelikler
@@ -279,169 +345,286 @@ export default function Subscriptions() {
             variant="contained"
             startIcon={<Download size={18} />}
             sx={{
-              background: 'linear-gradient(135deg, rgb(216, 121, 67) 0%, rgb(231, 138, 83) 100%)',
-              color: 'white',
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.primary.contrastText,
               '&:hover': {
-                background: 'linear-gradient(135deg, rgb(200, 105, 50) 0%, rgb(220, 125, 70) 100%)',
-                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
+                backgroundColor: theme.palette.primary.dark,
               },
-              textTransform: 'none',
               fontWeight: 600,
               px: 3,
-              py: 1,
             }}
           >
             Export Excel
           </Button>
-        </Box>
+        </Stack>
 
-        {/* Özet Kartları */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(5, 1fr)' }, gap: 3, mb: 3 }}>
+        {/* Summary Cards */}
+        <Grid container spacing={3} sx={{ mb: 3 }}>
           {summaryCards.map((card, index) => (
-            <Card
-              key={index}
+            <Grid key={index} size={{ xs: 12, sm: 6, md: 2.4 }}>
+              <Card
                 sx={{
-                  p: 2,
-                  borderRadius: 3,
-                  boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+                  borderRadius: 2,
+                  boxShadow: theme.shadows[1],
+                  border: `1px solid ${theme.palette.divider}`,
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     transform: 'translateY(-4px)',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                    boxShadow: theme.shadows[4],
                   },
-                  border: `1px solid ${
-                    card.color === 'success'
-                      ? 'rgba(0, 200, 83, 0.2)'
-                      : card.color === 'error'
-                      ? 'rgba(244, 67, 54, 0.2)'
-                      : card.color === 'warning'
-                      ? 'rgba(255, 152, 0, 0.2)'
-                      : card.color === 'info'
-                      ? 'rgba(33, 150, 243, 0.2)'
-                      : 'rgba(102, 126, 234, 0.2)'
-                  }`,
                 }}
               >
-                <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-                  <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontSize: '0.875rem', fontWeight: 500, mb: 1.5 }}>
+                <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                  <Typography variant="body2" color="text.secondary" fontWeight="500" gutterBottom>
                     {card.title}
                   </Typography>
                   <Typography
-                    variant="h4"
+                    variant="h5"
                     fontWeight="bold"
-                    sx={{
-                      color:
-                        card.color === 'success'
-                          ? 'rgb(16, 185, 129)'
-                          : card.color === 'error'
-                          ? 'rgb(239, 68, 68)'
-                          : card.color === 'warning'
-                          ? 'rgb(245, 158, 11)'
-                          : card.color === 'info'
-                          ? 'rgb(59, 130, 246)'
-                          : 'rgb(216, 121, 67)',
-                      fontSize: { xs: '1.75rem', sm: '2rem' },
-                    }}
+                    sx={{ color: card.color }}
                   >
                     {card.value}
                   </Typography>
                 </CardContent>
               </Card>
+            </Grid>
           ))}
-        </Box>
+        </Grid>
 
-        {/* Filtreler */}
+        {/* Filters */}
         <Paper
           sx={{
-            p: 3,
+            p: 2,
             mb: 3,
-            borderRadius: 3,
-            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+            borderRadius: 2,
+            border: `1px solid ${theme.palette.divider}`,
+            boxShadow: 'none',
           }}
         >
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
             <TextField
               placeholder="Kullanıcı adı, email veya plan ile ara..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               size="small"
-              sx={{
-                flex: 1,
-                minWidth: 250,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  '&:hover fieldset': {
-                    borderColor: 'rgb(216, 121, 67)',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'rgb(216, 121, 67)',
-                  },
-                },
+              fullWidth
+              InputProps={{
+                startAdornment: <Search size={18} style={{ marginRight: 8, opacity: 0.5 }} />,
               }}
+              sx={{ flex: 1 }}
             />
-            <FormControl size="small" sx={{ minWidth: 180 }}>
-              <InputLabel>Durum</InputLabel>
-              <Select
-                value={statusFilter}
-                label="Durum"
-                onChange={(e) => setStatusFilter(e.target.value)}
-                sx={{
-                  borderRadius: 2,
-                  '&:hover fieldset': {
-                    borderColor: 'rgb(216, 121, 67)',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'rgb(216, 121, 67)',
-                  },
-                }}
-              >
-                <MenuItem value="ALL">Tümü</MenuItem>
-                <MenuItem value="ACTIVE">Aktif</MenuItem>
-                <MenuItem value="TRIAL">Deneme</MenuItem>
-                <MenuItem value="PENDING">Beklemede</MenuItem>
-                <MenuItem value="CANCELED">İptal</MenuItem>
-                <MenuItem value="EXPIRED">Süresi Dolmuş</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl size="small" sx={{ minWidth: 180 }}>
-              <InputLabel>Plan</InputLabel>
-              <Select
-                value={planFilter}
-                label="Plan"
-                onChange={(e) => setPlanFilter(e.target.value)}
-                sx={{
-                  borderRadius: 2,
-                  '&:hover fieldset': {
-                    borderColor: 'rgb(216, 121, 67)',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'rgb(216, 121, 67)',
-                  },
-                }}
-              >
-                <MenuItem value="ALL">Tümü</MenuItem>
-                <MenuItem value="basic">Basic</MenuItem>
-                <MenuItem value="professional">Professional</MenuItem>
-                <MenuItem value="enterprise">Enterprise</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
+            <Stack direction="row" spacing={2} sx={{ width: { xs: '100%', md: 'auto' } }}>
+              <FormControl size="small" sx={{ minWidth: 150, flex: 1 }}>
+                <InputLabel>Durum</InputLabel>
+                <Select
+                  value={statusFilter}
+                  label="Durum"
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <MenuItem value="ALL">Tümü</MenuItem>
+                  <MenuItem value="ACTIVE">Aktif</MenuItem>
+                  <MenuItem value="TRIAL">Deneme</MenuItem>
+                  <MenuItem value="PENDING">Beklemede</MenuItem>
+                  <MenuItem value="CANCELED">İptal</MenuItem>
+                  <MenuItem value="EXPIRED">Süresi Dolmuş</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl size="small" sx={{ minWidth: 150, flex: 1 }}>
+                <InputLabel>Plan</InputLabel>
+                <Select
+                  value={planFilter}
+                  label="Plan"
+                  onChange={(e) => setPlanFilter(e.target.value)}
+                >
+                  <MenuItem value="ALL">Tümü</MenuItem>
+                  <MenuItem value="basic">Basic</MenuItem>
+                  <MenuItem value="professional">Professional</MenuItem>
+                  <MenuItem value="enterprise">Enterprise</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+          </Stack>
         </Paper>
 
-        {/* Tablo */}
-        <DataTable
-          data={filteredSubscriptions}
-          columns={columns}
-          isLoading={isLoading}
-          onRowClick={handleViewDetails}
-        />
+        {/* Content: Table or Cards */}
+        {isLoading ? (
+          <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 2 }}>
+            <Typography>Yükleniyor...</Typography>
+          </Paper>
+        ) : isMobile ? (
+          // Mobile Card View
+          <Stack spacing={2}>
+            {table.getRowModel().rows.map((row) => (
+              <Card
+                key={row.id}
+                sx={{
+                  borderRadius: 2,
+                  border: `1px solid ${theme.palette.divider}`,
+                  boxShadow: 'none',
+                }}
+                onClick={() => handleViewDetails(row.original)}
+              >
+                <CardContent sx={{ p: 2 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                    <Box>
+                      {(() => {
+                        const tenant = row.original.tenant;
+                        const user = tenant?.users?.[0];
+                        return (
+                          <>
+                            <Typography variant="subtitle1" fontWeight="bold">
+                              {user?.fullName || tenant?.name || 'N/A'}
+                            </Typography>
+                            {user?.email && (
+                              <Typography variant="body2" color="text.secondary">
+                                {user.email}
+                              </Typography>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </Box>
+                    <Box onClick={(e) => e.stopPropagation()}>
+                      <IconButton size="small" onClick={(e) => handleMenuOpen(e, row.original)}>
+                        <MoreVertical size={18} />
+                      </IconButton>
+                    </Box>
+                  </Stack>
 
-        {/* Detay Modal */}
+                  <Divider sx={{ my: 1.5 }} />
+
+                  <Stack spacing={1}>
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography variant="body2" color="text.secondary">Plan:</Typography>
+                      <Typography variant="body2" fontWeight="medium">{row.original.plan?.name || 'N/A'}</Typography>
+                    </Stack>
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography variant="body2" color="text.secondary">Durum:</Typography>
+                      <StatusChip status={row.original.status} />
+                    </Stack>
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography variant="body2" color="text.secondary">Başlangıç:</Typography>
+                      <Typography variant="body2">{formatDateOnly(row.original.startDate)}</Typography>
+                    </Stack>
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography variant="body2" color="text.secondary">Sonraki Ödeme:</Typography>
+                      <Typography variant="body2">
+                        {row.original.nextBillingDate ? formatDateOnly(row.original.nextBillingDate) : formatDateOnly(row.original.endDate)}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </CardContent>
+              </Card>
+            ))}
+            {table.getRowModel().rows.length === 0 && (
+              <Typography textAlign="center" color="text.secondary" py={4}>Veri bulunamadı</Typography>
+            )}
+            {table.getRowModel().rows.length > 0 && (
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={filteredSubscriptions.length}
+                rowsPerPage={pagination.pageSize}
+                page={pagination.pageIndex}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Satır:"
+                sx={{
+                  '.MuiTablePagination-selectLabel': { mb: 0 },
+                  '.MuiTablePagination-displayedRows': { mb: 0 },
+                }}
+              />
+            )}
+          </Stack>
+        ) : (
+          // Desktop Table View
+          <Paper
+            sx={{
+              width: '100%',
+              mb: 2,
+              borderRadius: 2,
+              overflow: 'hidden',
+              border: `1px solid ${theme.palette.divider}`,
+              boxShadow: 'none',
+            }}
+          >
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id} sx={{ bgcolor: theme.palette.background.default }}>
+                      {headerGroup.headers.map((header) => (
+                        <TableCell
+                          key={header.id}
+                          align="left"
+                          padding="normal"
+                          sx={{ fontWeight: 600, color: theme.palette.text.secondary }}
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}>
+                            <Box component="span">
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                            </Box>
+                            {header.column.getCanSort() && (
+                              <ArrowUpDown size={14} style={{ opacity: 0.5 }} />
+                            )}
+                          </Stack>
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableHead>
+                <TableBody>
+                  {table.getRowModel().rows.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={columns.length} align="center" sx={{ py: 4 }}>
+                        <Typography color="text.secondary">Veri bulunamadı</Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        hover
+                        key={row.id}
+                        onClick={() => handleViewDetails(row.original)}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={filteredSubscriptions.length}
+              rowsPerPage={pagination.pageSize}
+              page={pagination.pageIndex}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              labelRowsPerPage="Sayfa başına:"
+              labelDisplayedRows={({ from, to, count }) => `${from}-${to} / ${count}`}
+            />
+          </Paper>
+        )}
+
+        {/* Modal Declarations */}
+
+        {/* Detail Modal */}
         <Dialog
           open={detailModalOpen}
           onClose={() => setDetailModalOpen(false)}
           maxWidth="md"
           fullWidth
+          PaperProps={{
+            sx: { borderRadius: 2 }
+          }}
         >
           {selectedSubscription && subscriptionDetail && (
             <>
@@ -453,7 +636,7 @@ export default function Subscriptions() {
                   <X size={20} />
                 </IconButton>
               </DialogTitle>
-              <DialogContent>
+              <DialogContent dividers>
                 <Tabs value={detailTab} onChange={(_, v) => setDetailTab(v)} sx={{ mb: 3 }}>
                   <Tab label="Genel" />
                   <Tab label="Ödeme Planı" />
@@ -461,128 +644,128 @@ export default function Subscriptions() {
                 </Tabs>
 
                 {detailTab === 0 && (
-                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
-                      <Box>
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Kullanıcı
+                      </Typography>
+                      <Typography variant="body1" fontWeight="medium">
+                        {subscriptionDetail.tenant?.users?.[0]?.fullName ||
+                          subscriptionDetail.tenant?.users?.[0]?.email ||
+                          subscriptionDetail.tenant?.name ||
+                          'N/A'}
+                      </Typography>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Email
+                      </Typography>
+                      <Typography variant="body1" fontWeight="medium">
+                        {subscriptionDetail.tenant?.users?.[0]?.email || 'N/A'}
+                      </Typography>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Plan
+                      </Typography>
+                      <Typography variant="body1" fontWeight="medium">
+                        {subscriptionDetail.plan?.name || 'N/A'}
+                      </Typography>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Durum
+                      </Typography>
+                      <StatusChip status={subscriptionDetail.status} />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Başlangıç Tarihi
+                      </Typography>
+                      <Typography variant="body1" fontWeight="medium">
+                        {formatDateOnly(subscriptionDetail.startDate)}
+                      </Typography>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Bitiş Tarihi
+                      </Typography>
+                      <Typography variant="body1" fontWeight="medium">
+                        {formatDateOnly(subscriptionDetail.endDate)}
+                      </Typography>
+                    </Grid>
+                    {subscriptionDetail.nextBillingDate && (
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Kullanıcı
+                          Sonraki Ödeme
                         </Typography>
                         <Typography variant="body1" fontWeight="medium">
-                          {subscriptionDetail.tenant?.users?.[0]?.fullName ||
-                            subscriptionDetail.tenant?.users?.[0]?.email ||
-                            subscriptionDetail.tenant?.name ||
-                            'N/A'}
+                          {formatDateOnly(subscriptionDetail.nextBillingDate)}
                         </Typography>
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Email
-                        </Typography>
-                        <Typography variant="body1" fontWeight="medium">
-                          {subscriptionDetail.tenant?.users?.[0]?.email || 'N/A'}
-                        </Typography>
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Plan
-                        </Typography>
-                        <Typography variant="body1" fontWeight="medium">
-                          {subscriptionDetail.plan?.name || 'N/A'}
-                        </Typography>
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Durum
-                        </Typography>
-                        <StatusChip status={subscriptionDetail.status} />
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Başlangıç Tarihi
-                        </Typography>
-                        <Typography variant="body1" fontWeight="medium">
-                          {formatDateOnly(subscriptionDetail.startDate)}
-                        </Typography>
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Bitiş Tarihi
-                        </Typography>
-                        <Typography variant="body1" fontWeight="medium">
-                          {formatDateOnly(subscriptionDetail.endDate)}
-                        </Typography>
-                      </Box>
-                      {subscriptionDetail.nextBillingDate && (
-                        <Box>
-                          <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Sonraki Ödeme
-                          </Typography>
-                          <Typography variant="body1" fontWeight="medium">
-                            {formatDateOnly(subscriptionDetail.nextBillingDate)}
-                          </Typography>
-                        </Box>
-                      )}
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Otomatik Yenileme
-                        </Typography>
-                        <Chip
-                          label={subscriptionDetail.autoRenew ? 'Aktif' : 'Pasif'}
-                          color={subscriptionDetail.autoRenew ? 'success' : 'default'}
-                          size="small"
-                        />
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Oluşturulma Tarihi
-                        </Typography>
-                        <Typography variant="body1" fontWeight="medium">
-                          {formatDateTime(subscriptionDetail.createdAt)}
-                        </Typography>
-                      </Box>
-                    </Box>
+                      </Grid>
+                    )}
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Otomatik Yenileme
+                      </Typography>
+                      <Chip
+                        label={subscriptionDetail.autoRenew ? 'Aktif' : 'Pasif'}
+                        color={subscriptionDetail.autoRenew ? 'success' : 'default'}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Oluşturulma Tarihi
+                      </Typography>
+                      <Typography variant="body1" fontWeight="medium">
+                        {formatDateTime(subscriptionDetail.createdAt)}
+                      </Typography>
+                    </Grid>
+                  </Grid>
                 )}
 
                 {detailTab === 1 && (
-                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
-                      <Box>
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Plan Fiyatı
+                      </Typography>
+                      <Typography variant="h6" fontWeight="bold" color="primary">
+                        ₺{subscriptionDetail.plan?.price?.toLocaleString('tr-TR') || '0'}
+                      </Typography>
+                    </Grid>
+                    {subscriptionDetail.lastBillingDate && (
+                      <Grid size={{ xs: 12, sm: 6 }}>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
-                          Plan Fiyatı
+                          Son Ödeme Tarihi
                         </Typography>
-                        <Typography variant="h6" fontWeight="bold" color="primary">
-                          ₺{subscriptionDetail.plan?.price?.toLocaleString('tr-TR') || '0'}
+                        <Typography variant="body1" fontWeight="medium">
+                          {formatDateOnly(subscriptionDetail.lastBillingDate)}
                         </Typography>
-                      </Box>
-                      {subscriptionDetail.lastBillingDate && (
-                        <Box>
-                          <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Son Ödeme Tarihi
-                          </Typography>
-                          <Typography variant="body1" fontWeight="medium">
-                            {formatDateOnly(subscriptionDetail.lastBillingDate)}
-                          </Typography>
-                        </Box>
-                      )}
-                      {subscriptionDetail.trialEndsAt && (
-                        <Box>
-                          <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Deneme Bitiş Tarihi
-                          </Typography>
-                          <Typography variant="body1" fontWeight="medium">
-                            {formatDateOnly(subscriptionDetail.trialEndsAt)}
-                          </Typography>
-                        </Box>
-                      )}
-                      {subscriptionDetail.iyzicoSubscriptionRef && (
-                        <Box>
-                          <Typography variant="body2" color="text.secondary" gutterBottom>
-                            iyzico Abonelik Referansı
-                          </Typography>
-                          <Typography variant="body2" fontFamily="monospace">
-                            {subscriptionDetail.iyzicoSubscriptionRef}
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
+                      </Grid>
+                    )}
+                    {subscriptionDetail.trialEndsAt && (
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          Deneme Bitiş Tarihi
+                        </Typography>
+                        <Typography variant="body1" fontWeight="medium">
+                          {formatDateOnly(subscriptionDetail.trialEndsAt)}
+                        </Typography>
+                      </Grid>
+                    )}
+                    {subscriptionDetail.iyzicoSubscriptionRef && (
+                      <Grid size={12}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          iyzico Abonelik Referansı
+                        </Typography>
+                        <Typography variant="body2" fontFamily="monospace">
+                          {subscriptionDetail.iyzicoSubscriptionRef}
+                        </Typography>
+                      </Grid>
+                    )}
+                  </Grid>
                 )}
 
                 {detailTab === 2 && (
