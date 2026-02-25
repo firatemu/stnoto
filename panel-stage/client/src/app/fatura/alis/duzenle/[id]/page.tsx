@@ -144,6 +144,10 @@ export default function DuzenleAlisFaturasiPage() {
           const birimFiyat = toNum(k.birimFiyat);
           const baseAmount = miktar * birimFiyat;
           const iskOran = toNum(k.iskontoOrani);
+          // KDV oranı yalnızca fatura kalemi tablosundan (k.kdvOrani); tabloda ne varsa o
+          const v = k.kdvOrani;
+          const n = v === undefined || v === null ? NaN : Number(v);
+          const kdvOrani = Number.isFinite(n) && n >= 0 ? n : 0;
           return {
             stokId: k.stokId,
             stok: k.stok ? {
@@ -155,7 +159,7 @@ export default function DuzenleAlisFaturasiPage() {
             } : undefined,
             miktar,
             birimFiyat,
-            kdvOrani: toNum(k.kdvOrani) || 20,
+            kdvOrani,
             iskontoOran: iskOran,
             iskontoTutar: toNum(k.iskontoTutari) || (baseAmount * iskOran) / 100,
           };
@@ -198,7 +202,7 @@ export default function DuzenleAlisFaturasiPage() {
   const handleAddKalem = () => {
     setFormData(prev => ({
       ...prev,
-      kalemler: [...prev.kalemler, { stokId: '', miktar: 1, birimFiyat: 0, kdvOrani: 20, iskontoOran: 0, iskontoTutar: 0 }],
+      kalemler: [...prev.kalemler, { stokId: '', miktar: 1, birimFiyat: 0, kdvOrani: 0, iskontoOran: 0, iskontoTutar: 0 }],
     }));
   };
 

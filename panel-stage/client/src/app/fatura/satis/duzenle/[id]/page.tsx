@@ -184,6 +184,12 @@ export default function DuzenleSatisFaturasiPage() {
           const birimFiyat = toNum(k.birimFiyat);
           const baseAmount = miktar * birimFiyat;
           const iskOran = toNum(k.iskontoOrani);
+          // KDV oranı sadece fatura kaleminden (k.kdvOrani); stok.kdvOrani asla kullanılmamalı (0 iken 20 görünmesin)
+          const v = k.kdvOrani ?? (k as any).kdv_orani;
+          const kdvOrani =
+            v === 0 || v === '0' || (typeof v === 'number' && Number.isFinite(v) && v === 0)
+              ? 0
+              : (v !== undefined && v !== null && v !== '' ? (Number.isFinite(Number(v)) ? Number(v) : 0) : 0);
           return {
             stokId: k.stokId,
             stok: k.stok ? {
@@ -196,7 +202,7 @@ export default function DuzenleSatisFaturasiPage() {
             } : undefined,
             miktar,
             birimFiyat,
-            kdvOrani: toNum(k.kdvOrani) || 20,
+            kdvOrani,
             iskontoOran: iskOran,
             iskontoTutar: toNum(k.iskontoTutari) || (baseAmount * iskOran) / 100,
             cokluIskonto: false,
@@ -265,7 +271,7 @@ export default function DuzenleSatisFaturasiPage() {
         stokId: '',
         miktar: 1,
         birimFiyat: 0,
-        kdvOrani: 20,
+        kdvOrani: 0,
         iskontoOran: 0,
         iskontoTutar: 0,
         cokluIskonto: false,
@@ -291,7 +297,8 @@ export default function DuzenleSatisFaturasiPage() {
         if (stok) {
           kalem.stokId = value;
           kalem.birimFiyat = stok.satisFiyati;
-          kalem.kdvOrani = stok.kdvOrani;
+          // Sadece stok değiştiğinde malzeme varsayılan KDV'si kullanılır; mevcut kalem KDV'si korunabilir
+          kalem.kdvOrani = typeof stok.kdvOrani === 'number' && !Number.isNaN(stok.kdvOrani) ? stok.kdvOrani : (kalem.kdvOrani ?? 0);
         }
       } else if (field === 'cokluIskonto') {
         kalem.cokluIskonto = value;
@@ -336,6 +343,9 @@ export default function DuzenleSatisFaturasiPage() {
         } else {
           kalem.iskontoTutar = (araToplam * kalem.iskontoOran) / 100;
         }
+      } else if (field === 'kdvOrani') {
+        const num = parseFloat(value);
+        kalem.kdvOrani = !Number.isNaN(num) && num >= 0 ? num : (kalem.kdvOrani ?? 0);
       } else {
         kalem[field] = value;
       }
@@ -424,14 +434,17 @@ export default function DuzenleSatisFaturasiPage() {
         satisElemaniId: formData.satisElemaniId || null,
         dovizCinsi: formData.dovizCinsi,
         dovizKuru: formData.dovizKuru,
-        kalemler: validKalemler.map(k => ({
-          stokId: k.stokId,
-          miktar: Number(k.miktar),
-          birimFiyat: Number(k.birimFiyat),
-          kdvOrani: Number(k.kdvOrani),
-          iskontoOrani: Number(k.iskontoOran) || 0,
-          iskontoTutari: Number(k.iskontoTutar) || 0,
-        })),
+        kalemler: validKalemler.map(k => {
+          const kdv = (k.kdvOrani === 0 || k.kdvOrani === '0') ? 0 : Number(k.kdvOrani);
+          return {
+            stokId: k.stokId,
+            miktar: Number(k.miktar),
+            birimFiyat: Number(k.birimFiyat),
+            kdvOrani: Number.isNaN(kdv) || kdv < 0 ? 0 : kdv,
+            iskontoOrani: Number(k.iskontoOran) || 0,
+            iskontoTutari: Number(k.iskontoTutar) || 0,
+          };
+        }),
       });
 
       if (formData.durum !== originalDurum) {
@@ -500,7 +513,7 @@ export default function DuzenleSatisFaturasiPage() {
       </Box>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
-        <TextField label="KDV %" type="number" size="small" value={kalem.kdvOrani} onChange={(e) => handleKalemChange(index, 'kdvOrani', e.target.value)} />
+        <TextField label="KDV %" type="number" size="small" value={kalem.kdvOrani ?? 0} onChange={(e) => handleKalemChange(index, 'kdvOrani', e.target.value)} />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant="caption" color="text.secondary">Çoklu İskonto:</Typography>
           <IconButton size="small" onClick={() => handleKalemChange(index, 'cokluIskonto', !kalem.cokluIskonto)} sx={{ color: kalem.cokluIskonto ? 'var(--primary)' : 'var(--muted-foreground)' }}>
@@ -658,7 +671,7 @@ export default function DuzenleSatisFaturasiPage() {
                         </TableCell>
                         <TableCell><TextField fullWidth type="number" size="small" value={kalem.miktar} onChange={(e) => handleKalemChange(index, 'miktar', e.target.value)} /></TableCell>
                         <TableCell><TextField fullWidth type="number" size="small" value={kalem.birimFiyat} onChange={(e) => handleKalemChange(index, 'birimFiyat', e.target.value)} /></TableCell>
-                        <TableCell><TextField fullWidth type="number" size="small" value={kalem.kdvOrani} onChange={(e) => handleKalemChange(index, 'kdvOrani', e.target.value)} /></TableCell>
+                        <TableCell><TextField fullWidth type="number" size="small" value={kalem.kdvOrani ?? 0} onChange={(e) => handleKalemChange(index, 'kdvOrani', e.target.value)} /></TableCell>
                         <TableCell sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           <TextField fullWidth size="small" value={kalem.cokluIskonto ? (kalem.iskontoFormula || '') : (kalem.iskontoOran || '')} onChange={(e) => handleKalemChange(index, 'iskontoOran', e.target.value)} />
                           <IconButton size="small" onClick={() => handleKalemChange(index, 'cokluIskonto', !kalem.cokluIskonto)} color={kalem.cokluIskonto ? "primary" : "default"}>

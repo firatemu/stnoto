@@ -125,8 +125,20 @@ export default function AlisIadeFaturaPrintPage() {
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+      const marginTop = 12;
+      const marginBottom = 12;
+      const contentHeight = pdfHeight - marginTop - marginBottom;
+
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height / canvas.width) * pdfWidth;
+      const numPages = Math.ceil(imgHeight / contentHeight) || 1;
+
+      for (let i = 0; i < numPages; i++) {
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, marginTop - i * contentHeight, imgWidth, imgHeight);
+      }
+
       pdf.save(`Iade-Fatura-${fatura?.faturaNo}.pdf`);
     } catch (error) {
       console.error('PDF oluşturulamadı:', error);

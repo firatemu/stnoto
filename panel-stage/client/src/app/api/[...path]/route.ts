@@ -44,11 +44,16 @@ async function proxyToBackend(request: NextRequest, pathSegments: string[]) {
 
   let res: Response;
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
     res = await fetch(url.toString(), {
       method: request.method,
       headers,
       body: body || undefined,
+      signal: controller.signal,
+      cache: 'no-store',
     });
+    clearTimeout(timeoutId);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Backend unreachable';
     console.error('[API Proxy] Backend fetch failed:', url.toString(), message);

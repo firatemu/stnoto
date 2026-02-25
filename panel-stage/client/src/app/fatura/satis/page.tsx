@@ -1796,7 +1796,17 @@ export default function SatisFaturalariPage() {
               <ListItemIcon><TrendingUp fontSize="small" sx={{ color: 'success.main' }} /></ListItemIcon>
               <Typography variant="body2">Kâr/Zarar Analizi</Typography>
             </MenuItem>,
-            <MenuItem key="copy" onClick={() => { handleMenuClose(); router.push(`/fatura/satis/yeni?kopyala=${fatura.id}`); }}>
+            <MenuItem
+              key="copy"
+              onClick={() => {
+                handleMenuClose();
+                const path = `/fatura/satis/yeni?kopyala=${fatura.id}`;
+                const tabId = `fatura-satis-kopyala-${fatura.id}`;
+                addTab({ id: tabId, label: `Kopya: ${fatura.faturaNo}`, path });
+                setActiveTab(tabId);
+                router.push(path);
+              }}
+            >
               <ListItemIcon><ContentCopy fontSize="small" /></ListItemIcon>
               <Typography variant="body2">Kopyasını Oluştur</Typography>
             </MenuItem>,

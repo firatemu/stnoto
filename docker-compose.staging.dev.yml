@@ -42,10 +42,11 @@ services:
       HOSTNAME: "0.0.0.0"
       PORT: "3000"
       NEXT_TELEMETRY_DISABLED: "1"
-      CHOKIDAR_USEPOLLING: "false"
-      WATCHPACK_POLLING: "false"
-      # Panel /api/* isteklerini backend container'a yönlendirir (login vb.)
-      API_PROXY_TARGET: "http://otomuhasebe-backend-staging-1:3000"
+      # Docker/Linux'ta hot reload için polling (dosya değişiklikleri algılansın)
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+      # Panel /api/* isteklerini backend container'a yönlendirir (Compose servis adı)
+      API_PROXY_TARGET: "http://backend-staging:3000"
     volumes:
       - ./panel-stage/client:/app
       - panel_stage_node_modules:/app/node_modules

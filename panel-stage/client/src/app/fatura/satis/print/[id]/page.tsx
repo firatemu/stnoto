@@ -70,7 +70,6 @@ export default function FaturaPrintPage() {
   const [paperSize, setPaperSize] = useState<'A4' | 'A5' | 'A5-landscape'>('A4');
   const [template, setTemplate] = useState<'classic' | 'modern'>('classic');
   const [zoom, setZoom] = useState(100);
-
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -106,7 +105,6 @@ export default function FaturaPrintPage() {
     if (!printRef.current) return;
 
     try {
-      // html2canvas ve jsPDF kullanarak PDF oluştur
       const html2canvas = (await import('html2canvas')).default;
       const jsPDF = (await import('jspdf')).default;
 
@@ -115,6 +113,9 @@ export default function FaturaPrintPage() {
         scale: 2,
         useCORS: true,
         logging: false,
+        allowTaint: true,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -127,7 +128,20 @@ export default function FaturaPrintPage() {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
 
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      // Çok sayfalı PDF'de sayfa sonu/başı boşluk (mm)
+      const marginTop = 12;
+      const marginBottom = 12;
+      const contentHeight = pdfHeight - marginTop - marginBottom;
+
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height / canvas.width) * pdfWidth;
+      const numPages = Math.ceil(imgHeight / contentHeight) || 1;
+
+      for (let i = 0; i < numPages; i++) {
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, marginTop - i * contentHeight, imgWidth, imgHeight);
+      }
+
       pdf.save(`Fatura-${fatura?.faturaNo}.pdf`);
     } catch (error) {
       console.error('PDF oluşturulamadı:', error);
@@ -380,13 +394,13 @@ export default function FaturaPrintPage() {
   );
 }
 
-// Klasik Şablon
+// Klasik Şablon - Kağıt her zaman içerik yüksekliğinde, footer normal akışta (taşma olmasın)
 function ClassicTemplate({
   fatura,
   companyInfo,
   paperSize,
   formatDate,
-  formatMoney
+  formatMoney,
 }: {
   fatura: Fatura;
   companyInfo: any;
@@ -403,7 +417,9 @@ function ClassicTemplate({
       sx={{
         width: { xs: '100%', sm: width },
         minWidth: { xs: '600px', sm: width },
-        height,
+        minHeight: height,
+        height: 'auto',
+        overflow: 'visible',
         p: paperSize === 'A4' ? { xs: 2, sm: 4 } : { xs: 1, sm: 2 },
         bgcolor: 'white',
         boxShadow: 3,
@@ -567,8 +583,8 @@ function ClassicTemplate({
         </Box>
       )}
 
-      {/* Footer */}
-      <Box sx={{ position: 'absolute', bottom: paperSize === 'A4' ? 30 : 15, left: paperSize === 'A4' ? 30 : 15, right: paperSize === 'A4' ? 30 : 15 }}>
+      {/* Footer her zaman içeriğin sonunda, normal akışta (tabloya taşmaz) */}
+      <Box sx={{ mt: 3, pt: 2 }}>
         <Divider sx={{ mb: 1 }} />
         <Typography variant="caption" align="center" display="block" sx={{ color: '#666' }}>
           Bu belge bilgi amaçlı hazırlanmıştır herhangi bir mali değeri yoktur.
@@ -578,13 +594,13 @@ function ClassicTemplate({
   );
 }
 
-// Modern Şablon
+// Modern Şablon - Kağıt her zaman içerik yüksekliğinde, footer normal akışta
 function ModernTemplate({
   fatura,
   companyInfo,
   paperSize,
   formatDate,
-  formatMoney
+  formatMoney,
 }: {
   fatura: Fatura;
   companyInfo: any;
@@ -601,14 +617,15 @@ function ModernTemplate({
       sx={{
         width: { xs: '100%', sm: width },
         minWidth: { xs: '600px', sm: width },
-        height,
+        minHeight: height,
+        height: 'auto',
+        overflow: 'visible',
         p: 0,
         bgcolor: 'white',
         boxShadow: 3,
         fontSize: { xs: '8pt', sm: fontSize },
         fontFamily: 'Helvetica, sans-serif',
         position: 'relative',
-        overflow: { xs: 'visible', sm: 'hidden' },
         '@media print': {
           boxShadow: 'none',
           width,
@@ -810,16 +827,8 @@ function ModernTemplate({
         )}
       </Box>
 
-      {/* Modern Footer */}
-      <Box sx={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        p: 2,
-        bgcolor: '#f8f9fa',
-        borderTop: '1px solid #e0e0e0',
-      }}>
+      {/* Footer her zaman içeriğin sonunda, normal akışta */}
+      <Box sx={{ mt: 3, p: 2, bgcolor: '#f8f9fa', borderTop: '1px solid #e0e0e0' }}>
         <Typography variant="caption" align="center" display="block" sx={{ color: '#999' }}>
           Bu belge bilgi amaçlı hazırlanmıştır herhangi bir mali değeri yoktur.
         </Typography>

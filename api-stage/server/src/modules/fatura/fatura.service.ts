@@ -496,7 +496,15 @@ export class FaturaService {
     const fallbackWarehouseId =
       (fatura.irsaliye as any)?.depoId ?? (fatura.satinAlmaIrsaliye as any)?.depoId ?? null;
     const warehouseId = (fatura as any).warehouseId ?? (fallbackWarehouseId != null ? String(fallbackWarehouseId) : undefined);
-    return { ...fatura, warehouseId };
+    // Kalem kdvOrani: sadece fatura kaleminden (stok.kdvOrani değil); 0 açıkça korunmalı
+    const kalemler = (fatura.kalemler || []).map((k: any) => {
+      const v = k.kdvOrani ?? (k as any).kdv_orani;
+      const isZero = v === 0 || v === '0' || (typeof v === 'number' && v === 0);
+      const n = isZero ? 0 : (typeof v === 'number' && !Number.isNaN(v) ? v : Number(v));
+      const out = typeof n === 'number' && !Number.isNaN(n) && n >= 0 ? n : 0;
+      return { ...k, kdvOrani: out };
+    });
+    return { ...fatura, warehouseId, kalemler };
   }
 
   async create(
@@ -575,30 +583,38 @@ export class FaturaService {
     let kdvTutar = 0;
 
     const kalemlerWithCalculations = kalemler.map((kalem) => {
-      const miktar = kalem.miktar || 1;
-      const birimFiyat = kalem.birimFiyat || 0;
+      const miktar = Math.max(1, Math.floor(Number(kalem.miktar) || 1));
+      const birimFiyat = Number(kalem.birimFiyat) || 0;
       const rawTutar = miktar * birimFiyat;
 
       // Satır bazlı iskonto hesapla
-      const iskontoOrani = kalem.iskontoOrani !== undefined ? kalem.iskontoOrani : 0;
+      const iskontoOrani = kalem.iskontoOrani !== undefined ? Number(kalem.iskontoOrani) : 0;
       let iskontoTutari = 0;
 
-      if (kalem.iskontoTutari !== undefined && kalem.iskontoTutari !== null && kalem.iskontoTutari > 0) {
-        iskontoTutari = kalem.iskontoTutari;
+      if (kalem.iskontoTutari !== undefined && kalem.iskontoTutari !== null && Number(kalem.iskontoTutari) > 0) {
+        iskontoTutari = Number(kalem.iskontoTutari);
       } else {
         iskontoTutari = (rawTutar * iskontoOrani) / 100;
       }
 
       const tutar = rawTutar - iskontoTutari;
-
-      const kalemKdv = (tutar * (kalem.kdvOrani || 0)) / 100;
+      // 0 geçerli KDV oranı; || 0 ile 0'ı ezmeyelim
+      const rawKdv = kalem.kdvOrani;
+      const kdvOraniInt =
+        rawKdv === 0 || (typeof rawKdv === 'string' && rawKdv === '0')
+          ? 0
+          : Math.round(Number(rawKdv) || 0);
+      const kalemKdv = (tutar * kdvOraniInt) / 100;
 
       toplamTutar += tutar;
       kdvTutar += kalemKdv;
 
+      // Sadece Prisma FaturaKalemi alanları
       return {
-        ...kalem,
+        stokId: String(kalem.stokId),
+        miktar,
         birimFiyat,
+        kdvOrani: kdvOraniInt,
         iskontoOrani: new Decimal(iskontoOrani),
         iskontoTutari: new Decimal(iskontoTutari),
         tutar: new Decimal(tutar),
@@ -1145,30 +1161,38 @@ export class FaturaService {
     let kdvTutar = 0;
 
     const kalemlerWithCalculations = kalemler.map((kalem) => {
-      const miktar = kalem.miktar || 1;
-      const birimFiyat = kalem.birimFiyat || 0;
+      const miktar = Math.max(1, Math.floor(Number(kalem.miktar) || 1));
+      const birimFiyat = Number(kalem.birimFiyat) || 0;
       const rawTutar = miktar * birimFiyat;
 
       // Satır bazlı iskonto hesapla
-      const iskontoOrani = kalem.iskontoOrani !== undefined ? kalem.iskontoOrani : 0;
+      const iskontoOrani = kalem.iskontoOrani !== undefined ? Number(kalem.iskontoOrani) : 0;
       let iskontoTutari = 0;
 
-      if (kalem.iskontoTutari !== undefined && kalem.iskontoTutari !== null && kalem.iskontoTutari > 0) {
-        iskontoTutari = kalem.iskontoTutari;
+      if (kalem.iskontoTutari !== undefined && kalem.iskontoTutari !== null && Number(kalem.iskontoTutari) > 0) {
+        iskontoTutari = Number(kalem.iskontoTutari);
       } else {
         iskontoTutari = (rawTutar * iskontoOrani) / 100;
       }
 
       const tutar = rawTutar - iskontoTutari;
-
-      const kalemKdv = (tutar * (kalem.kdvOrani || 0)) / 100;
+      // 0 geçerli KDV oranı; || 0 ile 0'ı ezmeyelim
+      const rawKdv = kalem.kdvOrani;
+      const kdvOraniInt =
+        rawKdv === 0 || (typeof rawKdv === 'string' && rawKdv === '0')
+          ? 0
+          : Math.round(Number(rawKdv) || 0);
+      const kalemKdv = (tutar * kdvOraniInt) / 100;
 
       toplamTutar += tutar;
       kdvTutar += kalemKdv;
 
+      // Sadece Prisma FaturaKalemi alanları; ek alanlar (örn. stok objesi) create'i bozmasın
       return {
-        ...kalem,
+        stokId: String(kalem.stokId),
+        miktar,
         birimFiyat,
+        kdvOrani: kdvOraniInt,
         iskontoOrani: new Decimal(iskontoOrani),
         iskontoTutari: new Decimal(iskontoTutari),
         tutar: new Decimal(tutar),
@@ -1205,7 +1229,8 @@ export class FaturaService {
       }
     }
 
-    const updatedFatura = await this.prisma.$transaction(async (prisma) => {
+    const updatedFatura = await this.prisma.$transaction(
+      async (prisma) => {
       // Eski kalemleri sil
       await prisma.faturaKalemi.deleteMany({
         where: { faturaId: id },
@@ -1267,7 +1292,9 @@ export class FaturaService {
       }
 
       return updated;
-    });
+    },
+    { timeout: 30000 }
+    );
 
     // Maliyetlendirme (sadece ALIS faturaları için ve parametre açıksa) - TRANSACTION DIŞINDA
     if (fatura.faturaTipi === 'ALIS') {

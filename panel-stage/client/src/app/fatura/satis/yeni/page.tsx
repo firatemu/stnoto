@@ -79,6 +79,10 @@ function YeniSatisFaturasiPageContent() {
   const searchParams = useSearchParams();
   const siparisId = searchParams.get('siparisId');
   const irsaliyeId = searchParams.get('irsaliyeId');
+  // kopyala: useSearchParams bazen ilk render'da boş dönebilir; URL'den yedekle
+  const kopyalaId =
+    searchParams.get('kopyala') ??
+    (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('kopyala') : null);
 
   const [cariler, setCariler] = useState<Cari[]>([]);
   const [stoklar, setStoklar] = useState<Stok[]>([]);
@@ -264,14 +268,23 @@ function YeniSatisFaturasiPageContent() {
     fetchSatisElemanlari();
     fetchWarehouses();
 
+    // kopyala ID: hem searchParams hem effect anında URL'den oku (tab/navigation sonrası güncel olsun)
+    const fromUrl =
+      typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('kopyala')
+        : null;
+    const copyId = kopyalaId || fromUrl;
+
     if (irsaliyeId) {
       fetchIrsaliyeBilgileri(irsaliyeId);
     } else if (siparisId) {
       fetchSiparisBilgileri(siparisId);
+    } else if (copyId) {
+      fetchFaturaKopyala(copyId);
     } else {
       generateFaturaNo();
     }
-  }, [siparisId, irsaliyeId]);
+  }, [siparisId, irsaliyeId, kopyalaId]);
 
   const fetchCariler = async () => {
     try {
@@ -295,11 +308,16 @@ function YeniSatisFaturasiPageContent() {
         return;
       }
 
+      // Kopyala modunda ambarı fetchFaturaKopyala set edecek; varsayılan atama yapma
+      const isCopyMode =
+        kopyalaId ||
+        (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('kopyala'));
+      if (isCopyMode) return;
+
       const defaultWarehouse = warehouseList.find((w: any) => w.isDefault);
       if (defaultWarehouse && !formData.warehouseId) {
         setFormData(prev => ({ ...prev, warehouseId: defaultWarehouse.id }));
       } else if (warehouseList.length === 1 && !formData.warehouseId) {
-        // Sadece 1 ambar varsa otomatik seç
         setFormData(prev => ({ ...prev, warehouseId: warehouseList[0].id }));
       }
     } catch (error) {
@@ -417,6 +435,76 @@ function YeniSatisFaturasiPageContent() {
       setLoadingSiparis(false);
     }
   };
+
+  const toNum = (v: any): number | undefined => {
+    if (v == null || v === '') return undefined;
+    const n = Number(v);
+    return Number.isNaN(n) ? undefined : n;
+  };
+
+  const fetchFaturaKopyala = async (faturaId: string) => {
+    try {
+      setLoadingSiparis(true);
+      const response = await axios.get(`/fatura/${faturaId}`);
+      const fatura = response.data;
+
+      const warehouseId = fatura.warehouseId ?? fatura.irsaliye?.depoId ?? '';
+
+      const kalemler: FaturaKalemi[] = (fatura.kalemler || []).map((k: any) => {
+        const miktar = toNum(k.miktar) ?? 1;
+        const birimFiyat = toNum(k.birimFiyat) ?? 0;
+        const baseAmount = miktar * birimFiyat;
+        const iskOran = toNum(k.iskontoOrani) ?? 0;
+        // KDV oranı fatura kalemi tablosundan; tabloda ne varsa o (0 dahil)
+        const v = k.kdvOrani;
+        const n = v === undefined || v === null ? NaN : Number(v);
+        const kdvOrani = Number.isFinite(n) && n >= 0 ? n : 0;
+        return {
+          stokId: k.stokId,
+          stok: k.stok ? {
+            id: k.stok.id,
+            stokKodu: k.stok.stokKodu,
+            stokAdi: k.stok.stokAdi,
+            satisFiyati: toNum(k.stok.satisFiyati) ?? 0,
+            kdvOrani: toNum(k.stok.kdvOrani) ?? 0,
+            miktar: 0,
+          } : undefined,
+          miktar,
+          birimFiyat,
+          kdvOrani,
+          iskontoOran: iskOran,
+          iskontoTutar: toNum(k.iskontoTutari) ?? (baseAmount * iskOran) / 100,
+          cokluIskonto: false,
+          iskontoFormula: '',
+        };
+      });
+
+      setFormData(prev => ({
+        ...prev,
+        cariId: fatura.cariId || '',
+        warehouseId: String(warehouseId || prev.warehouseId),
+        tarih: fatura.tarih ? new Date(fatura.tarih).toISOString().split('T')[0] : prev.tarih,
+        vade: fatura.vade ? new Date(fatura.vade).toISOString().split('T')[0] : prev.vade,
+        aciklama: fatura.aciklama || '',
+        satisElemaniId: fatura.satisElemaniId || '',
+        dovizCinsi: (fatura.dovizCinsi || 'TRY') as 'TRY' | 'USD' | 'EUR' | 'GBP',
+        dovizKuru: toNum(fatura.dovizKuru) ?? 1,
+        genelIskontoOran: 0,
+        genelIskontoTutar: toNum(fatura.iskonto) ?? 0,
+        kalemler,
+      }));
+
+      await generateFaturaNo();
+      showSnackbar('Fatura kopyalandı. Yeni fatura numarası atandı.', 'success');
+    } catch (error: any) {
+      console.error('Fatura kopyalanırken hata:', error);
+      showSnackbar(error.response?.data?.message || 'Fatura kopyalanırken hata oluştu', 'error');
+      generateFaturaNo();
+    } finally {
+      setLoadingSiparis(false);
+    }
+  };
+
   const fetchIrsaliyeler = async (cariId: string) => {
     if (!cariId) {
       showSnackbar('Önce cari hesap seçmelisiniz', 'error');
