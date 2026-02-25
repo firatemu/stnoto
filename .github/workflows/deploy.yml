@@ -1,9 +1,8 @@
 
 name: Production Deployment
 
+# Sadece manuel: Production deploy push ile tetiklenmez, sadece staging Actions'a gider.
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
 
 env:

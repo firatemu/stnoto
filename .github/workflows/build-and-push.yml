@@ -1,12 +1,7 @@
 name: Build and Push Production Images
 
+# Sadece manuel: Production image'ları push ile tetiklenmez, sadece staging Actions'a gider.
 on:
-  push:
-    branches:
-      - main
-      - production
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
       tag:
