@@ -791,6 +791,8 @@ model Fatura {
   workOrder           WorkOrder?            @relation("WorkOrderInvoice")
   satisElemaniId      String?
   satisElemani        SatisElemani?         @relation(fields: [satisElemaniId], references: [id])
+  warehouseId         String?
+  warehouse           Warehouse?            @relation("FaturaWarehouse", fields: [warehouseId], references: [id])
 
   @@unique([faturaNo, tenantId])
   @@index([tenantId])
@@ -1254,6 +1256,7 @@ model Warehouse {
   stockMoves2             StockMove[]              @relation("ToWarehouse")
   stok_hareketleri        StokHareket[]
   warehouseCriticalStocks WarehouseCriticalStock[]
+  faturaWarehouses        Fatura[]                 @relation("FaturaWarehouse")
   fromWarehouseTransfers  WarehouseTransfer[]      @relation("WarehouseTransferFrom")
   toWarehouseTransfers    WarehouseTransfer[]      @relation("WarehouseTransferTo")
   tenant                  Tenant?                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)

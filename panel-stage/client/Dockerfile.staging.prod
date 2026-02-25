@@ -14,7 +14,9 @@ COPY . .
 
 # Set build time envs (ARG allows override for stnoto.com: --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.stnoto.com)
 ARG NEXT_PUBLIC_API_BASE_URL=https://staging-api.otomuhasebe.com
+ARG API_PROXY_TARGET=http://backend-staging:3000
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+ENV API_PROXY_TARGET=$API_PROXY_TARGET
 ENV NODE_ENV=production
 
 RUN npx next build

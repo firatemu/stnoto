@@ -84,6 +84,7 @@ jobs:
           tags: ${{ env.IMAGE_PANEL }}
           build-args: |
             NEXT_PUBLIC_API_BASE_URL=https://api.stnoto.com
+            API_PROXY_TARGET=http://backend-staging:3000
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
