@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Prisma, FaturaDurum, FaturaTipi, HareketTipi } from '@prisma/client';
 import { PrismaService } from '../../common/prisma.service';
 import { GetCostingQueryDto } from './dto/get-costing-query.dto';
@@ -258,13 +262,15 @@ export class CostingService {
     for (const line of purchaseLines) {
       const qty = Number(line.miktar);
       if (!qty || qty <= 0) continue;
+      const fatura = line.fatura;
+      if (!fatura?.tarih) continue;
       const tutarNet = Number(line.tutar || 0);
       const kdvTutar = Number(line.kdvTutar || 0);
       const totalKdvDahil = tutarNet + kdvTutar; // KDV dahil tutar
       const unitCost = qty ? totalKdvDahil / qty : 0;
       timeline.push({
         type: 'increase',
-        date: line.fatura.tarih,
+        date: fatura.tarih,
         quantity: qty,
         unitCost,
       });
@@ -273,9 +279,11 @@ export class CostingService {
     for (const line of salesLines) {
       const qty = Number(line.miktar);
       if (!qty || qty <= 0) continue;
+      const fatura = line.fatura;
+      if (!fatura?.tarih) continue;
       timeline.push({
         type: 'decrease',
-        date: line.fatura.tarih,
+        date: fatura.tarih,
         quantity: qty,
       });
     }
@@ -283,13 +291,15 @@ export class CostingService {
     for (const line of salesReturnLines) {
       const qty = Number(line.miktar);
       if (!qty || qty <= 0) continue;
+      const fatura = line.fatura;
+      if (!fatura?.tarih) continue;
       const tutarNet = Number(line.tutar || 0);
       const kdvTutar = Number(line.kdvTutar || 0);
       const totalKdvDahil = tutarNet + kdvTutar; // KDV dahil tutar
       const unitCost = qty ? totalKdvDahil / qty : 0;
       timeline.push({
         type: 'increase',
-        date: line.fatura.tarih,
+        date: fatura.tarih,
         quantity: qty,
         unitCost,
       });
@@ -450,6 +460,10 @@ export class CostingService {
    * Toplu maliyet hesaplama (rate limit aşımını önlemek için tek istekte tüm stoklar)
    */
   async calculateWeightedAverageCostBulk(stokIds: string[]) {
+    if (!stokIds || !Array.isArray(stokIds)) {
+      throw new BadRequestException('stokIds zorunludur ve dizi olmalıdır.');
+    }
+
     const results: Array<{
       stokId: string;
       stokKodu: string;

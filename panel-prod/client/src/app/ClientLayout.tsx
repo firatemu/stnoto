@@ -1,6 +1,5 @@
 'use client';
 
-import InactivityTracker from '@/components/InactivityTracker';
 import { theme } from '@/lib/theme';
 import QueryProvider from '@/providers/QueryProvider';
 import StorageGuard from '@/providers/StorageGuard';
@@ -61,7 +60,6 @@ export default function ClientLayout({
         <ThemeProvider theme={theme}>
           <CssBaseline />
           {children}
-          <InactivityTracker />
         </ThemeProvider>
       </AppRouterCacheProvider>
     </QueryProvider>

@@ -1,6 +1,5 @@
 'use client';
 
-import InactivityTracker from '@/components/InactivityTracker';
 import { lightTheme, darkTheme } from '@/lib/theme';
 import QueryProvider from '@/providers/QueryProvider';
 import StorageGuard from '@/providers/StorageGuard';
@@ -71,7 +70,6 @@ export default function ClientLayout({
         <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
           <CssBaseline />
           {children}
-          <InactivityTracker />
         </ThemeProvider>
       </AppRouterCacheProvider>
     </QueryProvider>

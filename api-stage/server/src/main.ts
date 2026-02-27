@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import helmet from 'helmet';
@@ -118,7 +118,7 @@ async function bootstrap() {
         });
         const message = `Validation failed: ${JSON.stringify(formattedErrors, null, 2)}`;
         console.error('[ValidationPipe] Validation error:', formattedErrors);
-        return new Error(message);
+        return new BadRequestException(message);
       },
     }),
   );

@@ -20,6 +20,7 @@ export class CostingController {
 
   @Post('calculate-bulk')
   calculateBulk(@Body() body: CalculateBulkCostDto) {
-    return this.costingService.calculateWeightedAverageCostBulk(body.stokIds);
+    const stokIds = body?.stokIds ?? [];
+    return this.costingService.calculateWeightedAverageCostBulk(stokIds);
   }
 }
