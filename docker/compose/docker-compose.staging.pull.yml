@@ -12,6 +12,8 @@ services:
     networks: [ app_net ]
     ports:
       - "3020:3000"
+    mem_limit: 512m
+    cpus: "0.75"
     healthcheck:
       test: [ "CMD", "wget", "-qO-", "http://0.0.0.0:3000/api/health" ]
       interval: 30s
@@ -32,6 +34,9 @@ services:
       NEXT_PUBLIC_API_BASE_URL: https://api.stnoto.com
       NODE_ENV: production
       API_PROXY_TARGET: "http://backend-staging:3000"
+      NODE_OPTIONS: "--max-old-space-size=768"
+    mem_limit: 1024m
+    cpus: "1.25"
     networks: [ app_net ]
     healthcheck:
       test: [ "CMD", "wget", "-qO-", "http://0.0.0.0:3000/" ]
