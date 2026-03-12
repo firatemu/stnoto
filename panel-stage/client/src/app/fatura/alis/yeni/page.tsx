@@ -38,6 +38,7 @@ import { Delete, Save, ArrowBack, ToggleOn, ToggleOff, LocalShipping, Add as Add
 import MainLayout from '@/components/Layout/MainLayout';
 import axios from '@/lib/axios';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTabStore } from '@/stores/tabStore';
 
 interface Cari {
   id: string;
@@ -69,7 +70,8 @@ interface FaturaKalemi {
   iskontoFormula?: string;
 }
 
-function YeniAlisFaturasiPageContent() {
+export function AlisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?: string; onBack?: () => void }) {
+  const isEdit = Boolean(editFaturaId);
   const router = useRouter();
   const searchParams = useSearchParams();
   const irsaliyeId = searchParams.get('irsaliyeId');
@@ -80,6 +82,8 @@ function YeniAlisFaturasiPageContent() {
   const [warehousesFetched, setWarehousesFetched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingIrsaliye, setLoadingIrsaliye] = useState(false);
+  const [loadingFatura, setLoadingFatura] = useState(isEdit);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     faturaNo: '',
@@ -107,12 +111,14 @@ function YeniAlisFaturasiPageContent() {
     fetchStoklar();
     fetchWarehouses();
 
-    if (irsaliyeId) {
+    if (isEdit && editFaturaId) {
+      fetchFatura();
+    } else if (irsaliyeId) {
       fetchIrsaliyeBilgileri(irsaliyeId);
     } else {
       generateFaturaNo();
     }
-  }, [irsaliyeId]);
+  }, [irsaliyeId, editFaturaId, isEdit]);
 
   const fetchCariler = async () => {
     try {
@@ -160,6 +166,59 @@ function YeniAlisFaturasiPageContent() {
     } catch (error) {
       console.error('Ambarlar yüklenirken hata:', error);
       setWarehousesFetched(true);
+    }
+  };
+
+  const toNumEdit = (v: any): number => {
+    if (v == null || v === '') return 0;
+    if (typeof v === 'number' && !Number.isNaN(v)) return v;
+    if (typeof v === 'object' && v != null && typeof (v as any).toNumber === 'function') return (v as any).toNumber();
+    const n = Number(v);
+    return Number.isNaN(n) ? 0 : n;
+  };
+
+  const fetchFatura = async () => {
+    if (!editFaturaId) return;
+    try {
+      setLoadingFatura(true);
+      const response = await axios.get(`/fatura/${editFaturaId}`);
+      const fatura = response.data;
+
+      setFormData({
+        faturaNo: fatura.faturaNo,
+        faturaTipi: fatura.faturaTipi,
+        cariId: fatura.cariId,
+        tarih: new Date(fatura.tarih).toISOString().split('T')[0],
+        vade: fatura.vade ? new Date(fatura.vade).toISOString().split('T')[0] : '',
+        durum: fatura.durum || 'ONAYLANDI',
+        genelIskontoOran: 0,
+        genelIskontoTutar: toNumEdit(fatura.iskonto),
+        aciklama: fatura.aciklama || '',
+        warehouseId: fatura.warehouseId || '',
+        kalemler: (fatura.kalemler || []).map((k: any) => ({
+          stokId: k.stokId,
+          stok: k.stok ? {
+            id: k.stok.id,
+            stokKodu: k.stok.stokKodu,
+            stokAdi: k.stok.stokAdi,
+            satisFiyati: toNumEdit(k.stok.satisFiyati),
+            alisFiyati: toNumEdit(k.stok.alisFiyati),
+            kdvOrani: toNumEdit(k.stok.kdvOrani),
+          } : undefined,
+          miktar: toNumEdit(k.miktar),
+          birimFiyat: toNumEdit(k.birimFiyat),
+          kdvOrani: toNumEdit(k.kdvOrani),
+          iskontoOran: toNumEdit(k.iskontoOrani),
+          iskontoTutar: toNumEdit(k.iskontoTutari),
+          cokluIskonto: Boolean(k.cokluIskonto),
+          iskontoFormula: k.iskontoFormula || '',
+        })),
+      });
+    } catch (error: any) {
+      showSnackbar(error.response?.data?.message || 'Fatura yüklenirken hata oluştu', 'error');
+      onBack?.();
+    } finally {
+      setLoadingFatura(false);
     }
   };
 
@@ -454,35 +513,70 @@ function YeniAlisFaturasiPageContent() {
         showSnackbar(`${removedCount} adet boş satır otomatik olarak kaldırıldı`, 'info');
       }
 
-      setLoading(true);
-      await axios.post('/fatura', {
-        faturaNo: formData.faturaNo,
-        faturaTipi: formData.faturaTipi,
-        cariId: formData.cariId,
-        tarih: new Date(formData.tarih).toISOString(),
-        vade: formData.vade ? new Date(formData.vade).toISOString() : null,
-        iskonto: Number(formData.genelIskontoTutar) || 0,
-        aciklama: formData.aciklama || null,
-        durum: formData.durum,
-        warehouseId: formData.warehouseId || null,
-        kalemler: validKalemler.map(k => ({
-          stokId: k.stokId,
-          miktar: Number(k.miktar),
-          birimFiyat: Number(k.birimFiyat),
-          kdvOrani: Number(k.kdvOrani),
-          iskontoOrani: Number(k.iskontoOran) || 0,
-          iskontoTutari: Number(k.iskontoTutar) || 0,
-        })),
-      });
+      setSaving(true);
+      if (isEdit) {
+        await axios.put(`/fatura/${editFaturaId}`, {
+          faturaNo: formData.faturaNo,
+          faturaTipi: formData.faturaTipi,
+          cariId: formData.cariId,
+          tarih: new Date(formData.tarih).toISOString(),
+          vade: formData.vade ? new Date(formData.vade).toISOString() : null,
+          iskonto: Number(formData.genelIskontoTutar) || 0,
+          aciklama: formData.aciklama || null,
+          durum: formData.durum,
+          warehouseId: formData.warehouseId || null,
+          kalemler: validKalemler.map(k => ({
+            stokId: k.stokId,
+            miktar: Number(k.miktar),
+            birimFiyat: Number(k.birimFiyat),
+            kdvOrani: Number(k.kdvOrani),
+            iskontoOrani: Number(k.iskontoOran) || 0,
+            iskontoTutari: Number(k.iskontoTutar) || 0,
+            cokluIskonto: k.cokluIskonto || false,
+            iskontoFormula: k.iskontoFormula || null,
+          })),
+        });
+        showSnackbar('Fatura başarıyla güncellendi', 'success');
+      } else {
+        await axios.post('/fatura', {
+          faturaNo: formData.faturaNo,
+          faturaTipi: formData.faturaTipi,
+          cariId: formData.cariId,
+          tarih: new Date(formData.tarih).toISOString(),
+          vade: formData.vade ? new Date(formData.vade).toISOString() : null,
+          iskonto: Number(formData.genelIskontoTutar) || 0,
+          aciklama: formData.aciklama || null,
+          durum: formData.durum,
+          warehouseId: formData.warehouseId || null,
+          kalemler: validKalemler.map(k => ({
+            stokId: k.stokId,
+            miktar: Number(k.miktar),
+            birimFiyat: Number(k.birimFiyat),
+            kdvOrani: Number(k.kdvOrani),
+            iskontoOrani: Number(k.iskontoOran) || 0,
+            iskontoTutari: Number(k.iskontoTutar) || 0,
+            cokluIskonto: k.cokluIskonto || false,
+            iskontoFormula: k.iskontoFormula || null,
+          })),
+        });
+        showSnackbar('Fatura başarıyla oluşturuldu', 'success');
+      }
 
-      showSnackbar('Fatura başarıyla oluşturuldu', 'success');
       setTimeout(() => {
-        router.push('/fatura/alis');
+        const currentTabId = useTabStore.getState().activeTab;
+        if (currentTabId) {
+          useTabStore.getState().removeTab(currentTabId);
+        }
+        if (onBack) {
+          onBack();
+        } else {
+          router.push('/fatura/alis');
+        }
       }, 1500);
     } catch (error: any) {
       showSnackbar(error.response?.data?.message || 'İşlem sırasında hata oluştu', 'error');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -751,7 +845,7 @@ function YeniAlisFaturasiPageContent() {
               color: 'var(--foreground)',
               letterSpacing: '-0.02em'
             }}>
-              Yeni Satın Alma Faturası
+              {isEdit ? 'Satın Alma Faturası Düzenle' : 'Yeni Satın Alma Faturası'}
             </Typography>
             <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
               Satın alma faturası oluşturun
@@ -768,11 +862,11 @@ function YeniAlisFaturasiPageContent() {
               Fatura Bilgileri
             </Typography>
             <Divider sx={{ mb: 2 }} />
-{warehousesFetched && warehouses.length === 0 && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  Sistemde tanımlı ambar bulunmamaktadır. İşlem yapabilmek için lütfen önce ambar tanımlayınız.
-                </Alert>
-              )}
+            {warehousesFetched && warehouses.length === 0 && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                Sistemde tanımlı ambar bulunmamaktadır. İşlem yapabilmek için lütfen önce ambar tanımlayınız.
+              </Alert>
+            )}
           </Box>
 
           <Box sx={{
@@ -1342,7 +1436,7 @@ function YeniAlisFaturasiPageContent() {
                 fullWidth={isMobile}
                 startIcon={<Save />}
                 onClick={handleSave}
-                disabled={loading}
+                disabled={saving || loadingFatura}
                 sx={{
                   bgcolor: 'var(--primary)',
                   color: 'var(--primary-foreground)',
@@ -1358,7 +1452,7 @@ function YeniAlisFaturasiPageContent() {
                   transition: 'all 0.2s ease',
                 }}
               >
-                {loading ? 'Kaydediliyor...' : 'Faturayı Kaydet'}
+                {saving ? 'Kaydediliyor...' : isEdit ? 'Faturayı Güncelle' : 'Faturayı Kaydet'}
               </Button>
             </Box>
           </Box>
@@ -1499,7 +1593,7 @@ function YeniAlisFaturasiPageContent() {
 export default function YeniAlisFaturasiPage() {
   return (
     <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><CircularProgress /></Box>}>
-      <YeniAlisFaturasiPageContent />
+      <AlisFaturaForm />
     </Suspense>
   );
 }

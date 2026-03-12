@@ -1129,7 +1129,17 @@ export function SatisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?:
           })),
         });
         showSnackbar('Fatura başarıyla güncellendi', 'success');
-        setTimeout(() => onBack?.(), 1500);
+        setTimeout(() => {
+          const currentTabId = useTabStore.getState().activeTab;
+          if (currentTabId) {
+            useTabStore.getState().removeTab(currentTabId);
+          }
+          if (onBack) {
+            onBack();
+          } else {
+            router.push('/fatura/satis');
+          }
+        }, 1500);
         return;
       }
 
@@ -1159,10 +1169,9 @@ export function SatisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?:
         })),
       });
       showSnackbar('Fatura başarıyla oluşturuldu', 'success');
-      const { removeTab, addTab, setActiveTab } = useTabStore.getState();
-      removeTab('fatura-satis-yeni');
-      addTab({ id: 'fatura-satis', label: 'Satış Faturaları', path: '/fatura/satis' });
-      setActiveTab('fatura-satis');
+      const { removeTab, activeTab } = useTabStore.getState();
+      if (activeTab) removeTab(activeTab);
+
       setTimeout(() => router.push('/fatura/satis'), 1500);
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'İşlem sırasında hata oluştu';

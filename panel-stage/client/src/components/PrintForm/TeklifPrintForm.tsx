@@ -71,9 +71,9 @@ const TeklifPrintForm: React.FC<TeklifPrintFormProps> = ({ open, order, onClose 
   if (!order) return null;
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
+    <Dialog
+      open={open}
+      onClose={onClose}
       maxWidth={false}
       fullWidth
       PaperProps={{
@@ -104,7 +104,7 @@ const TeklifPrintForm: React.FC<TeklifPrintFormProps> = ({ open, order, onClose 
           <div className={`print-content ${printFormat}`}>
             <div className="print-header">
               <div className="company-info">
-                <h1>STNOTO</h1>
+                <h1>FATİH OTO YEDEK PARÇA</h1>
                 <p>Satış Teklifi</p>
               </div>
               <div className="order-info">

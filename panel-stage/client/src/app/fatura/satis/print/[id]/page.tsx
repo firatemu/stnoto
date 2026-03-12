@@ -153,12 +153,13 @@ export default function FaturaPrintPage() {
     return new Date(dateString).toLocaleDateString('tr-TR');
   };
 
-  const formatMoney = (amount: number) => {
+  const formatMoney = (amount: any) => {
+    const numericAmount = typeof amount === 'string' ? parseFloat(amount) : Number(amount) || 0;
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
       currency: 'TRY',
       minimumFractionDigits: 2,
-    }).format(amount);
+    }).format(numericAmount);
   };
 
   if (loading || !fatura) {
@@ -406,7 +407,7 @@ function ClassicTemplate({
   companyInfo: any;
   paperSize: 'A4' | 'A5' | 'A5-landscape';
   formatDate: (date: string) => string;
-  formatMoney: (amount: number) => string;
+  formatMoney: (amount: any) => string;
 }) {
   const width = paperSize === 'A4' ? '210mm' : paperSize === 'A5' ? '148mm' : '210mm';
   const height = paperSize === 'A4' ? '297mm' : paperSize === 'A5' ? '210mm' : '148mm';
@@ -537,7 +538,7 @@ function ClassicTemplate({
                 <TableCell align="center">{kalem.miktar} {kalem.stok.birim}</TableCell>
                 <TableCell align="right">{formatMoney(kalem.birimFiyat)}</TableCell>
                 <TableCell align="center">{kalem.kdvOrani}%</TableCell>
-                <TableCell align="right"><strong>{formatMoney(kalem.tutar + kalem.kdvTutar)}</strong></TableCell>
+                <TableCell align="right"><strong>{formatMoney(Number(kalem.tutar || 0) + Number(kalem.kdvTutar || 0))}</strong></TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -606,7 +607,7 @@ function ModernTemplate({
   companyInfo: any;
   paperSize: 'A4' | 'A5' | 'A5-landscape';
   formatDate: (date: string) => string;
-  formatMoney: (amount: number) => string;
+  formatMoney: (amount: any) => string;
 }) {
   const width = paperSize === 'A4' ? '210mm' : paperSize === 'A5' ? '148mm' : '210mm';
   const height = paperSize === 'A4' ? '297mm' : paperSize === 'A5' ? '210mm' : '148mm';
@@ -761,7 +762,7 @@ function ModernTemplate({
                   </TableCell>
                   <TableCell align="right">
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {formatMoney(kalem.tutar + kalem.kdvTutar)}
+                      {formatMoney(Number(kalem.tutar || 0) + Number(kalem.kdvTutar || 0))}
                     </Typography>
                   </TableCell>
                 </TableRow>

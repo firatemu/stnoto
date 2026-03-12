@@ -71,9 +71,9 @@ const SalesOrderPrintForm: React.FC<SalesOrderPrintFormProps> = ({ open, order, 
   if (!order) return null;
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
+    <Dialog
+      open={open}
+      onClose={onClose}
       maxWidth={false}
       fullWidth
       PaperProps={{
@@ -104,7 +104,7 @@ const SalesOrderPrintForm: React.FC<SalesOrderPrintFormProps> = ({ open, order, 
           <div className={`print-content ${printFormat}`}>
             <div className="print-header">
               <div className="company-info">
-                <h1>STNOTO</h1>
+                <h1>FATİH OTO YEDEK PARÇA</h1>
                 <p>Satış Siparişi</p>
               </div>
               <div className="order-info">

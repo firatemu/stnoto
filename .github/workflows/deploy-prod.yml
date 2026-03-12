@@ -1,0 +1,80 @@
+name: Production CD (Docker Image via GHCR)
+
+on:
+  push:
+    branches:
+      - main # main dalına (branch) kod itildiğinde otomatik çalışır. (İsterseniz workflow_dispatch ekleyebilirsiniz)
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: firatemu/stnoto
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Backend (NestJS)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api-stage/server
+          file: ./api-stage/server/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Frontend (Next.js)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./panel-stage/client
+          file: ./panel-stage/client/Dockerfile.staging.prod
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy to Production Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}       # Github Secrets üzerinden sunucu IP'si
+          username: ${{ secrets.VPS_USERNAME }}   # Sunucu kullanıcı adı (örn: root)
+          key: ${{ secrets.VPS_SSH_KEY }}     # Sunucu SSH Private Key
+          script: |
+            echo "🚀 Yeni İmajlar Sunucuya Çekiliyor..."
+            # Sunucuda projenizin bulunduğu dizine gidin (örnek: /var/www/otomuhasebe)
+            cd /var/www/otomuhasebe
+            
+            # Github Container Registry girişi (Secret)
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Yeni imajları zorla çek
+            docker-compose -f docker-compose.prod.yml pull
+            
+            # Veritabanına hiç dokunmadan sadece Frontend ve Backend konteynerlarını yeniden başlat
+            docker-compose -f docker-compose.prod.yml up -d
+            
+            # Eski, kullanılmayan (dangling) imajları silerek sunucu diskini temizle
+            docker image prune -f

@@ -1,0 +1,41 @@
+version: '3.8'
+
+# Bu dosya, veritabanını İÇERMEYEN salt "Proje Kodu" (API ve Frontend) başlatıcısıdır.
+# Sadece `docker-compose.prod.yml` olarak sunucuda bulunması ve Github Actions tarafından tetiklenmesi yeterlidir.
+
+services:
+  backend:
+    # İmaj yolu, Actions dosyasındaki IMAGE_PREFIX'e göre oluşturulur.
+    image: ghcr.io/firatemu/stnoto-backend:latest
+    container_name: otomuhasebe-api
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3020
+      # Buradaki diğer çevresel değişkenler (DATABASE_URL vb.) sunucudaki .env dosyasından okunacaktır.
+    env_file:
+      - .env
+    ports:
+      - "3020:3020"
+    networks:
+      - app-network
+
+  frontend:
+    image: ghcr.io/firatemu/stnoto-frontend:latest
+    container_name: otomuhasebe-client
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3010
+    env_file:
+      - .env
+    ports:
+      - "3010:3010"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+networks:
+  app-network:
+    driver: bridge
