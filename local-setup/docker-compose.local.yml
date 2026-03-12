@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  # --- Infrastructure ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: otomuhasebe-postgres-local
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: localpassword
+      POSTGRES_DB: otomuhasebe_local
+    volumes:
+      - postgres_local_data:/var/lib/postgresql/data
+    networks:
+      - app_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: otomuhasebe-redis-local
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - app_net
+
+  minio:
+    image: minio/minio:latest
+    container_name: otomuhasebe-minio-local
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    volumes:
+      - minio_local_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - app_net
+
+  # --- Applications (Optional: Run via Docker or Local Node) ---
+  # If you want to run apps in Docker, uncomment these. 
+  # Otherwise, run them via 'npm run dev' on your host machine for better performance.
+
+  # backend:
+  #   build:
+  #     context: ./api-stage
+  #     dockerfile: server/Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - DATABASE_URL=postgresql://postgres:localpassword@postgres:5432/otomuhasebe_local
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - app_net
+
+networks:
+  app_net:
+    driver: bridge
+
+volumes:
+  postgres_local_data:
+  minio_local_data:
