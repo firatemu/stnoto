@@ -63,18 +63,59 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}   # Sunucu kullanıcı adı (örn: root)
           key: ${{ secrets.VPS_SSH_KEY }}     # Sunucu SSH Private Key
           script: |
-            echo "🚀 Yeni İmajlar Sunucuya Çekiliyor..."
-            # Sunucuda projenizin bulunduğu dizine gidin (örnek: /var/www/otomuhasebe)
+            echo "🚀 Sunucu Hazırlanıyor..."
+            sudo mkdir -p /var/www/otomuhasebe
+            sudo chown -R $USER:$USER /var/www/otomuhasebe
             cd /var/www/otomuhasebe
             
-            # Github Container Registry girişi (Secret)
+            echo "📦 Docker Compose Yapılandırması Güncelleniyor..."
+            cat << 'EOF' > docker-compose.prod.yml
+version: '3.8'
+services:
+  backend:
+    image: ghcr.io/firatemu/stnoto-backend:latest
+    container_name: otomuhasebe-api
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3020
+    env_file:
+      - .env
+    ports:
+      - "3020:3020"
+    networks:
+      - app-network
+
+  frontend:
+    image: ghcr.io/firatemu/stnoto-frontend:latest
+    container_name: otomuhasebe-client
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3010
+    env_file:
+      - .env
+    ports:
+      - "3010:3010"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+networks:
+  app-network:
+    driver: bridge
+EOF
+
+            echo "🔑 GitHub Container Registry Girişi Yapılıyor..."
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
-            # Yeni imajları zorla çek
+            echo "📥 Yeni İmajlar Çekiliyor..."
             docker-compose -f docker-compose.prod.yml pull
             
-            # Veritabanına hiç dokunmadan sadece Frontend ve Backend konteynerlarını yeniden başlat
+            echo "⬆️ Servisler Yeniden Başlatılıyor..."
             docker-compose -f docker-compose.prod.yml up -d
             
-            # Eski, kullanılmayan (dangling) imajları silerek sunucu diskini temizle
+            echo "🧹 Sistem Temizleniyor..."
             docker image prune -f
+            echo "✅ Dağıtım Başarıyla Tamamlandı!"
