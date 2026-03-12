@@ -3,23 +3,23 @@ FROM node:20-alpine AS build
 WORKDIR /app
 
 # Gerekli dosyaları kopyala
-COPY server/package*.json ./server/
+COPY package*.json ./
 # Prisma şeması
-COPY server/prisma ./server/prisma
+COPY prisma ./prisma
 
 # Bağımlılıkları kur
-RUN cd server && npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 # Uygulama kaynaklarını kopyala (node_modules hariç)
-COPY server/src ./server/src
-COPY server/tsconfig.json ./server/tsconfig.json
-COPY server/nest-cli.json ./server/nest-cli.json
+COPY src ./src
+COPY tsconfig.json ./tsconfig.json
+COPY nest-cli.json ./nest-cli.json
 
 # Generate Prisma Client
-RUN cd server && npx prisma generate --schema=./prisma/schema.prisma
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 # Build
-RUN cd server && npm run build
+RUN npm run build
 
 # ---- Runtime stage ----
 FROM node:20-alpine AS run
@@ -27,11 +27,11 @@ WORKDIR /app/server
 ENV NODE_ENV=production
 
 # Prod runtime dosyaları
-COPY --from=build /app/server/node_modules ./node_modules
-COPY --from=build /app/server/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
 
 # Runtime prisma client gerekiyorse
-COPY --from=build /app/server/prisma ./prisma
+COPY --from=build /app/prisma ./prisma
 
 EXPOSE 3000
-CMD ["node", "/app/server/dist/src/main.js"]
+CMD ["node", "dist/src/main.js"]
