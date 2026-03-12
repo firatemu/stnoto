@@ -1,15 +1,14 @@
-name: Production CD (Docker Image via GHCR)
+name: Production CD
 
 on:
   push:
     branches:
-      - main # main dalına (branch) kod itildiğinde otomatik çalışır. (İsterseniz workflow_dispatch ekleyebilirsiniz)
+      - main
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
   IMAGE_PREFIX: firatemu/stnoto
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 permissions:
   contents: read
@@ -18,8 +17,6 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    # permissions buradaydı, yukarı taşıdık.
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -57,68 +54,57 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - name: Deploy to Production Server via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VPS_HOST }}       # Github Secrets üzerinden sunucu IP'si
-          username: ${{ secrets.VPS_USERNAME }}   # Sunucu kullanıcı adı (örn: root)
-          key: ${{ secrets.VPS_SSH_KEY }}     # Sunucu SSH Private Key
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            echo "🚀 Sunucu Hazırlanıyor..."
-            sudo mkdir -p /var/www/otomuhasebe
-            sudo chown -R $USER:$USER /var/www/otomuhasebe
-            cd /var/www/otomuhasebe
+            sudo mkdir -p /var/www/stnoto
+            sudo chown -R $USER:$USER /var/www/stnoto
+            cd /var/www/stnoto
             
-            echo "📦 Docker Compose Yapılandırması Güncelleniyor..."
-            cat << 'EOF' > docker-compose.prod.yml
-version: '3.8'
-services:
-  backend:
-    image: ghcr.io/firatemu/stnoto-backend:latest
-    container_name: otomuhasebe-api
-    restart: always
-    environment:
-      - NODE_ENV=production
-      - PORT=3020
-    env_file:
-      - .env
-    ports:
-      - "3020:3020"
-    networks:
-      - app-network
+            cat << 'EOF' > docker-compose.yml
+            version: '3.8'
+            services:
+              backend:
+                image: ghcr.io/firatemu/stnoto-backend:latest
+                container_name: stnoto-api
+                restart: always
+                environment:
+                  - NODE_ENV=production
+                  - PORT=3020
+                env_file:
+                  - .env
+                ports:
+                  - "3020:3020"
+                networks:
+                  - app-network
 
-  frontend:
-    image: ghcr.io/firatemu/stnoto-frontend:latest
-    container_name: otomuhasebe-client
-    restart: always
-    environment:
-      - NODE_ENV=production
-      - PORT=3010
-    env_file:
-      - .env
-    ports:
-      - "3010:3010"
-    networks:
-      - app-network
-    depends_on:
-      - backend
+              frontend:
+                image: ghcr.io/firatemu/stnoto-frontend:latest
+                container_name: stnoto-client
+                restart: always
+                environment:
+                  - NODE_ENV=production
+                  - PORT=3010
+                env_file:
+                  - .env
+                ports:
+                  - "3010:3010"
+                networks:
+                  - app-network
+                depends_on:
+                  - backend
 
-networks:
-  app-network:
-    driver: bridge
-EOF
+            networks:
+              app-network:
+                driver: bridge
+            EOF
 
-            echo "🔑 GitHub Container Registry Girişi Yapılıyor..."
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            
-            echo "📥 Yeni İmajlar Çekiliyor..."
-            docker-compose -f docker-compose.prod.yml pull
-            
-            echo "⬆️ Servisler Yeniden Başlatılıyor..."
-            docker-compose -f docker-compose.prod.yml up -d
-            
-            echo "🧹 Sistem Temizleniyor..."
+            docker-compose pull
+            docker-compose up -d
             docker image prune -f
-            echo "✅ Dağıtım Başarıyla Tamamlandı!"
