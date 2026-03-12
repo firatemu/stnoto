@@ -1,5 +1,7 @@
 # ---- Build stage ----
 FROM node:20-alpine AS build
+# Prisma ve Bcrypt için sistem bağımlılıkları
+RUN apk add --no-cache libc6-compat openssl python3 make g++
 WORKDIR /app
 
 # Gerekli dosyaları kopyala
@@ -14,6 +16,8 @@ RUN npm install --legacy-peer-deps
 COPY src ./src
 COPY tsconfig.json ./tsconfig.json
 COPY nest-cli.json ./nest-cli.json
+COPY prisma.config.ts ./prisma.config.ts
+COPY package-lock.json ./package-lock.json
 
 # Generate Prisma Client
 RUN npx prisma generate --schema=./prisma/schema.prisma
