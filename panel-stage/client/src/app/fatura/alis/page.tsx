@@ -31,7 +31,7 @@ import {
   Tooltip,
   ListItemIcon,
 } from '@mui/material';
-import { Add, Visibility, Edit, Delete, Close, Cancel, Print, Undo, MoreVert } from '@mui/icons-material';
+import { Add, Visibility, Edit, Delete, Close, Cancel, Print, Undo, MoreVert, Search } from '@mui/icons-material';
 import { GridColDef, GridPaginationModel, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
 import MainLayout from '@/components/Layout/MainLayout';
 import KPIHeader from '@/components/Fatura/KPIHeader';
@@ -171,7 +171,7 @@ export default function AlisFaturalariPage() {
     fetchCariler();
     fetchStoklar();
     fetchStats();
-  }, [paginationModel, sortModel, filterModel]);
+  }, [paginationModel, sortModel, filterModel, searchTerm, filterStartDate, filterEndDate, filterDurum]);
 
   const fetchFaturalar = async () => {
     try {
@@ -968,6 +968,38 @@ export default function AlisFaturalariPage() {
             </Button>
           </Box>
         </Box>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            mb: 3,
+            border: '1px solid var(--border)',
+            borderRadius: 2,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            bgcolor: 'var(--card)'
+          }}
+        >
+          <TextField
+            size="small"
+            placeholder="Fatura No veya Cari ile ara..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{ width: 350 }}
+            InputProps={{
+              startAdornment: <Search sx={{ color: 'text.secondary', mr: 1, fontSize: 20 }} />,
+            }}
+          />
+          <Button
+            variant="text"
+            onClick={handleClearFilters}
+            disabled={!searchTerm && !filterStartDate && !filterEndDate && filterDurum.length === 0}
+            sx={{ textTransform: 'none' }}
+          >
+            Temizle
+          </Button>
+        </Paper>
 
         <KPIHeader loading={loading} data={stats} type="ALIS" />
 

@@ -7,7 +7,7 @@ services:
     container_name: otomuhasebe-postgres-local
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "5444:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: localpassword
