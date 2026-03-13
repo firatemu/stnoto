@@ -1,41 +1,95 @@
 version: '3.8'
 
-# Bu dosya, veritabanını İÇERMEYEN salt "Proje Kodu" (API ve Frontend) başlatıcısıdır.
-# Sadece `docker-compose.prod.yml` olarak sunucuda bulunması ve Github Actions tarafından tetiklenmesi yeterlidir.
+# otomuhasebe core stack for stnoto.com production environment
+# Includes database, storage, cache and automatic SSL via Caddy
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: otomuhasebe-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB:-otomuhasebe}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: otomuhasebe-redis
+    restart: always
+    networks:
+      - app-network
+
+  minio:
+    image: minio/minio
+    container_name: otomuhasebe-minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+    volumes:
+      - minio_data:/data
+    networks:
+      - app-network
+
   backend:
-    # İmaj yolu, Actions dosyasındaki IMAGE_PREFIX'e göre oluşturulur.
     image: ghcr.io/firatemu/stnoto-backend:latest
-    container_name: otomuhasebe-api
+    container_name: stnoto-api
     restart: always
     environment:
       - NODE_ENV=production
-      - PORT=3020
-      # Buradaki diğer çevresel değişkenler (DATABASE_URL vb.) sunucudaki .env dosyasından okunacaktır.
+      - PORT=3000
     env_file:
       - .env
-    ports:
-      - "3020:3020"
+    depends_on:
+      - postgres
+      - redis
+      - minio
     networks:
       - app-network
 
   frontend:
     image: ghcr.io/firatemu/stnoto-frontend:latest
-    container_name: otomuhasebe-client
+    container_name: stnoto-client
     restart: always
     environment:
       - NODE_ENV=production
-      - PORT=3010
+      - PORT=3000
     env_file:
       - .env
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: otomuhasebe-caddy
+    restart: always
     ports:
-      - "3010:3010"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
     networks:
       - app-network
     depends_on:
+      - frontend
       - backend
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data:
+  caddy_data:
+  caddy_config:

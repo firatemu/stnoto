@@ -49,6 +49,8 @@ jobs:
           file: ./panel-stage/client/Dockerfile.staging.prod
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-frontend:latest
+          build-args: |
+            NEXT_PUBLIC_API_BASE_URL=https://api.stnoto.com
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -67,20 +69,56 @@ jobs:
             sudo chown -R $USER:$USER /var/www/stnoto
             cd /var/www/stnoto
             
-            cat << 'EOF' > docker-compose.yml
+            # Docker Compose dosyasını sunucuya kopyala (Github Actions üzerinden içerik olarak)
+            cat << 'EOF' > docker-compose.prod.yml
             version: '3.8'
             services:
+              postgres:
+                image: postgres:16-alpine
+                container_name: otomuhasebe-postgres
+                restart: always
+                environment:
+                  - POSTGRES_USER=${POSTGRES_USER:-postgres}
+                  - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+                  - POSTGRES_DB=${POSTGRES_DB:-otomuhasebe}
+                volumes:
+                  - postgres_data:/var/lib/postgresql/data
+                networks:
+                  - app-network
+
+              redis:
+                image: redis:7-alpine
+                container_name: otomuhasebe-redis
+                restart: always
+                networks:
+                  - app-network
+
+              minio:
+                image: minio/minio
+                container_name: otomuhasebe-minio
+                restart: always
+                command: server /data --console-address ":9001"
+                environment:
+                  - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+                  - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+                volumes:
+                  - minio_data:/data
+                networks:
+                  - app-network
+
               backend:
                 image: ghcr.io/firatemu/stnoto-backend:latest
                 container_name: stnoto-api
                 restart: always
                 environment:
                   - NODE_ENV=production
-                  - PORT=3020
+                  - PORT=3000
                 env_file:
                   - .env
-                ports:
-                  - "3020:3020"
+                depends_on:
+                  - postgres
+                  - redis
+                  - minio
                 networks:
                   - app-network
 
@@ -90,22 +128,75 @@ jobs:
                 restart: always
                 environment:
                   - NODE_ENV=production
-                  - PORT=3010
+                  - PORT=3000
                 env_file:
                   - .env
+                depends_on:
+                  - backend
+                networks:
+                  - app-network
+
+              caddy:
+                image: caddy:2-alpine
+                container_name: otomuhasebe-caddy
+                restart: always
                 ports:
-                  - "3010:3010"
+                  - "80:80"
+                  - "443:443"
+                volumes:
+                  - ./Caddyfile:/etc/caddy/Caddyfile
+                  - caddy_data:/data
+                  - caddy_config:/config
                 networks:
                   - app-network
                 depends_on:
+                  - frontend
                   - backend
 
             networks:
               app-network:
                 driver: bridge
+
+            volumes:
+              postgres_data:
+              minio_data:
+              caddy_data:
+              caddy_config:
+            EOF
+
+            # Caddyfile dosyasını sunucuya kopyala
+            cat << 'EOF' > Caddyfile
+            {
+                email admin@stnoto.com
+            }
+
+            (common_security) {
+                header {
+                    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+                    X-Content-Type-Options "nosniff"
+                    X-Frame-Options "SAMEORIGIN"
+                    Referrer-Policy "strict-origin-when-cross-origin"
+                }
+                encode gzip zstd
+            }
+
+            stnoto.com, www.stnoto.com {
+                import common_security
+                handle /api/* {
+                    reverse_proxy stnoto-api:3000
+                }
+                handle {
+                    reverse_proxy stnoto-client:3000
+                }
+            }
+
+            api.stnoto.com {
+                import common_security
+                reverse_proxy stnoto-api:3000
+            }
             EOF
 
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker-compose pull
-            docker-compose up -d
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
             docker image prune -f
