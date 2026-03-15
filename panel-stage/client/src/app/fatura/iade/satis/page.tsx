@@ -1428,6 +1428,6 @@ export default function SatisIadeFaturalariPage() {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </MainLayout >
+    </MainLayout>
   );
 }
