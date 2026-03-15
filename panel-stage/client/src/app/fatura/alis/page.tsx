@@ -33,11 +33,11 @@ import {
 } from '@mui/material';
 import { Add, Visibility, Edit, Delete, Close, Cancel, Print, Undo, MoreVert, Search } from '@mui/icons-material';
 import { GridColDef, GridPaginationModel, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
-import MainLayout from '@/components/Layout/MainLayout';
 import KPIHeader from '@/components/Fatura/KPIHeader';
 import InvoiceDataGrid from '@/components/Fatura/InvoiceDataGrid';
 import StatusBadge from '@/components/Fatura/StatusBadge';
 import axios from '@/lib/axios';
+import MainLayout from '@/components/Layout/MainLayout';
 import { useRouter } from 'next/navigation';
 import { useTabStore } from '@/stores/tabStore';
 
@@ -1496,6 +1496,7 @@ export default function AlisFaturalariPage() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+    </Box>
     </MainLayout >
   );
 }

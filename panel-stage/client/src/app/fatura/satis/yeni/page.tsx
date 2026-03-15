@@ -36,6 +36,7 @@ import {
 } from '@mui/material';
 import { Delete, Save, ArrowBack, ToggleOn, ToggleOff, LocalShipping } from '@mui/icons-material';
 import axios from '@/lib/axios';
+import MainLayout from '@/components/Layout/MainLayout';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTabStore } from '@/stores/tabStore';
 
@@ -2398,7 +2399,7 @@ export function SatisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?:
         fullWidth
         fullScreen={isMobile}
       >
-        <DialogTitle component="div" sx={{ bgcolor: 'error.main', color: 'white', display: 'flex', alignItems: 'center', gap: 1 }} component="div">
+        <DialogTitle component="div" sx={{ bgcolor: 'error.main', color: 'white', display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box component="span" sx={{ fontSize: 24 }}>⚠️</Box>
           Yetersiz Stok Uyarısı
         </DialogTitle>
@@ -2459,13 +2460,15 @@ export function SatisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?:
 
 export default function YeniSatisFaturasiPage() {
   return (
-    <Suspense fallback={
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress />
-      </Box>
-    }>
-      <SatisFaturaForm />
-    </Suspense>
+    <MainLayout>
+      <Suspense fallback={
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <CircularProgress />
+        </Box>
+      }>
+        <SatisFaturaForm />
+      </Suspense>
+    </MainLayout>
   );
 }
 

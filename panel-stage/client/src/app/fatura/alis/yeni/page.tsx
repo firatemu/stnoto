@@ -35,8 +35,8 @@ import {
   useTheme,
 } from '@mui/material';
 import { Delete, Save, ArrowBack, ToggleOn, ToggleOff, LocalShipping, Add as AddIcon } from '@mui/icons-material';
-import MainLayout from '@/components/Layout/MainLayout';
 import axios from '@/lib/axios';
+import MainLayout from '@/components/Layout/MainLayout';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTabStore } from '@/stores/tabStore';
 
@@ -819,7 +819,7 @@ export function AlisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?: 
   );
 
   return (
-    <MainLayout>
+    <>
       <Box sx={{ mb: isMobile ? 2 : 3 }}>
         <Box sx={{
           display: 'flex',
@@ -1586,14 +1586,16 @@ export function AlisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?: 
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </MainLayout>
+    </>
   );
 }
 
 export default function YeniAlisFaturasiPage() {
   return (
-    <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><CircularProgress /></Box>}>
-      <AlisFaturaForm />
-    </Suspense>
+    <MainLayout>
+      <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><CircularProgress /></Box>}>
+        <AlisFaturaForm />
+      </Suspense>
+    </MainLayout>
   );
 }

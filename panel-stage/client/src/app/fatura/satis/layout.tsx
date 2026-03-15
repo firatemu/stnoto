@@ -1,11 +1,18 @@
 'use client';
 
-import MainLayout from '@/components/Layout/MainLayout';
+import { usePathname } from 'next/navigation';
 
 export default function SatisFaturaLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <MainLayout>{children}</MainLayout>;
+  const pathname = usePathname();
+  const isPrintPage = pathname?.includes('/print');
+
+  if (isPrintPage) {
+    return <>{children}</>;
+  }
+
+  return <>{children}</>;
 }
