@@ -252,10 +252,10 @@ export default function KategoriYonetimiPage() {
       await axios.post('/kategori/ana-kategori', {
         anaKategori,
       });
-      
+
       // Başarı mesajı
       alert(`✅ Ana kategori "${anaKategori}" başarıyla eklendi.`);
-      
+
       // Listeyi yenile
       await fetchKategoriler();
       handleCloseAnaKategoriDialog();
@@ -284,10 +284,10 @@ export default function KategoriYonetimiPage() {
       await axios.post(`/kategori/${encodedAnaKategori}/alt-kategori`, {
         altKategori,
       });
-      
+
       // Başarı mesajı
       alert(`✅ Alt kategori "${altKategori}" başarıyla eklendi.`);
-      
+
       // Listeyi yenile
       await fetchKategoriler();
       handleCloseAltKategoriDialog();
@@ -301,7 +301,7 @@ export default function KategoriYonetimiPage() {
   const handleDeleteAltKategori = useCallback(async (anaKategori: string, altKategori: string) => {
     const confirmMessage = `Bu alt kategoriyi silmek istediğinizden emin misiniz?\n\n` +
       `Alt kategori "${altKategori}" silindiğinde, bu kategoriyi kullanan tüm ürünlerden alt kategori bilgisi kaldırılacaktır.`;
-    
+
     if (!confirm(confirmMessage)) {
       return;
     }
@@ -311,10 +311,10 @@ export default function KategoriYonetimiPage() {
       const encodedAnaKategori = encodeURIComponent(anaKategori);
       const encodedAltKategori = encodeURIComponent(altKategori);
       await axios.delete(`/kategori/${encodedAnaKategori}/alt-kategori/${encodedAltKategori}`);
-      
+
       // Başarı mesajı
       alert(`✅ Alt kategori "${altKategori}" başarıyla silindi.`);
-      
+
       // Listeyi yenile
       await fetchKategoriler();
     } catch (error: any) {
@@ -442,7 +442,7 @@ export default function KategoriYonetimiPage() {
       ) : (
         <Grid container spacing={3}>
           {filteredKategoriler.map((kategori) => (
-            <Grid size={{ xs: 12, md: 6 }} key={kategori.anaKategori}>
+            <Grid item xs={12} md={6} key={kategori.anaKategori}>
               <Accordion
                 expanded={expandedKategori === kategori.anaKategori}
                 onChange={handleAccordionChange(kategori.anaKategori)}
@@ -479,7 +479,7 @@ export default function KategoriYonetimiPage() {
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Chip 
+                      <Chip
                         label={`${kategori.altKategoriler.length} alt kategori`}
                         size="small"
                         color="primary"
@@ -534,8 +534,8 @@ export default function KategoriYonetimiPage() {
                           </TableRow>
                         ) : (
                           kategori.altKategoriler.map((altKategori) => (
-                            <TableRow 
-                              key={altKategori} 
+                            <TableRow
+                              key={altKategori}
                               hover
                               sx={{
                                 '&:hover': {

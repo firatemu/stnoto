@@ -213,7 +213,7 @@ function KrediIslemleriContent() {
                     <Skeleton variant="rectangular" height={60} sx={{ mb: 2 }} />
                     <Grid container spacing={3}>
                         {[1, 2, 3, 4].map(i => (
-                            <Grid key={i} size={{ xs: 12, md: 3 }}>
+                            <Grid key={i} item xs={12} md={3}>
                                 <Skeleton variant="rectangular" height={120} />
                             </Grid>
                         ))}
@@ -266,7 +266,7 @@ function KrediIslemleriContent() {
 
                 {/* Summary Cards */}
                 <Grid container spacing={2} sx={{ mb: 4 }}>
-                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Grid item xs={12} sm={6} md={3}>
                         <Card sx={{
                             bgcolor: 'color-mix(in srgb, var(--chart-2) 15%, transparent)',
                             borderLeft: '4px solid var(--chart-2)',
@@ -290,7 +290,7 @@ function KrediIslemleriContent() {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Grid item xs={12} sm={6} md={3}>
                         <Card sx={{
                             bgcolor: 'color-mix(in srgb, var(--chart-2) 15%, transparent)',
                             borderLeft: '4px solid var(--chart-2)',
@@ -312,7 +312,7 @@ function KrediIslemleriContent() {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Grid item xs={12} sm={6} md={3}>
                         <Card sx={{
                             bgcolor: 'color-mix(in srgb, var(--chart-2) 15%, transparent)',
                             borderLeft: '4px solid var(--chart-2)',
@@ -334,7 +334,7 @@ function KrediIslemleriContent() {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Grid item xs={12} sm={6} md={3}>
                         <Card sx={{
                             bgcolor: 'color-mix(in srgb, var(--chart-2) 15%, transparent)',
                             borderLeft: '4px solid var(--chart-2)',
@@ -383,7 +383,7 @@ function KrediIslemleriContent() {
                         Filtreler
                     </Typography>
                     <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, md: 6 }}>
+                        <Grid item xs={12} md={6}>
                             <TextField
                                 select
                                 fullWidth
@@ -403,7 +403,7 @@ function KrediIslemleriContent() {
                                 ))}
                             </TextField>
                         </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
+                        <Grid item xs={12} md={6}>
                             <TextField
                                 select
                                 fullWidth
@@ -622,7 +622,7 @@ export default function KrediIslemleriPage() {
                     <Skeleton variant="rectangular" height={60} sx={{ mb: 2 }} />
                     <Grid container spacing={3}>
                         {[1, 2, 3, 4].map(i => (
-                            <Grid key={i} size={{ xs: 12, md: 3 }}>
+                            <Grid key={i} item xs={12} md={3}>
                                 <Skeleton variant="rectangular" height={120} />
                             </Grid>
                         ))}

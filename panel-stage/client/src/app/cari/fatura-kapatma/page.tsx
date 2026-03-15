@@ -138,7 +138,6 @@ export default function FaturaKapatmaPage() {
       NAKIT: 'Nakit',
       KREDI_KARTI: 'Kredi Kartı',
       BANKA_HAVALESI: 'Havale',
-      BANKA_HAVALESI: 'Havale',
     };
     return types[tip] || tip;
   };
@@ -220,7 +219,7 @@ export default function FaturaKapatmaPage() {
         <>
           {/* Özet Kartlar */}
           <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <Card sx={{ bgcolor: 'color-mix(in srgb, var(--chart-1) 15%, transparent)', border: '1px solid var(--chart-1)' }}>
                 <CardContent>
                   <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
@@ -239,7 +238,7 @@ export default function FaturaKapatmaPage() {
               </Card>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <Card sx={{ bgcolor: 'color-mix(in srgb, var(--chart-3) 15%, transparent)', border: '1px solid var(--chart-3)' }}>
                 <CardContent>
                   <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
@@ -258,7 +257,7 @@ export default function FaturaKapatmaPage() {
               </Card>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <Card sx={{ bgcolor: 'color-mix(in srgb, var(--destructive) 15%, transparent)', border: '1px solid var(--destructive)' }}>
                 <CardContent>
                   <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
@@ -277,7 +276,7 @@ export default function FaturaKapatmaPage() {
               </Card>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <Card sx={{ bgcolor: 'color-mix(in srgb, var(--chart-2) 15%, transparent)', border: '1px solid var(--chart-2)' }}>
                 <CardContent>
                   <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
@@ -461,7 +460,7 @@ export default function FaturaKapatmaPage() {
           {faturalar.length > 0 && (
             <Paper sx={{ p: 3, mt: 3, borderRadius: 2, bgcolor: 'var(--muted)' }}>
               <Grid container spacing={3}>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid item xs={12} md={4}>
                   <Box>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                       Fatura Durumu
@@ -473,7 +472,7 @@ export default function FaturaKapatmaPage() {
                     </Stack>
                   </Box>
                 </Grid>
-                <Grid size={{ xs: 12, md: 8 }}>
+                <Grid item xs={12} md={8}>
                   <Box>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                       Ödeme Durumu

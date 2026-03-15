@@ -49,8 +49,8 @@ export default function StokPage() {
 
   return (
     <MainLayout>
-      <Typography 
-        variant="h4" 
+      <Typography
+        variant="h4"
         sx={{
           fontWeight: 700,
           fontSize: '1.875rem',
@@ -61,10 +61,10 @@ export default function StokPage() {
       >
         Stok Yönetimi
       </Typography>
-      
-      <Typography 
-        variant="body1" 
-        sx={{ 
+
+      <Typography
+        variant="body1"
+        sx={{
           mb: 4,
           color: 'var(--muted-foreground)',
           fontSize: '0.875rem',
@@ -77,9 +77,9 @@ export default function StokPage() {
         {menuItems.map((item, index) => {
           const IconComponent = item.icon;
           return (
-            <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }}>
-              <Card 
-                sx={{ 
+            <Grid key={index} item xs={12} sm={6} md={4}>
+              <Card
+                sx={{
                   borderRadius: 'var(--radius)',
                   border: '1px solid var(--border)',
                   bgcolor: 'var(--card)',
@@ -108,8 +108,8 @@ export default function StokPage() {
                     >
                       <IconComponent sx={{ fontSize: 40, color: item.color }} />
                     </Box>
-                    <Typography 
-                      variant="h5" 
+                    <Typography
+                      variant="h5"
                       sx={{
                         fontWeight: 700,
                         fontSize: '1.25rem',
@@ -119,8 +119,8 @@ export default function StokPage() {
                     >
                       {item.title}
                     </Typography>
-                    <Typography 
-                      variant="body2" 
+                    <Typography
+                      variant="body2"
                       sx={{
                         color: 'var(--muted-foreground)',
                         fontSize: '0.875rem',

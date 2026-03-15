@@ -15,7 +15,7 @@ import { useDashboardStats, useMonthlySales, useCollectionData, useInventoryData
 import { NotificationsActiveOutlined } from '@mui/icons-material';
 
 export default function DashboardPage() {
-  const { user } = useAuthStore();
+  const currentUser = useAuthStore((state: any) => state.user);
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const [remindersOpen, setRemindersOpen] = useState(false);
   const [tenantSettings, setTenantSettings] = useState<any>(null);
@@ -62,14 +62,14 @@ export default function DashboardPage() {
   return (
     <MainLayout>
       <PageContainer>
-        {/* Header with Company Logo & Welcome */}
-        <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        {/* COMPACT HEADER */}
+        <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box
               sx={{
-                width: 56,
-                height: 56,
-                borderRadius: '12px',
+                width: 48,
+                height: 48,
+                borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -81,93 +81,88 @@ export default function DashboardPage() {
               }}
             >
               {loading ? (
-                <Skeleton variant="rectangular" width={56} height={56} />
+                <Skeleton variant="rectangular" width={48} height={48} />
               ) : tenantSettings?.logoUrl ? (
-                <Box component="img" src={tenantSettings.logoUrl} sx={{ width: '100%', height: '100%', objectFit: 'contain', p: 1 }} />
+                <Box component="img" src={tenantSettings.logoUrl} sx={{ width: '100%', height: '100%', objectFit: 'contain', p: 0.5 }} />
               ) : (
-                <Box sx={{ width: 14, height: 42, bgcolor: 'var(--primary)', borderRadius: '999px' }} />
+                <Box sx={{ width: 12, height: 36, bgcolor: 'var(--primary)', borderRadius: '999px' }} />
               )}
             </Box>
             <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--foreground)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-                {loading ? <Skeleton width={180} /> : (tenantSettings?.companyName || 'Hoş Geldiniz')}
+              <Typography variant="h6" sx={{ fontWeight: 700, color: 'var(--foreground)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+                {loading ? <Skeleton width={150} /> : (tenantSettings?.companyName || 'Kurumsal Panel')}
               </Typography>
-              <Typography variant="body2" sx={{ color: 'var(--muted-foreground)', fontWeight: 500 }}>
-                {loading ? <Skeleton width={120} /> : `Merhaba, ${user?.fullName || 'Kullanıcı'} 👋`}
+              <Typography variant="caption" sx={{ color: 'var(--muted-foreground)', fontWeight: 600 }}>
+                {loading ? <Skeleton width={100} /> : `Merhaba, ${currentUser?.fullName || 'Kullanıcı'} 👋`}
               </Typography>
             </Box>
           </Box>
 
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Alert severity="success" icon={false} sx={{ py: 0, px: 1.5, fontWeight: 600, borderRadius: '8px', fontSize: '0.8rem' }}>
-              Kurumsal Panel
-            </Alert>
+            <ToggleButtonGroup
+              value={period}
+              exclusive
+              onChange={handlePeriodChange}
+              size="small"
+              sx={{
+                mr: 1,
+                bgcolor: 'var(--card)',
+                height: 32,
+                '& .MuiToggleButton-root': {
+                  border: '1px solid var(--border)',
+                  px: 1.2,
+                  py: 0,
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  color: 'text.secondary',
+                  '&.Mui-selected': {
+                    bgcolor: 'var(--primary)',
+                    color: 'white',
+                    borderColor: 'var(--primary)',
+                    '&:hover': { bgcolor: 'var(--primary)' }
+                  }
+                }
+              }}
+            >
+              <ToggleButton value="daily">GÜN</ToggleButton>
+              <ToggleButton value="weekly">HF</ToggleButton>
+              <ToggleButton value="monthly">AY</ToggleButton>
+            </ToggleButtonGroup>
+
             <IconButton
+              size="small"
               onClick={() => setRemindersOpen(!remindersOpen)}
               sx={{
-                width: 40,
-                height: 40,
+                width: 32,
+                height: 32,
                 bgcolor: remindersOpen ? 'var(--primary)' : 'var(--card)',
                 color: remindersOpen ? 'var(--primary-foreground)' : 'var(--foreground)',
                 border: '1px solid var(--border)',
-                boxShadow: 'var(--shadow-sm)',
               }}
             >
-              <NotificationsActiveOutlined fontSize="small" />
+              <NotificationsActiveOutlined sx={{ fontSize: 18 }} />
             </IconButton>
           </Box>
         </Box>
 
-        {/* 1. Quick Stats */}
-        <StatsCards stats={stats} loading={loading} />
+        <CollectionStats
+          data={collectionData?.stats || {
+            currentMonthCollection: 0,
+            currentMonthPayment: 0,
+            previousMonthCollection: 0,
+            previousMonthPayment: 0
+          }}
+          period={period}
+          loading={collectionLoading}
+        />
 
-        {/* 2. Collection & Payment Overview */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, mt: 3 }}>
-          <Typography variant="h5" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>
-            Tahsilat ve Ödeme Analizi
-          </Typography>
-
-          <ToggleButtonGroup
-            value={period}
-            exclusive
-            onChange={handlePeriodChange}
-            size="small"
-            sx={{
-              bgcolor: 'var(--card)',
-              border: '1px solid var(--border)',
-              borderRadius: '8px',
-              '& .MuiToggleButton-root': {
-                border: 'none',
-                px: 1.5,
-                py: 0.4,
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                textTransform: 'none',
-                color: 'var(--muted-foreground)',
-                '&.Mui-selected': {
-                  bgcolor: 'var(--primary)',
-                  color: 'white',
-                  '&:hover': { bgcolor: 'var(--primary)' }
-                }
-              }
-            }}
-          >
-            <ToggleButton value="daily">Günlük</ToggleButton>
-            <ToggleButton value="weekly">Haftalık</ToggleButton>
-            <ToggleButton value="monthly">Aylık</ToggleButton>
-          </ToggleButtonGroup>
-        </Box>
-
-        <CollectionStats data={collectionData?.stats || {}} period={period} loading={collectionLoading} />
-
-        <Grid container spacing={2.5} sx={{ mt: 3 }}>
-          {/* Collection Chart - Full Width */}
-          <Grid size={{ xs: 12, lg: 8 }}>
+        <Grid container spacing={1.5} sx={{ mt: 1 }}>
+          <Grid item xs={12}>
             <CollectionChart data={collectionData?.chartData || []} period={period} loading={collectionLoading} />
           </Grid>
 
-          {/* Inventory - Full width on mobile, half on desktop */}
-          <Grid size={{ xs: 12, lg: 4 }}>
+          <Grid item xs={12}>
             <InventoryOverview
               criticalStock={inventoryData?.criticalStock || []}
               categoryDistribution={inventoryData?.categoryDistribution || []}
@@ -175,8 +170,7 @@ export default function DashboardPage() {
             />
           </Grid>
 
-          {/* Recent Transactions - Full Width */}
-          <Grid size={{ xs: 12 }}>
+          <Grid item xs={12}>
             <RecentTransactions
               invoices={transactionsData?.invoices || []}
               payments={transactionsData?.payments || []}
@@ -184,10 +178,9 @@ export default function DashboardPage() {
             />
           </Grid>
 
-          {/* Reminders - Collapsible */}
-          <Grid size={{ xs: 12 }}>
+          <Grid item xs={12}>
             <Collapse in={remindersOpen} timeout={300}>
-              <Box sx={{ mt: 2 }}>
+              <Box sx={{ mt: 1 }}>
                 <Reminders />
               </Box>
             </Collapse>

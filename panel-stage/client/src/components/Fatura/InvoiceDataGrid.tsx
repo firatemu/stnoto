@@ -26,12 +26,15 @@ interface InvoiceDataGridProps {
     sortModel: GridSortModel;
     onPaginationModelChange: (model: GridPaginationModel) => void;
     onSortModelChange: (model: GridSortModel) => void;
+    filterModel?: GridFilterModel;
     onFilterModelChange?: (model: GridFilterModel) => void;
     onRowClick?: (params: any) => void;
     checkboxSelection?: boolean;
     onRowSelectionModelChange?: (newSelectionModel: string[]) => void;
     /** Tablo yüksekliği (px). Varsayılan: 650 */
     height?: number;
+    /** Custom SX styling for DataGrid */
+    sx?: any;
 }
 
 function CustomToolbar() {
@@ -55,6 +58,7 @@ export default function InvoiceDataGrid({
     rowCount,
     paginationModel,
     sortModel,
+    filterModel,
     onPaginationModelChange,
     onSortModelChange,
     onFilterModelChange,
@@ -62,6 +66,7 @@ export default function InvoiceDataGrid({
     checkboxSelection = true,
     onRowSelectionModelChange,
     height = 650,
+    sx: customSx,
 }: InvoiceDataGridProps) {
     return (
         <Paper
@@ -86,13 +91,14 @@ export default function InvoiceDataGrid({
                 sortModel={sortModel}
                 sortingMode="server"
                 onSortModelChange={onSortModelChange}
+                filterModel={filterModel}
                 filterMode="server"
                 onFilterModelChange={onFilterModelChange}
                 onRowClick={onRowClick}
                 checkboxSelection={checkboxSelection}
                 onRowSelectionModelChange={(newSelection) => {
                     if (onRowSelectionModelChange) {
-                        onRowSelectionModelChange(newSelection as unknown as string[]);
+                        onRowSelectionModelChange(Array.from(newSelection as any) as string[]);
                     }
                 }}
                 slots={{
@@ -124,6 +130,7 @@ export default function InvoiceDataGrid({
                     '& .MuiDataGrid-footerContainer': {
                         borderTop: '1px solid var(--border)',
                     },
+                    ...customSx,
                 }}
             />
         </Paper>

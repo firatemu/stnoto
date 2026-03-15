@@ -190,7 +190,7 @@ export default function CustomerVehicleDialog({
             <Box sx={{ mb: 3 }}>
               <SectionHeader icon={PersonIcon} title="Müşteri Bilgileri" />
               <Grid container spacing={2}>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid item xs={12} md={6}>
                   <Autocomplete
                     options={cariler}
                     getOptionLabel={(opt) => `${opt.cariKodu || ''} - ${opt.unvan || opt.id}`.trim() || opt.id}
@@ -212,7 +212,7 @@ export default function CustomerVehicleDialog({
             <Box sx={{ mb: 3 }}>
               <SectionHeader icon={CarIcon} title="Araç Bilgileri" />
               <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     label="Plaka"
                     value={form.plaka}
@@ -222,7 +222,7 @@ export default function CustomerVehicleDialog({
                     placeholder="34 ABC 123"
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     label="Marka"
                     value={form.aracMarka}
@@ -232,7 +232,7 @@ export default function CustomerVehicleDialog({
                     placeholder="Toyota, Honda, Ford..."
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     label="Model"
                     value={form.aracModel}
@@ -242,7 +242,7 @@ export default function CustomerVehicleDialog({
                     placeholder="Corolla, Civic, Focus..."
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     label="Model Yılı"
                     type="number"
@@ -253,7 +253,7 @@ export default function CustomerVehicleDialog({
                     placeholder="2024"
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     label="Renk"
                     value={form.renk}
@@ -262,7 +262,7 @@ export default function CustomerVehicleDialog({
                     placeholder="Beyaz, Siyah, Gri..."
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     label="Kilometre (KM)"
                     type="number"
@@ -282,7 +282,7 @@ export default function CustomerVehicleDialog({
             <Box sx={{ mb: 3 }}>
               <SectionHeader icon={RuhsatIcon} title="Ruhsat Bilgileri" />
               <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     label="Şase No (VIN)"
                     value={form.saseno}
@@ -291,7 +291,7 @@ export default function CustomerVehicleDialog({
                     placeholder="17 karakterlik VIN"
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     label="Ruhsat No"
                     value={form.ruhsatNo}
@@ -300,7 +300,7 @@ export default function CustomerVehicleDialog({
                     placeholder="Ruhsat belge numarası"
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     label="Tescil Tarihi"
                     type="date"
@@ -310,7 +310,7 @@ export default function CustomerVehicleDialog({
                     fullWidth
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                <Grid item xs={12} sm={6} md={6}>
                   <TextField
                     label="Ruhsat Sahibi"
                     value={form.ruhsatSahibi}
@@ -319,7 +319,7 @@ export default function CustomerVehicleDialog({
                     placeholder="Ruhsat üzerindeki sahip adı"
                   />
                 </Grid>
-                <Grid size={{ xs: 12 }}>
+                <Grid item xs={12}>
                   <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                     Ruhsat Fotoğrafı
                   </Typography>
@@ -391,7 +391,7 @@ export default function CustomerVehicleDialog({
             <Box sx={{ mb: 3 }}>
               <SectionHeader icon={TechIcon} title="Araç Teknik Bilgileri" />
               <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth>
                     <InputLabel>Motor Hacmi</InputLabel>
                     <Select
@@ -406,7 +406,7 @@ export default function CustomerVehicleDialog({
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth>
                     <InputLabel>Yakıt Tipi</InputLabel>
                     <Select
@@ -421,7 +421,7 @@ export default function CustomerVehicleDialog({
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     label="Motor Gücü (HP)"
                     type="number"
@@ -432,7 +432,7 @@ export default function CustomerVehicleDialog({
                     placeholder="150"
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth>
                     <InputLabel>Şanzıman</InputLabel>
                     <Select
@@ -447,7 +447,7 @@ export default function CustomerVehicleDialog({
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid size={{ xs: 12 }}>
+                <Grid item xs={12}>
                   <TextField
                     label="Açıklama / Notlar"
                     value={form.aciklama}

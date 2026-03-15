@@ -137,9 +137,9 @@ export default function CreateCreditDialog({ open, onClose, onSubmit, loading }:
                 <DialogContent dividers>
                     <Grid container spacing={3}>
                         {/* LEFT COLUMN: Inputs */}
-                        <Grid size={{ xs: 12, md: 7 }}>
+                        <Grid item xs={12} md={7}>
                             <Grid container spacing={2}>
-                                <Grid size={{ xs: 12 }}>
+                                <Grid item xs={12}>
                                     <Controller
                                         name="krediTuru"
                                         control={control}
@@ -159,7 +159,7 @@ export default function CreateCreditDialog({ open, onClose, onSubmit, loading }:
                                     />
                                 </Grid>
 
-                                <Grid size={{ xs: 12 }}>
+                                <Grid item xs={12}>
                                     <Controller
                                         name="tutar"
                                         control={control}
@@ -181,7 +181,7 @@ export default function CreateCreditDialog({ open, onClose, onSubmit, loading }:
                                     />
                                 </Grid>
 
-                                <Grid size={{ xs: 12 }}>
+                                <Grid item xs={12}>
                                     <Controller
                                         name="taksitTutari"
                                         control={control}
@@ -203,7 +203,7 @@ export default function CreateCreditDialog({ open, onClose, onSubmit, loading }:
                                     />
                                 </Grid>
 
-                                <Grid size={{ xs: 6 }}>
+                                <Grid item xs={6}>
                                     <Controller
                                         name="yillikFaizOrani"
                                         control={control}
@@ -222,7 +222,7 @@ export default function CreateCreditDialog({ open, onClose, onSubmit, loading }:
                                 </Grid>
 
                                 {watchedValues.krediTuru !== KrediTuru.ROTATIF && (
-                                    <Grid size={{ xs: 6 }}>
+                                    <Grid item xs={6}>
                                         <Controller
                                             name="taksitSayisi"
                                             control={control}
@@ -242,7 +242,7 @@ export default function CreateCreditDialog({ open, onClose, onSubmit, loading }:
                                 )}
 
                                 {watchedValues.krediTuru === KrediTuru.ROTATIF && (
-                                    <Grid size={{ xs: 12 }}>
+                                    <Grid item xs={12}>
                                         <Controller
                                             name="odemeSikligi"
                                             control={control}
@@ -264,7 +264,7 @@ export default function CreateCreditDialog({ open, onClose, onSubmit, loading }:
                                     </Grid>
                                 )}
 
-                                <Grid size={{ xs: 6 }}>
+                                <Grid item xs={6}>
                                     <Controller
                                         name="kullanimTarihi"
                                         control={control}
@@ -282,7 +282,7 @@ export default function CreateCreditDialog({ open, onClose, onSubmit, loading }:
                                     />
                                 </Grid>
 
-                                <Grid size={{ xs: 6 }}>
+                                <Grid item xs={6}>
                                     <Controller
                                         name="ilkTaksitTarihi"
                                         control={control}
@@ -300,7 +300,7 @@ export default function CreateCreditDialog({ open, onClose, onSubmit, loading }:
                                     />
                                 </Grid>
 
-                                <Grid size={{ xs: 12 }}>
+                                <Grid item xs={12}>
                                     <Controller
                                         name="aciklama"
                                         control={control}
@@ -319,7 +319,7 @@ export default function CreateCreditDialog({ open, onClose, onSubmit, loading }:
                         </Grid>
 
                         {/* RIGHT COLUMN: Summary Card */}
-                        <Grid size={{ xs: 12, md: 5 }}>
+                        <Grid item xs={12} md={5}>
                             <Card variant="outlined" sx={{ height: '100%', bgcolor: 'grey.50', borderRadius: 2 }}>
                                 <CardContent>
                                     <Typography variant="h6" gutterBottom color="primary.main" fontWeight="bold">

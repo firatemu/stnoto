@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../common/prisma.service';
 import { OverviewQueryDto } from './dto/overview-query.dto';
+import { TenantResolverService } from '../../common/services/tenant-resolver.service';
+import { buildTenantWhereClause } from '../../common/utils/staging.util';
+import { Decimal } from '@prisma/client/runtime/library';
 
 interface DateRangeResult {
   startDate: Date;
@@ -24,14 +27,20 @@ interface StokSummary {
 
 @Injectable()
 export class RaporlamaService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tenantResolver: TenantResolverService,
+  ) { }
 
   async getOverview(query: OverviewQueryDto) {
+    const tenantId = await this.tenantResolver.resolveForQuery();
+    const tenantWhere = buildTenantWhereClause(tenantId ?? undefined);
     const range = this.resolveRange(query);
 
     const now = new Date();
 
     const faturaWhereBase: Prisma.FaturaWhereInput = {
+      ...tenantWhere,
       deletedAt: null,
       tarih: {
         gte: range.startDate,
@@ -84,6 +93,8 @@ export class RaporlamaService {
       }),
       this.prisma.tahsilat.aggregate({
         where: {
+          ...tenantWhere,
+          deletedAt: null,
           tip: 'TAHSILAT',
           tarih: {
             gte: range.startDate,
@@ -95,6 +106,8 @@ export class RaporlamaService {
       }),
       this.prisma.tahsilat.aggregate({
         where: {
+          ...tenantWhere,
+          deletedAt: null,
           tip: 'ODEME',
           tarih: {
             gte: range.startDate,
@@ -106,6 +119,7 @@ export class RaporlamaService {
       }),
       this.prisma.masraf.aggregate({
         where: {
+          ...tenantWhere,
           tarih: {
             gte: range.startDate,
             lte: range.endDate,
@@ -293,8 +307,12 @@ export class RaporlamaService {
   }
 
   private async getLowStockItems() {
+    const tenantId = await this.tenantResolver.resolveForQuery();
+    const tenantWhere = buildTenantWhereClause(tenantId ?? undefined);
+
     const candidates = await this.prisma.stok.findMany({
       where: {
+        ...tenantWhere,
         kritikStokMiktari: { gt: 0 },
       },
       select: {
@@ -424,12 +442,15 @@ export class RaporlamaService {
   }
 
   async getSalespersonPerformance(query: OverviewQueryDto) {
+    const tenantId = await this.tenantResolver.resolveForQuery();
+    const tenantWhere = buildTenantWhereClause(tenantId ?? undefined);
     const range = this.resolveRange(query);
 
     const [salesRaw, collectionsRaw, salespersons] = await Promise.all([
       this.prisma.fatura.groupBy({
         by: ['satisElemaniId'],
         where: {
+          ...tenantWhere,
           faturaTipi: 'SATIS',
           durum: 'ONAYLANDI',
           tarih: {
@@ -449,6 +470,8 @@ export class RaporlamaService {
       this.prisma.tahsilat.groupBy({
         by: ['satisElemaniId'],
         where: {
+          ...tenantWhere,
+          deletedAt: null,
           tip: 'TAHSILAT',
           tarih: {
             gte: range.startDate,
@@ -464,7 +487,10 @@ export class RaporlamaService {
         },
       }),
       this.prisma.satisElemani.findMany({
-        where: { aktif: true },
+        where: {
+          ...tenantWhere,
+          aktif: true,
+        },
         select: { id: true, adSoyad: true },
       }),
     ]);

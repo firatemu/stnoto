@@ -306,7 +306,7 @@ const MalzemeFormDialog = memo(({
             📋 Genel Bilgiler
           </Typography>
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
                 label="Stok Kodu"
@@ -324,7 +324,7 @@ const MalzemeFormDialog = memo(({
                 }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label="Stok Adı"
@@ -337,7 +337,7 @@ const MalzemeFormDialog = memo(({
                 inputProps={{ style: { fontSize: '1rem' } }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
                 label="Barkod"
@@ -364,7 +364,7 @@ const MalzemeFormDialog = memo(({
             🏷️ Kategori ve Ölçü Bilgileri
           </Typography>
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label="Tedarikçi Kodu"
@@ -377,7 +377,7 @@ const MalzemeFormDialog = memo(({
               />
             </Grid>
 
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label="OEM Kodu"
@@ -390,7 +390,7 @@ const MalzemeFormDialog = memo(({
               />
             </Grid>
 
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <FormControl fullWidth size="medium" className="form-control-select">
                 <InputLabel shrink>Marka</InputLabel>
                 <Select
@@ -411,7 +411,7 @@ const MalzemeFormDialog = memo(({
               </FormControl>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <FormControl fullWidth size="medium" className="form-control-select">
                 <InputLabel shrink>Ana Kategori *</InputLabel>
                 <Select
@@ -432,7 +432,7 @@ const MalzemeFormDialog = memo(({
               </FormControl>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <FormControl
                 fullWidth
                 size="medium"
@@ -478,7 +478,7 @@ const MalzemeFormDialog = memo(({
               </FormControl>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 8 }}>
+            <Grid item xs={12} md={8}>
               <TextField
                 fullWidth
                 label="Ölçü / Teknik Özellikler"
@@ -491,7 +491,7 @@ const MalzemeFormDialog = memo(({
               />
             </Grid>
 
-            <Grid size={{ xs: 12, md: 2 }}>
+            <Grid item xs={12} md={2}>
               <Autocomplete<Location, false, false, true>
                 fullWidth
                 options={locations}
@@ -523,7 +523,7 @@ const MalzemeFormDialog = memo(({
               />
             </Grid>
 
-            <Grid size={{ xs: 12, md: 2 }}>
+            <Grid item xs={12} md={2}>
               <FormControl fullWidth size="medium" className="form-control-select">
                 <InputLabel shrink>Birim *</InputLabel>
                 <Select
@@ -550,7 +550,7 @@ const MalzemeFormDialog = memo(({
             💰 Fiyat Bilgileri
           </Typography>
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label="Alış Fiyatı"
@@ -568,7 +568,7 @@ const MalzemeFormDialog = memo(({
               />
             </Grid>
 
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label="Satış Fiyatı"
@@ -603,7 +603,7 @@ const MalzemeFormDialog = memo(({
             🚗 Araç Bilgileri
           </Typography>
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <FormControl fullWidth size="medium" className="form-control-select">
                 <InputLabel shrink>Araç Markası</InputLabel>
                 <Select
@@ -624,7 +624,7 @@ const MalzemeFormDialog = memo(({
               </FormControl>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <FormControl fullWidth size="medium" disabled={!localFormData.aracMarka}>
                 <InputLabel shrink>Araç Modeli</InputLabel>
                 <Select
@@ -645,7 +645,7 @@ const MalzemeFormDialog = memo(({
               </FormControl>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <FormControl fullWidth size="medium">
                 <InputLabel shrink>Motor Hacmi</InputLabel>
                 <Select
@@ -666,7 +666,7 @@ const MalzemeFormDialog = memo(({
               </FormControl>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item xs={12} md={6}>
               <FormControl fullWidth size="medium">
                 <InputLabel shrink>Yakıt Tipi</InputLabel>
                 <Select
@@ -1506,7 +1506,7 @@ export default function MalzemeListesiPage() {
       {/* Arama ve Filtreleme Alanı */}
       <Paper sx={{ mb: 3, p: 2, bgcolor: 'var(--card)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-sm)' }}>
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 3 }}>
+          <Grid item xs={12} md={3}>
             <FormControl fullWidth size="small" className="form-control-select">
               <InputLabel>Kategori</InputLabel>
               <Select
@@ -1525,7 +1525,7 @@ export default function MalzemeListesiPage() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
+          <Grid item xs={12} md={3}>
             <FormControl fullWidth size="small" disabled={!selectedKategori} className="form-control-select">
               <InputLabel>Alt Kategori</InputLabel>
               <Select
@@ -1544,7 +1544,7 @@ export default function MalzemeListesiPage() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
+          <Grid item xs={12} md={3}>
             <FormControl fullWidth size="small" className="form-control-select">
               <InputLabel>Marka</InputLabel>
               <Select
@@ -1563,7 +1563,7 @@ export default function MalzemeListesiPage() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
+          <Grid item xs={12} md={3}>
             <FormControl fullWidth size="small" className="form-control-select">
               <InputLabel>Stok Durumu</InputLabel>
               <Select

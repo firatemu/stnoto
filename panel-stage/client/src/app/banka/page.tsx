@@ -400,7 +400,7 @@ export default function BankaPage() {
                                     )}
                                 />
                                 <Grid container spacing={2}>
-                                    <Grid size={{ xs: 6 }}>
+                                    <Grid item xs={6}>
                                         <Controller
                                             name="sube"
                                             control={control}
@@ -409,7 +409,7 @@ export default function BankaPage() {
                                             )}
                                         />
                                     </Grid>
-                                    <Grid size={{ xs: 6 }}>
+                                    <Grid item xs={6}>
                                         <Controller
                                             name="sehir"
                                             control={control}
@@ -420,7 +420,7 @@ export default function BankaPage() {
                                     </Grid>
                                 </Grid>
                                 <Grid container spacing={2}>
-                                    <Grid size={{ xs: 6 }}>
+                                    <Grid item xs={6}>
                                         <Controller
                                             name="yetkili"
                                             control={control}
@@ -429,7 +429,7 @@ export default function BankaPage() {
                                             )}
                                         />
                                     </Grid>
-                                    <Grid size={{ xs: 6 }}>
+                                    <Grid item xs={6}>
                                         <Controller
                                             name="telefon"
                                             control={control}

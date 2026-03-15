@@ -251,7 +251,7 @@ const TahsilatFormDialog = memo(({
             <DialogContent sx={{ mt: 3, px: 3, pb: 1 }}>
                 <Grid container spacing={3}>
                     {/* Section: Temel Bilgiler */}
-                    <Grid size={12}>
+                    <Grid item xs={12}>
                         <Typography variant="subtitle2" color="text.secondary" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <AttachMoney fontSize="small" color="action" />
                             FİNANSAL DETAYLAR
@@ -259,7 +259,7 @@ const TahsilatFormDialog = memo(({
                         <Paper elevation={0} sx={{ p: 2, bgcolor: 'var(--muted)', borderRadius: 2, border: '1px solid var(--border)' }}>
                             <Grid container spacing={2}>
                                 {/* Ödeme Tipi */}
-                                <Grid size={{ xs: 12, md: 6 }}>
+                                <Grid item xs={12} md={6}>
                                     <FormControl fullWidth>
                                         <InputLabel>Ödeme Tipi</InputLabel>
                                         <Select
@@ -275,7 +275,7 @@ const TahsilatFormDialog = memo(({
                                 </Grid>
 
                                 {/* Tutar */}
-                                <Grid size={{ xs: 12, md: 6 }}>
+                                <Grid item xs={12} md={6}>
                                     <TextField
                                         fullWidth
                                         label="Tutar"
@@ -293,7 +293,7 @@ const TahsilatFormDialog = memo(({
 
                                 {/* Kasa / Banka Seçimi */}
                                 {localFormData.odemeTipi === 'KREDI_KARTI' && isTahsilat ? (
-                                    <Grid size={12}>
+                                    <Grid item xs={12}>
                                         <FormControl fullWidth error={!!errors.bankaHesapId}>
                                             <InputLabel>POS Banka Hesabı</InputLabel>
                                             <Select
@@ -316,7 +316,7 @@ const TahsilatFormDialog = memo(({
                                         </FormControl>
                                     </Grid>
                                 ) : (
-                                    <Grid size={12}>
+                                    <Grid item xs={12}>
                                         <FormControl fullWidth error={!!errors.kasaId}>
                                             <InputLabel>{localFormData.odemeTipi === 'NAKIT' ? 'Nakit Kasa' : 'Kredi Kartı Kasası'}</InputLabel>
                                             <Select
@@ -348,7 +348,7 @@ const TahsilatFormDialog = memo(({
 
                                 {/* Firma Kredi Kartı Seçimi (Ödeme & Kredi Kartı) */}
                                 {!isTahsilat && localFormData.odemeTipi === 'KREDI_KARTI' && localFormData.kasaId && (
-                                    <Grid size={12}>
+                                    <Grid item xs={12}>
                                         <FormControl fullWidth error={!!errors.firmaKrediKartiId}>
                                             <InputLabel>Firma Kredi Kartı</InputLabel>
                                             <Select
@@ -372,7 +372,7 @@ const TahsilatFormDialog = memo(({
                     </Grid>
 
                     {/* Tarih */}
-                    <Grid size={12}>
+                    <Grid item xs={12}>
                         <TextField
                             fullWidth
                             label="İşlem Tarihi"
@@ -386,7 +386,7 @@ const TahsilatFormDialog = memo(({
                     </Grid>
 
                     {/* Section: Cari & Diğer */}
-                    <Grid size={12}>
+                    <Grid item xs={12}>
                         <Typography variant="subtitle2" color="text.secondary" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
                             <Person fontSize="small" color="action" />
                             CARİ & DİĞER BİLGİLER
@@ -394,7 +394,7 @@ const TahsilatFormDialog = memo(({
                         <Paper elevation={0} sx={{ p: 2, bgcolor: 'var(--card)', borderRadius: 2, border: '1px solid var(--border)' }}>
                             <Grid container spacing={2}>
                                 {/* Cari Seçimi */}
-                                <Grid size={12}>
+                                <Grid item xs={12}>
                                     <Autocomplete
                                         options={cariler}
                                         getOptionLabel={(option) => `${option.cariKodu} - ${option.unvan}`}
@@ -440,7 +440,7 @@ const TahsilatFormDialog = memo(({
                                 </Grid>
 
                                 {/* Satış Elemanı */}
-                                <Grid size={12}>
+                                <Grid item xs={12}>
                                     <Autocomplete
                                         options={satisElemanlari}
                                         getOptionLabel={(option) => option.adSoyad}
@@ -462,7 +462,7 @@ const TahsilatFormDialog = memo(({
                                 </Grid>
 
                                 {/* Açıklama */}
-                                <Grid size={12}>
+                                <Grid item xs={12}>
                                     <TextField
                                         fullWidth
                                         label="Açıklama"
@@ -479,23 +479,23 @@ const TahsilatFormDialog = memo(({
 
                                 {/* Kredi Kartı Detayları (Sadece Tahsilat + Kredi Kartı) */}
                                 {isTahsilat && localFormData.odemeTipi === 'KREDI_KARTI' && (
-                                    <Grid size={12}>
+                                    <Grid item xs={12}>
                                         <Alert severity="info" icon={<CreditCard />} sx={{ mt: 1 }}>
                                             <Typography variant="body2" fontWeight={600} gutterBottom>Müşteri Kart Bilgileri (Opsiyonel)</Typography>
                                             <Grid container spacing={2}>
-                                                <Grid size={{ xs: 12, md: 4 }}>
+                                                <Grid item xs={12} md={4}>
                                                     <TextField
                                                         fullWidth size="small" label="Kart Sahibi"
                                                         value={localFormData.kartSahibi} onChange={(e) => handleLocalChange('kartSahibi', e.target.value)}
                                                     />
                                                 </Grid>
-                                                <Grid size={{ xs: 12, md: 4 }}>
+                                                <Grid item xs={12} md={4}>
                                                     <TextField
                                                         fullWidth size="small" label="Son 4 Hane" inputProps={{ maxLength: 4 }}
                                                         value={localFormData.kartSonDort} onChange={(e) => handleLocalChange('kartSonDort', e.target.value)}
                                                     />
                                                 </Grid>
-                                                <Grid size={{ xs: 12, md: 4 }}>
+                                                <Grid item xs={12} md={4}>
                                                     <TextField
                                                         fullWidth size="small" label="Banka Adı"
                                                         value={localFormData.bankaAdi} onChange={(e) => handleLocalChange('bankaAdi', e.target.value)}

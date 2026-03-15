@@ -8,6 +8,7 @@ import {
   IsDateString,
   ValidateNested,
   Min,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { FaturaTipi, FaturaDurum } from '@prisma/client';
@@ -38,6 +39,14 @@ export class CreateFaturaKalemiDto {
   @IsOptional()
   @Min(0)
   iskontoTutari?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  cokluIskonto?: boolean;
+
+  @IsString()
+  @IsOptional()
+  iskontoFormula?: string;
 }
 
 export class CreateFaturaDto {

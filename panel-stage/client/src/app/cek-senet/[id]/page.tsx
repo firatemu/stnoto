@@ -71,43 +71,43 @@ export default function CekDetayPage() {
                 </Box>
 
                 <Grid container spacing={3}>
-                    <Grid size={{ xs: 12, md: 8 }}>
+                    <Grid item xs={12} md={8}>
                         <Card sx={{ p: 3, mb: 3 }}>
                             <Typography variant="h6" mb={2}>Temel Bilgiler</Typography>
                             <Grid container spacing={2}>
-                                <Grid size={{ xs: 6, md: 4 }}>
+                                <Grid item xs={6} md={4}>
                                     <Typography color="text.secondary">Evrak No</Typography>
                                     <Typography fontWeight="bold">{cek.evrakNo}</Typography>
                                 </Grid>
-                                <Grid size={{ xs: 6, md: 4 }}>
+                                <Grid item xs={6} md={4}>
                                     <Typography color="text.secondary">Vade Tarihi</Typography>
                                     <Typography fontWeight="bold">{new Date(cek.vadeTarihi).toLocaleDateString()}</Typography>
                                 </Grid>
-                                <Grid size={{ xs: 6, md: 4 }}>
+                                <Grid item xs={6} md={4}>
                                     <Typography color="text.secondary">Tutar</Typography>
                                     <Typography fontWeight="bold" variant="h6">
                                         {new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(cek.tutar)}
                                     </Typography>
                                 </Grid>
-                                <Grid size={{ xs: 6, md: 4 }}>
+                                <Grid item xs={6} md={4}>
                                     <Typography color="text.secondary">Kalan Tutar</Typography>
                                     <Typography fontWeight="bold" color="error">
                                         {new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(cek.kalanTutar)}
                                     </Typography>
                                 </Grid>
-                                <Grid size={{ xs: 6, md: 4 }}>
+                                <Grid item xs={6} md={4}>
                                     <Typography color="text.secondary">Tip</Typography>
                                     <Typography>{cek.tip?.replace('_', ' ')}</Typography>
                                 </Grid>
-                                <Grid size={{ xs: 6, md: 4 }}>
+                                <Grid item xs={6} md={4}>
                                     <Typography color="text.secondary">Çek Sahibi / Borçlu</Typography>
                                     <Typography>{cek.borclu || '-'}</Typography>
                                 </Grid>
-                                <Grid size={{ xs: 6, md: 4 }}>
+                                <Grid item xs={6} md={4}>
                                     <Typography color="text.secondary">Banka</Typography>
                                     <Typography>{cek.banka || '-'}</Typography>
                                 </Grid>
-                                <Grid size={{ xs: 6, md: 4 }}>
+                                <Grid item xs={6} md={4}>
                                     <Typography color="text.secondary">Şube / Hesap</Typography>
                                     <Typography>{cek.sube} / {cek.hesapNo}</Typography>
                                 </Grid>
@@ -153,7 +153,7 @@ export default function CekDetayPage() {
                         </Card>
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 4 }}>
+                    <Grid item xs={12} md={4}>
                         <Card sx={{ p: 3 }}>
                             <Typography variant="h6" mb={2}>Hızlı İşlemler</Typography>
                             <Button

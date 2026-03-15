@@ -153,7 +153,7 @@ export default function SilinenHavalelerPage() {
 
         {/* İstatistikler */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid size={{ xs: 12, md: 3 }}>
+          <Grid item xs={12} md={3}>
             <Card sx={{ bgcolor: '#f9fafb', border: '1px solid #6b7280' }}>
               <CardContent>
                 <Typography variant="body2" color="textSecondary">Toplam Silinen</Typography>
@@ -163,7 +163,7 @@ export default function SilinenHavalelerPage() {
               </CardContent>
             </Card>
           </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
+          <Grid item xs={12} md={3}>
             <Card sx={{ bgcolor: '#ecfdf5', border: '1px solid #10b981' }}>
               <CardContent>
                 <Typography variant="body2" color="textSecondary">Gelen Havale</Typography>
@@ -173,7 +173,7 @@ export default function SilinenHavalelerPage() {
               </CardContent>
             </Card>
           </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
+          <Grid item xs={12} md={3}>
             <Card sx={{ bgcolor: '#fef2f2', border: '1px solid #ef4444' }}>
               <CardContent>
                 <Typography variant="body2" color="textSecondary">Giden Havale</Typography>
@@ -183,7 +183,7 @@ export default function SilinenHavalelerPage() {
               </CardContent>
             </Card>
           </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
+          <Grid item xs={12} md={3}>
             <Card sx={{ bgcolor: '#fffbeb', border: '1px solid #f59e0b' }}>
               <CardContent>
                 <Typography variant="body2" color="textSecondary">Toplam Tutar</Typography>
@@ -202,7 +202,7 @@ export default function SilinenHavalelerPage() {
             Filtreler
           </Typography>
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid item xs={12} md={4}>
               <FormControl fullWidth size="small">
                 <InputLabel>Hareket Tipi</InputLabel>
                 <Select
@@ -216,7 +216,7 @@ export default function SilinenHavalelerPage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
                 size="small"
@@ -227,7 +227,7 @@ export default function SilinenHavalelerPage() {
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
                 size="small"
@@ -352,12 +352,12 @@ export default function SilinenHavalelerPage() {
               <Box sx={{ mt: 2 }}>
                 <Grid container spacing={3}>
                   {/* Temel Bilgiler */}
-                  <Grid size={{ xs: 12 }}>
+                  <Grid item xs={12}>
                     <Typography variant="h6" sx={{ mb: 2, pb: 1, borderBottom: '2px solid #e5e7eb' }}>
                       Temel Bilgiler
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
+                  <Grid item xs={6}>
                     <Typography variant="caption" color="textSecondary">Hareket Tipi</Typography>
                     <Chip
                       icon={selectedKayit.hareketTipi === 'GELEN' ? <TrendingUp /> : <TrendingDown />}
@@ -369,7 +369,7 @@ export default function SilinenHavalelerPage() {
                       }}
                     />
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
+                  <Grid item xs={6}>
                     <Typography variant="caption" color="textSecondary">Tutar</Typography>
                     <Typography variant="h5" sx={{
                       color: selectedKayit.hareketTipi === 'GELEN' ? '#10b981' : '#ef4444',
@@ -379,27 +379,27 @@ export default function SilinenHavalelerPage() {
                       {formatCurrency(selectedKayit.tutar)}
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
+                  <Grid item xs={6}>
                     <Typography variant="caption" color="textSecondary">Banka Hesabı</Typography>
                     <Typography variant="body1" fontWeight={500}>
                       {selectedKayit.bankaHesabiAdi}
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
+                  <Grid item xs={6}>
                     <Typography variant="caption" color="textSecondary">Cari</Typography>
                     <Typography variant="body1" fontWeight={500}>
                       {selectedKayit.cariUnvan}
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
+                  <Grid item xs={6}>
                     <Typography variant="caption" color="textSecondary">İşlem Tarihi</Typography>
                     <Typography variant="body1">{formatDate(selectedKayit.tarih)}</Typography>
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
+                  <Grid item xs={6}>
                     <Typography variant="caption" color="textSecondary">Referans No</Typography>
                     <Typography variant="body1">{selectedKayit.referansNo || '-'}</Typography>
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
+                  <Grid item xs={6}>
                     <Typography variant="caption" color="textSecondary">
                       {selectedKayit.hareketTipi === 'GELEN' ? 'Gönderen' : 'Alıcı'}
                     </Typography>
@@ -407,27 +407,27 @@ export default function SilinenHavalelerPage() {
                       {selectedKayit.hareketTipi === 'GELEN' ? (selectedKayit.gonderen || '-') : (selectedKayit.alici || '-')}
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
+                  <Grid item xs={6}>
                     <Typography variant="caption" color="textSecondary">Açıklama</Typography>
                     <Typography variant="body1">{selectedKayit.aciklama || '-'}</Typography>
                   </Grid>
 
                   {/* Silme Bilgileri */}
-                  <Grid size={{ xs: 12 }}>
+                  <Grid item xs={12}>
                     <Typography variant="h6" sx={{ mt: 2, mb: 2, pb: 1, borderBottom: '2px solid #e5e7eb' }}>
                       Silme Bilgileri
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 12 }}>
+                  <Grid item xs={12}>
                     <Box sx={{ bgcolor: '#fef2f2', p: 2, borderRadius: 1, border: '1px solid #ef4444' }}>
                       <Grid container spacing={2}>
-                        <Grid size={{ xs: 6 }}>
+                        <Grid item xs={6}>
                           <Typography variant="caption" color="textSecondary">Silinme Tarihi</Typography>
                           <Typography variant="body1" fontWeight={600} color="error.main">
                             {formatDate(selectedKayit.deletedAt)}
                           </Typography>
                         </Grid>
-                        <Grid size={{ xs: 6 }}>
+                        <Grid item xs={6}>
                           <Typography variant="caption" color="textSecondary">Silen Kullanıcı</Typography>
                           {selectedKayit.deletedByUser ? (
                             <Box>
@@ -442,7 +442,7 @@ export default function SilinenHavalelerPage() {
                             <Typography variant="body1">-</Typography>
                           )}
                         </Grid>
-                        <Grid size={{ xs: 12 }}>
+                        <Grid item xs={12}>
                           <Typography variant="caption" color="textSecondary">Silme Nedeni</Typography>
                           <Typography variant="body1" sx={{ mt: 0.5 }}>
                             {selectedKayit.deleteReason || 'Belirtilmemiş'}
@@ -453,27 +453,27 @@ export default function SilinenHavalelerPage() {
                   </Grid>
 
                   {/* Orijinal Kayıt Bilgileri */}
-                  <Grid size={{ xs: 12 }}>
+                  <Grid item xs={12}>
                     <Typography variant="h6" sx={{ mt: 2, mb: 2, pb: 1, borderBottom: '2px solid #e5e7eb' }}>
                       Orijinal Kayıt Bilgileri
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 12 }}>
+                  <Grid item xs={12}>
                     <Box sx={{ bgcolor: '#f9fafb', p: 2, borderRadius: 1 }}>
                       <Grid container spacing={2}>
-                        <Grid size={{ xs: 6 }}>
+                        <Grid item xs={6}>
                           <Typography variant="caption" color="textSecondary">Oluşturulma Tarihi</Typography>
                           <Typography variant="body2">
                             {formatDate(selectedKayit.originalCreatedAt)}
                           </Typography>
                         </Grid>
-                        <Grid size={{ xs: 6 }}>
+                        <Grid item xs={6}>
                           <Typography variant="caption" color="textSecondary">Son Güncelleme</Typography>
                           <Typography variant="body2">
                             {formatDate(selectedKayit.originalUpdatedAt)}
                           </Typography>
                         </Grid>
-                        <Grid size={{ xs: 12 }}>
+                        <Grid item xs={12}>
                           <Typography variant="caption" color="textSecondary">Orijinal ID</Typography>
                           <Typography variant="caption" sx={{ fontFamily: 'monospace', display: 'block', mt: 0.5 }}>
                             {selectedKayit.originalId}

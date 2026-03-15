@@ -132,7 +132,7 @@ function TransferPageContent() {
     try {
       const response = await axios.get(`/location/${locationId}`);
       const location = response.data;
-      
+
       setFromLocation(location);
       setFromWarehouse({
         id: location.warehouseId,
@@ -145,9 +145,9 @@ function TransferPageContent() {
         fromWarehouseId: location.warehouseId,
         fromLocationId: location.id,
       });
-      
+
       fetchLocations(location.warehouseId, setFromLocations);
-      
+
       // Bu raftaki ürünleri listele
       const productsData: ProductStock[] = location.productLocationStocks.map((stock: any) => ({
         product: stock.product,
@@ -162,7 +162,7 @@ function TransferPageContent() {
   useEffect(() => {
     fetchProducts();
     fetchWarehouses();
-    
+
     if (preselectedFromLocationId) {
       fetchLocationDetails(preselectedFromLocationId);
     }
@@ -176,7 +176,7 @@ function TransferPageContent() {
       fromWarehouseId: warehouse?.id || '',
       fromLocationId: '',
     });
-    
+
     if (warehouse) {
       fetchLocations(warehouse.id, setFromLocations);
     } else {
@@ -194,7 +194,7 @@ function TransferPageContent() {
     });
     setSelectedProduct(null);
     setAvailableQty(0);
-    
+
     if (location) {
       // Bu raftaki ürünleri getir
       try {
@@ -220,7 +220,7 @@ function TransferPageContent() {
       toWarehouseId: warehouse?.id || '',
       toLocationId: '',
     });
-    
+
     if (warehouse) {
       fetchLocations(warehouse.id, setToLocations);
     } else {
@@ -239,7 +239,7 @@ function TransferPageContent() {
   const handleProductChange = (product: Product | null) => {
     setSelectedProduct(product);
     setFormData({ ...formData, productId: product?.id || '', qty: 1 });
-    
+
     if (product) {
       const stockInfo = productsInFromLocation.find(p => p.product.id === product.id);
       setAvailableQty(stockInfo?.qtyOnHand || 0);
@@ -249,8 +249,8 @@ function TransferPageContent() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.productId || !formData.fromWarehouseId || !formData.fromLocationId || 
-        !formData.toWarehouseId || !formData.toLocationId || formData.qty <= 0) {
+    if (!formData.productId || !formData.fromWarehouseId || !formData.fromLocationId ||
+      !formData.toWarehouseId || !formData.toLocationId || formData.qty <= 0) {
       setSnackbar({ open: true, message: 'Lütfen tüm alanları doldurun', severity: 'error' });
       return;
     }
@@ -276,9 +276,9 @@ function TransferPageContent() {
         qty: formData.qty,
         note: formData.note || undefined,
       });
-      
+
       setSnackbar({ open: true, message: 'Transfer işlemi başarılı', severity: 'success' });
-      
+
       // Form temizle
       setTimeout(() => {
         if (preselectedFromLocationId) {
@@ -350,7 +350,7 @@ function TransferPageContent() {
 
       <Grid container spacing={3}>
         {/* Form */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
             {/* Kaynak Raf Bilgileri */}
             <Typography variant="h6" gutterBottom color="primary">
@@ -403,10 +403,10 @@ function TransferPageContent() {
                   label="Ürün *"
                   placeholder="Ürün seç..."
                   helperText={
-                    !formData.fromLocationId 
-                      ? 'Önce kaynak raf seçin' 
-                      : productsInFromLocation.length === 0 
-                        ? 'Bu rafta ürün yok' 
+                    !formData.fromLocationId
+                      ? 'Önce kaynak raf seçin'
+                      : productsInFromLocation.length === 0
+                        ? 'Bu rafta ürün yok'
                         : `Bu rafta ${productsInFromLocation.length} farklı ürün var`
                   }
                 />
@@ -503,12 +503,12 @@ function TransferPageContent() {
               startIcon={loading ? <CircularProgress size={20} /> : <Save />}
               onClick={handleSubmit}
               disabled={
-                loading || 
-                !formData.productId || 
-                !formData.fromWarehouseId || 
-                !formData.fromLocationId || 
-                !formData.toWarehouseId || 
-                !formData.toLocationId || 
+                loading ||
+                !formData.productId ||
+                !formData.fromWarehouseId ||
+                !formData.fromLocationId ||
+                !formData.toWarehouseId ||
+                !formData.toLocationId ||
                 formData.qty <= 0 ||
                 formData.qty > availableQty
               }
@@ -519,7 +519,7 @@ function TransferPageContent() {
         </Grid>
 
         {/* Özet Card */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item xs={12} md={4}>
           <Card sx={{ bgcolor: 'var(--muted)' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -539,10 +539,10 @@ function TransferPageContent() {
                     {selectedProduct.stokAdi}
                   </Typography>
                   {availableQty > 0 && (
-                    <Chip 
-                      label={`Mevcut: ${availableQty}`} 
-                      size="small" 
-                      color="info" 
+                    <Chip
+                      label={`Mevcut: ${availableQty}`}
+                      size="small"
+                      color="info"
                       sx={{ mt: 1 }}
                     />
                   )}

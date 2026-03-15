@@ -565,6 +565,7 @@ export class FaturaService {
     let kdvTutar = 0;
 
     const kalemlerWithCalculations = kalemler.map((kalem) => {
+      const { cokluIskonto, iskontoFormula, ...kalemRest } = kalem as any;
       const miktar = kalem.miktar || 1;
       const birimFiyat = kalem.birimFiyat || 0;
       const rawTutar = miktar * birimFiyat;
@@ -587,7 +588,7 @@ export class FaturaService {
       kdvTutar += kalemKdv;
 
       return {
-        ...kalem,
+        ...kalemRest,
         birimFiyat,
         iskontoOrani: new Decimal(iskontoOrani),
         iskontoTutari: new Decimal(iskontoTutari),

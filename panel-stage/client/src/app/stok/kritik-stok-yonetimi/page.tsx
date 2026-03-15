@@ -413,7 +413,7 @@ export default function KritikStokYonetimiPage() {
                 </Typography>
 
                 <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid size={{ xs: 12, md: 3 }}>
+                    <Grid item xs={12} md={3}>
                         <Card sx={{ bgcolor: 'var(--destructive-foreground)', borderLeft: '4px solid var(--destructive)' }}>
                             <CardContent>
                                 <Typography variant="caption" color="var(--muted-foreground)">Kritik Ürünler</Typography>
@@ -421,7 +421,7 @@ export default function KritikStokYonetimiPage() {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid size={{ xs: 12, md: 3 }}>
+                    <Grid item xs={12} md={3}>
                         <Card sx={{ bgcolor: 'var(--warning-foreground)', borderLeft: '4px solid var(--warning)' }}>
                             <CardContent>
                                 <Typography variant="caption" color="var(--muted-foreground)">Uyarı</Typography>
@@ -429,7 +429,7 @@ export default function KritikStokYonetimiPage() {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid size={{ xs: 12, md: 3 }}>
+                    <Grid item xs={12} md={3}>
                         <Card sx={{ bgcolor: 'var(--card)', borderLeft: '4px solid var(--chart-2)' }}>
                             <CardContent>
                                 <Typography variant="caption" color="var(--muted-foreground)">Normal</Typography>
@@ -437,7 +437,7 @@ export default function KritikStokYonetimiPage() {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid size={{ xs: 12, md: 3 }}>
+                    <Grid item xs={12} md={3}>
                         <Card sx={{ bgcolor: 'var(--card)', borderLeft: '4px solid var(--primary)' }}>
                             <CardContent>
                                 <Typography variant="caption" color="var(--muted-foreground)">Toplam Ürün</Typography>
@@ -450,7 +450,7 @@ export default function KritikStokYonetimiPage() {
                 <Card sx={{ bgcolor: 'var(--card)', mb: 3, borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-sm)' }}>
                     <CardContent>
                         <Grid container spacing={2} alignItems="center">
-                            <Grid size={{ xs: 12, md: 4 }}>
+                            <Grid item xs={12} md={4}>
                                 <TextField
                                     fullWidth
                                     placeholder="Ürün adı veya kodu ile ara..."
@@ -462,7 +462,7 @@ export default function KritikStokYonetimiPage() {
                                     sx={{ '& .MuiInputBase-root': { borderRadius: 'var(--radius)' } }}
                                 />
                             </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
+                            <Grid item xs={12} md={4}>
                                 <FormControl fullWidth>
                                     <InputLabel>Durum Filtresi</InputLabel>
                                     <Select
@@ -477,7 +477,7 @@ export default function KritikStokYonetimiPage() {
                                     </Select>
                                 </FormControl>
                             </Grid>
-                            <Grid size={{ xs: 12, md: 4 }}>
+                            <Grid item xs={12} md={4}>
                                 <Box sx={{
                                     display: 'flex',
                                     gap: 1,
@@ -488,7 +488,7 @@ export default function KritikStokYonetimiPage() {
                                 }}>
                                     <Tooltip title="Mevcut Durumu Dışa Aktar">
                                         <Button
-                                            variant="ghost"
+                                            variant="text"
                                             startIcon={<Download />}
                                             onClick={handleExport}
                                             sx={{
@@ -606,11 +606,11 @@ export default function KritikStokYonetimiPage() {
                 <DialogContent>
                     <Box sx={{ mb: 3, p: 2, bgcolor: 'var(--muted)', borderRadius: 'var(--radius)' }}>
                         <Grid container spacing={2}>
-                            <Grid size={{ xs: 6 }}>
+                            <Grid item xs={6}>
                                 <Typography variant="caption" color="var(--muted-foreground)">Güncellenen</Typography>
                                 <Typography variant="h5" fontWeight="bold" color="var(--primary)">{updateResult?.updated}</Typography>
                             </Grid>
-                            <Grid size={{ xs: 6 }}>
+                            <Grid item xs={6}>
                                 <Typography variant="caption" color="var(--muted-foreground)">Atlanan / Hatalı</Typography>
                                 <Typography variant="h5" fontWeight="bold" color="var(--destructive)">{updateResult?.skipped}</Typography>
                             </Grid>
@@ -649,7 +649,7 @@ export default function KritikStokYonetimiPage() {
                 </DialogContent>
                 <DialogActions sx={{ p: 2, gap: 1 }}>
                     <Button
-                        variant="ghost"
+                        variant="text"
                         onClick={() => setUpdateResult(null)}
                         sx={{ borderRadius: 'var(--radius)' }}
                     >

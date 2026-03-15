@@ -43,7 +43,7 @@ export default function MarkaYonetimiPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [yeniMarkaAdi, setYeniMarkaAdi] = useState('');
   const [updating, setUpdating] = useState(false);
-  
+
   // Yeni marka ekleme state
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [yeniMarkaInput, setYeniMarkaInput] = useState('');
@@ -96,10 +96,10 @@ export default function MarkaYonetimiPage() {
       // URL encoding kullan
       const encodedMarkaAdi = encodeURIComponent(markaAdi);
       await axios.delete(`/marka/${encodedMarkaAdi}`);
-      
+
       // Başarı mesajı
       alert(`✅ Marka "${markaAdi}" başarıyla silindi.`);
-      
+
       // Listeyi yenile
       await fetchMarkalar();
     } catch (error: any) {
@@ -176,7 +176,7 @@ export default function MarkaYonetimiPage() {
       });
 
       alert(`✅ Marka "${editingMarka.markaAdi}" başarıyla "${yeniMarkaAdi.trim()}" olarak güncellendi.`);
-      
+
       // Listeyi yenile
       await fetchMarkalar();
       handleCloseEditDialog();
@@ -227,7 +227,7 @@ export default function MarkaYonetimiPage() {
 
       <Paper sx={{ mb: 2, p: 2, bgcolor: 'color-mix(in srgb, var(--secondary) 15%, transparent)' }}>
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h3" fontWeight="bold" color="#191970">
                 {markalar.length}
@@ -237,7 +237,7 @@ export default function MarkaYonetimiPage() {
               </Typography>
             </Box>
           </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h3" fontWeight="bold" color="#06b6d4">
                 {markalar.reduce((sum, m) => sum + (m.urunSayisi || 0), 0)}
@@ -305,7 +305,7 @@ export default function MarkaYonetimiPage() {
                     </Typography>
                   </TableCell>
                   <TableCell align="center">
-                    <Chip 
+                    <Chip
                       label={marka.urunSayisi || 0}
                       size="small"
                       color={marka.urunSayisi && marka.urunSayisi > 0 ? 'primary' : 'default'}
@@ -322,9 +322,9 @@ export default function MarkaYonetimiPage() {
                           <Edit fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip 
+                      <Tooltip
                         title={
-                          marka.urunSayisi > 0 
+                          marka.urunSayisi > 0
                             ? `Bu markaya ait ${marka.urunSayisi} ürün bulunmaktadır. Ürünü olan markalar silinemez.`
                             : 'Markayı Sil'
                         }
@@ -354,8 +354,8 @@ export default function MarkaYonetimiPage() {
       </TableContainer>
 
       {/* Marka Düzenleme Dialog */}
-      <Dialog 
-        open={editDialogOpen} 
+      <Dialog
+        open={editDialogOpen}
         onClose={handleCloseEditDialog}
         maxWidth="sm"
         fullWidth
@@ -412,8 +412,8 @@ export default function MarkaYonetimiPage() {
       </Dialog>
 
       {/* Yeni Marka Ekleme Dialog */}
-      <Dialog 
-        open={addDialogOpen} 
+      <Dialog
+        open={addDialogOpen}
         onClose={() => setAddDialogOpen(false)}
         maxWidth="sm"
         fullWidth
@@ -443,11 +443,11 @@ export default function MarkaYonetimiPage() {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button 
+          <Button
             onClick={() => {
               setAddDialogOpen(false);
               setYeniMarkaInput('');
-            }} 
+            }}
             disabled={creating}
           >
             İptal

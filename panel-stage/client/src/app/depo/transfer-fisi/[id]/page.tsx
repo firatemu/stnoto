@@ -245,7 +245,7 @@ export default function WarehouseTransferDetayPage() {
 
                 <Grid container spacing={3}>
                     {/* Main Info */}
-                    <Grid size={{ xs: 12, md: 4 }}>
+                    <Grid item xs={12} md={4}>
                         <Paper sx={{ p: 3, height: '100%' }}>
                             <Typography variant="h6" gutterBottom>Genel Bilgiler</Typography>
                             <Stack spacing={2}>
@@ -285,7 +285,7 @@ export default function WarehouseTransferDetayPage() {
                     </Grid>
 
                     {/* Staff Info */}
-                    <Grid size={{ xs: 12, md: 4 }}>
+                    <Grid item xs={12} md={4}>
                         <Paper sx={{ p: 3, height: '100%' }}>
                             <Typography variant="h6" gutterBottom>Görevli Bilgileri</Typography>
                             <Stack spacing={2}>
@@ -306,7 +306,7 @@ export default function WarehouseTransferDetayPage() {
                     </Grid>
 
                     {/* History Logs */}
-                    <Grid size={{ xs: 12, md: 4 }}>
+                    <Grid item xs={12} md={4}>
                         <Paper sx={{ p: 3, height: '100%' }}>
                             <Typography variant="h6" gutterBottom>İşlem Geçmişi</Typography>
                             <Stack spacing={2}>
@@ -328,7 +328,7 @@ export default function WarehouseTransferDetayPage() {
                     </Grid>
 
                     {/* Bottom Row: Items Table (Full Width) */}
-                    <Grid size={{ xs: 12 }}>
+                    <Grid item xs={12}>
                         <Paper sx={{ p: 3 }}>
                             <Typography variant="h6" gutterBottom>Transfer Edilen Malzemeler</Typography>
                             <TableContainer>

@@ -17,6 +17,7 @@ import { SecurityModule } from './common/services/security.module';
 import { TenantSecurityExceptionFilter } from './common/filters/tenant-security-exception.filter';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AracModule } from './modules/arac/arac.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BankaHavaleModule } from './modules/banka-havale/banka-havale.module';
 import { BankaHesapModule } from './modules/banka-hesap/banka-hesap.module';
@@ -102,6 +103,7 @@ import { QueueModule } from './common/modules/queue.module';
     PaymentsModule,
     PlansModule,
     AnalyticsModule,
+    DashboardModule,
     UsersModule,
     LicensesModule,
     StokModule,

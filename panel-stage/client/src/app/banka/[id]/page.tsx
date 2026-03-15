@@ -195,7 +195,7 @@ export default function BankaDetayPage() {
                     <Skeleton variant="rectangular" height={60} sx={{ mb: 2 }} />
                     <Grid container spacing={3}>
                         {[1, 2, 3, 4].map(i => (
-                            <Grid key={i} size={{ xs: 12, md: 3 }}>
+                            <Grid key={i} item xs={12} md={3}>
                                 <Skeleton variant="rectangular" height={100} />
                             </Grid>
                         ))}
@@ -281,7 +281,7 @@ export default function BankaDetayPage() {
 
                 {/* Summary Cards */}
                 <Grid container spacing={2} sx={{ mb: 4 }}>
-                    <Grid size={{ xs: 12, md: 3 }}>
+                    <Grid item xs={12} md={3}>
                         <Card sx={{
                             bgcolor: 'color-mix(in srgb, var(--chart-2) 15%, transparent)',
                             borderLeft: '4px solid var(--chart-2)',
@@ -312,7 +312,7 @@ export default function BankaDetayPage() {
                         const Icon = type.icon;
                         const accentColor = 'var(--chart-2)';
                         return (
-                            <Grid key={type.value} size={{ xs: 12, sm: 6, md: 2.25 }}>
+                            <Grid key={type.value} item xs={12} sm={6} md={2.25}>
                                 <Card sx={{
                                     bgcolor: `color-mix(in srgb, ${accentColor} 15%, transparent)`,
                                     borderLeft: `4px solid ${accentColor}`,

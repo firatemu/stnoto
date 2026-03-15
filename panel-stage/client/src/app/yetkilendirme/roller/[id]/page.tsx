@@ -166,7 +166,7 @@ export default function RoleDetailPage() {
 
             <Grid container spacing={3}>
                 {/* Left Col: Details */}
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid item xs={12} md={4}>
                     <Card sx={{ p: 3, height: '100%', borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
                         <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
                             <AdminPanelSettings fontSize="small" color="primary" />
@@ -195,7 +195,7 @@ export default function RoleDetailPage() {
                 </Grid>
 
                 {/* Right Col: Permissions */}
-                <Grid size={{ xs: 12, md: 8 }}>
+                <Grid item xs={12} md={8}>
                     <Card sx={{ p: 3, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
                         <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Security fontSize="small" color="primary" />

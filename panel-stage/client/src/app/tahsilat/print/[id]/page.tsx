@@ -398,7 +398,7 @@ function ReceiptTemplate({
 
         {/* Info Grid */}
         <Grid container spacing={isLandscape ? 2 : 3} sx={{ mb: isLandscape ? 2 : 4 }}>
-          <Grid size={{ xs: 6 }}>
+          <Grid item xs={6}>
             <Box sx={{
               p: 2,
               border: `1px solid ${colors.border}`,
@@ -434,7 +434,7 @@ function ReceiptTemplate({
             </Box>
           </Grid>
 
-          <Grid size={{ xs: 6 }}>
+          <Grid item xs={6}>
             <Box sx={{
               p: 2,
               border: `1px solid ${colors.border}`,
@@ -477,7 +477,7 @@ function ReceiptTemplate({
         {/* Amount Section */}
         <Box sx={{ mb: isLandscape ? 2 : 4 }}>
           <Grid container spacing={0} sx={{ border: `2px solid ${colors.accent}`, borderRadius: 2, overflow: 'hidden' }}>
-            <Grid size={{ xs: 8 }} sx={{ p: 2, bgcolor: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <Grid item xs={8} sx={{ p: 2, bgcolor: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <Typography variant="caption" sx={{ color: colors.secondary, fontWeight: 700, mb: 0.5, letterSpacing: '0.05em' }}>
                 YALNIZ
               </Typography>
@@ -485,7 +485,7 @@ function ReceiptTemplate({
                 # {amountInWords} #
               </Typography>
             </Grid>
-            <Grid size={{ xs: 4 }} sx={{ bgcolor: colors.bgAmount, color: colors.accent, p: 2, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end' }}>
+            <Grid item xs={4} sx={{ bgcolor: colors.bgAmount, color: colors.accent, p: 2, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-end' }}>
               <Typography variant="caption" sx={{ color: colors.secondary, fontWeight: 600, mb: 0.5 }}>
                 TOPLAM TUTAR
               </Typography>
@@ -511,7 +511,7 @@ function ReceiptTemplate({
         {/* Footer / Signatures */}
         <Box sx={{ mt: 'auto', pt: isLandscape ? 1 : 2 }}>
           <Grid container spacing={4}>
-            <Grid size={{ xs: 6 }}>
+            <Grid item xs={6}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="caption" sx={{ fontWeight: 700, color: colors.secondary, mb: isLandscape ? 2 : 4, display: 'block', textTransform: 'uppercase' }}>
                   {tahsilat.tip === 'TAHSILAT' ? 'TAHSİL EDEN' : 'ÖDEME YAPAN'}
@@ -522,7 +522,7 @@ function ReceiptTemplate({
                 </Typography>
               </Box>
             </Grid>
-            <Grid size={{ xs: 6 }}>
+            <Grid item xs={6}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="caption" sx={{ fontWeight: 700, color: colors.secondary, mb: isLandscape ? 2 : 4, display: 'block', textTransform: 'uppercase' }}>
                   {tahsilat.tip === 'TAHSILAT' ? 'ÖDEME YAPAN' : 'TAHSİL EDEN'}

@@ -101,13 +101,11 @@ const ODEME_TIPI_LABELS: Record<string, string> = {
   NAKIT: 'Nakit',
   KREDI_KARTI: 'Kredi Kartı',
   BANKA_HAVALESI: 'Banka Havalesi',
-  BANKA_HAVALESI: 'Banka Havalesi',
 };
 
 const ODEME_TIPI_COLORS: Record<string, string> = {
   NAKIT: '#10b981',
   KREDI_KARTI: '#3b82f6',
-  BANKA_HAVALESI: '#0891b2',
   BANKA_HAVALESI: '#0891b2',
 };
 
@@ -163,7 +161,7 @@ const MasrafFormDialog = memo(({
       </DialogTitle>
       <DialogContent sx={{ bgcolor: 'var(--background)' }}>
         <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <FormControl fullWidth required className="form-control-select">
               <InputLabel>Kategori</InputLabel>
               <Select
@@ -179,7 +177,7 @@ const MasrafFormDialog = memo(({
               </Select>
             </FormControl>
           </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <FormControl fullWidth required className="form-control-select">
               <InputLabel>Ödeme Tipi</InputLabel>
               <Select
@@ -193,7 +191,7 @@ const MasrafFormDialog = memo(({
               </Select>
             </FormControl>
           </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <TextField
               fullWidth
               required
@@ -205,7 +203,7 @@ const MasrafFormDialog = memo(({
               inputProps={{ min: 0.01, step: 0.01 }}
             />
           </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <TextField
               fullWidth
               required
@@ -217,7 +215,7 @@ const MasrafFormDialog = memo(({
               InputLabelProps={{ shrink: true }}
             />
           </Grid>
-          <Grid size={{ xs: 12 }}>
+          <Grid item xs={12}>
             <TextField
               fullWidth
               label="Açıklama"
@@ -611,7 +609,6 @@ export default function MasrafPage() {
           NAKIT: 'var(--chart-2)',
           KREDI_KARTI: 'var(--chart-1)',
           BANKA_HAVALESI: 'var(--secondary)',
-          BANKA_HAVALESI: 'var(--secondary)',
         };
         const chipColor = colorMap[row.odemeTipi] || 'var(--muted-foreground)';
         return (
@@ -772,7 +769,7 @@ export default function MasrafPage() {
         {/* İstatistikler */}
         {stats && (
           <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <Card sx={{ bgcolor: 'var(--card)', border: '1px solid var(--destructive)', boxShadow: 'var(--shadow-sm)' }}>
                 <CardContent>
                   <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>Toplam Masraf</Typography>
@@ -782,7 +779,7 @@ export default function MasrafPage() {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <Card sx={{ bgcolor: 'var(--card)', border: '1px solid var(--chart-3)', boxShadow: 'var(--shadow-sm)' }}>
                 <CardContent>
                   <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>Toplam Kayıt</Typography>
@@ -792,7 +789,7 @@ export default function MasrafPage() {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <Card sx={{ bgcolor: 'var(--card)', border: '1px solid var(--chart-2)', boxShadow: 'var(--shadow-sm)' }}>
                 <CardContent>
                   <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>Kategori Sayısı</Typography>
@@ -802,7 +799,7 @@ export default function MasrafPage() {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <Card sx={{ bgcolor: 'var(--card)', border: '1px solid var(--chart-1)', boxShadow: 'var(--shadow-sm)' }}>
                 <CardContent>
                   <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>Ortalama Masraf</Typography>
@@ -822,7 +819,7 @@ export default function MasrafPage() {
             Filtreler
           </Typography>
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid item xs={12} md={4}>
               <FormControl fullWidth size="small" className="form-control-select">
                 <InputLabel>Kategori</InputLabel>
                 <Select
@@ -839,7 +836,7 @@ export default function MasrafPage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
                 size="small"
@@ -851,7 +848,7 @@ export default function MasrafPage() {
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
                 size="small"
@@ -921,7 +918,7 @@ export default function MasrafPage() {
             </Typography>
             <Grid container spacing={2}>
               {stats.kategoriler.map((kat) => (
-                <Grid size={{ xs: 12, md: 4 }} key={kat.kategoriId}>
+                <Grid item xs={12} md={4} key={kat.kategoriId}>
                   <Card variant="outlined" sx={{ bgcolor: 'var(--card)', borderColor: 'var(--border)' }}>
                     <CardContent>
                       <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>{kat.kategoriAdi}</Typography>
@@ -1035,7 +1032,7 @@ export default function MasrafPage() {
                   {kategoriEditMode ? 'Kategori Düzenle' : 'Yeni Kategori Ekle'}
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, md: 6 }}>
+                  <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
                       label="Kategori Adı *"
@@ -1045,7 +1042,7 @@ export default function MasrafPage() {
                       placeholder="Örn: Ofis Giderleri"
                     />
                   </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
+                  <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
                       label="Açıklama"
@@ -1055,7 +1052,7 @@ export default function MasrafPage() {
                       placeholder="Kategori açıklaması (opsiyonel)"
                     />
                   </Grid>
-                  <Grid size={{ xs: 12 }}>
+                  <Grid item xs={12}>
                     <Box sx={{ display: 'flex', gap: 2 }}>
                       <Button
                         variant="contained"

@@ -467,7 +467,7 @@ export default function InvoiceViewModal({ open, onClose, document }: InvoiceVie
             {/* Fatura Özet Bilgileri */}
             <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
               <Grid container spacing={2}>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid item xs={12} md={6}>
                   <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                     Alıcı
                   </Typography>
@@ -480,7 +480,7 @@ export default function InvoiceViewModal({ open, onClose, document }: InvoiceVie
                     </Typography>
                   )}
                 </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid item xs={12} md={6}>
                   <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                     Satıcı
                   </Typography>
@@ -493,7 +493,7 @@ export default function InvoiceViewModal({ open, onClose, document }: InvoiceVie
                     </Typography>
                   )}
                 </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid item xs={12} md={4}>
                   <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                     Fatura Tarihi
                   </Typography>
@@ -501,13 +501,13 @@ export default function InvoiceViewModal({ open, onClose, document }: InvoiceVie
                     {formatDate(invoiceData.issueDate || document?.invoiceDate || '')}
                   </Typography>
                 </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid item xs={12} md={4}>
                   <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                     Fatura Tipi
                   </Typography>
                   <Chip label={invoiceData.invoiceType || invoiceData.profileId || '-'} size="small" />
                 </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid item xs={12} md={4}>
                   <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                     Para Birimi
                   </Typography>
@@ -562,7 +562,7 @@ export default function InvoiceViewModal({ open, onClose, document }: InvoiceVie
             {/* Toplamlar */}
             <Paper elevation={1} sx={{ p: 2 }}>
               <Grid container spacing={2}>
-                <Grid size={{ xs: 12, md: 6 }}>
+                <Grid item xs={12} md={6}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2" color="text.secondary">
                       Ara Toplam:

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Box, Card, Typography, Tabs, Tab, Button } from '@mui/material';
+import { Box, Typography, Tabs, Tab, Button } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { ArrowForward, DescriptionOutlined, PaymentOutlined } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
+import DashboardWidget from '../common/DashboardWidget';
 
 interface RecentTransactionsProps {
     invoices: Array<any>;
@@ -21,30 +22,31 @@ export default function RecentTransactions({ invoices, payments, loading }: Rece
     const invoiceColumns: GridColDef[] = [
         {
             field: 'unvan',
-            headerName: 'Cari',
+            headerName: 'Cari Ünvan',
             flex: 1,
             renderCell: (params) => (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <DescriptionOutlined sx={{ fontSize: 16, color: 'text.secondary' }} />
-                    <Typography variant="body2" fontWeight={500}>{params.value}</Typography>
+                    <DescriptionOutlined sx={{ fontSize: 14, color: 'text.secondary' }} />
+                    <Typography variant="caption" sx={{ fontWeight: 600 }}>{params.value}</Typography>
                 </Box>
             ),
         },
         {
             field: 'tarih',
             headerName: 'Tarih',
-            width: 100,
-            valueFormatter: (params) => {
-                if (!params.value) return '-';
-                return new Date(params.value).toLocaleDateString('tr-TR');
-            },
+            width: 90,
+            renderCell: (params) => (
+                <Typography variant="caption" color="text.secondary">
+                    {params.value ? new Date(params.value).toLocaleDateString('tr-TR') : '-'}
+                </Typography>
+            ),
         },
         {
             field: 'tutar',
             headerName: 'Tutar',
-            width: 120,
+            width: 110,
             renderCell: (params) => (
-                <Typography variant="body2" fontWeight={700}>
+                <Typography variant="caption" sx={{ fontWeight: 700 }}>
                     ₺{Number(params.value).toLocaleString('tr-TR')}
                 </Typography>
             ),
@@ -58,26 +60,33 @@ export default function RecentTransactions({ invoices, payments, loading }: Rece
             flex: 1,
             renderCell: (params) => (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <PaymentOutlined sx={{ fontSize: 16, color: 'text.secondary' }} />
-                    <Typography variant="body2" fontWeight={500}>{params.value || 'Kasa Hareketi'}</Typography>
+                    <PaymentOutlined sx={{ fontSize: 14, color: 'text.secondary' }} />
+                    <Typography variant="caption" sx={{ fontWeight: 600 }}>{params.value || 'Kasa Hareketi'}</Typography>
                 </Box>
             ),
         },
         {
             field: 'tarih',
             headerName: 'Tarih',
-            width: 100,
-            valueFormatter: (params) => {
-                if (!params.value) return '-';
-                return new Date(params.value).toLocaleDateString('tr-TR');
-            },
+            width: 90,
+            renderCell: (params) => (
+                <Typography variant="caption" color="text.secondary">
+                    {params.value ? new Date(params.value).toLocaleDateString('tr-TR') : '-'}
+                </Typography>
+            ),
         },
         {
             field: 'tutar',
             headerName: 'Tutar',
-            width: 120,
+            width: 110,
             renderCell: (params) => (
-                <Typography variant="body2" fontWeight={700} sx={{ color: params.row.tur === 'GIRIS' ? 'var(--chart-3)' : 'var(--destructive)' }}>
+                <Typography
+                    variant="caption"
+                    sx={{
+                        fontWeight: 700,
+                        color: params.row.tur === 'GIRIS' ? '#10b981' : '#ef4444'
+                    }}
+                >
                     {params.row.tur === 'GIRIS' ? '+' : '-'}₺{Number(params.value).toLocaleString('tr-TR')}
                 </Typography>
             ),
@@ -85,64 +94,72 @@ export default function RecentTransactions({ invoices, payments, loading }: Rece
     ];
 
     return (
-        <Card sx={{ height: '100%', p: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ p: 3, pb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Box
-                        sx={{
-                            width: 4,
-                            height: 24,
-                            borderRadius: '4px',
-                            bgcolor: 'var(--primary)',
-                        }}
-                    />
-                    <Box>
-                        <Typography variant="h6" sx={{ lineHeight: 1.2 }}>
-                            Son Hareketler
-                        </Typography>
-                    </Box>
-                </Box>
+        <DashboardWidget
+            title="Son Hareketler"
+            subtitle="En son kaydedilen fatura ve ödemeler"
+            height={360}
+            headerAction={
                 <Button
-                    endIcon={<ArrowForward />}
+                    endIcon={<ArrowForward sx={{ fontSize: 14 }} />}
                     size="small"
                     onClick={() => router.push(tabValue === 0 ? '/fatura' : '/kasa')}
-                    sx={{ color: 'text.secondary' }}
+                    sx={{
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        color: 'var(--primary)'
+                    }}
                 >
-                    Tümünü Gör
+                    TÜMÜ
                 </Button>
-            </Box>
-
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 3, mt: 2 }}>
-                <Tabs value={tabValue} onChange={handleTabChange}>
-                    <Tab label="Son Faturalar" />
-                    <Tab label="Son Ödemeler" />
+            }
+        >
+            <Box sx={{ borderBottom: '1px solid var(--border)', mx: -2.5, px: 2.5, mt: -2.5, mb: 1, display: 'flex' }}>
+                <Tabs
+                    value={tabValue}
+                    onChange={handleTabChange}
+                    sx={{
+                        minHeight: 36,
+                        '& .MuiTab-root': {
+                            minHeight: 36,
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            textTransform: 'none',
+                            px: 1.5
+                        }
+                    }}
+                >
+                    <Tab label="Faturalar" />
+                    <Tab label="Ödemeler" />
                 </Tabs>
             </Box>
 
-            <Box sx={{ flex: 1, width: '100%', minHeight: 300 }}>
-                {tabValue === 0 && (
-                    <DataGrid
-                        rows={invoices}
-                        columns={invoiceColumns}
-                        loading={loading}
-                        getRowId={(row) => row.id}
-                        hideFooter
-                        disableColumnMenu
-                        sx={{ border: 'none' }}
-                    />
-                )}
-                {tabValue === 1 && (
-                    <DataGrid
-                        rows={payments}
-                        columns={paymentColumns}
-                        loading={loading}
-                        getRowId={(row) => row.id}
-                        hideFooter
-                        disableColumnMenu
-                        sx={{ border: 'none' }}
-                    />
-                )}
+            <Box sx={{ height: 240 }}>
+                <DataGrid
+                    rows={tabValue === 0 ? invoices : payments}
+                    columns={tabValue === 0 ? invoiceColumns : paymentColumns}
+                    loading={loading}
+                    getRowId={(row) => row.id}
+                    hideFooter
+                    disableColumnMenu
+                    density="compact"
+                    sx={{
+                        border: 'none',
+                        '& .MuiDataGrid-columnHeaders': {
+                            bgcolor: 'transparent',
+                            borderBottom: '1px solid var(--border)',
+                            minHeight: '28px !important',
+                            maxHeight: '28px !important',
+                            fontSize: '0.65rem'
+                        },
+                        '& .MuiDataGrid-cell': {
+                            borderBottom: '1px solid var(--border)',
+                            px: 1
+                        },
+                        '& .MuiDataGrid-columnHeaderTitle': { fontWeight: 700 }
+                    }}
+                />
             </Box>
-        </Card>
+        </DashboardWidget>
     );
 }

@@ -251,7 +251,7 @@ export default function BirimSetleriPage() {
 
       <Grid container spacing={3}>
         {birimSetleri.map((birimSeti) => (
-          <Grid size={{ xs: 12, md: 6 }} key={birimSeti.id}>
+          <Grid item xs={12} md={6} key={birimSeti.id}>
             <Card elevation={2}>
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>

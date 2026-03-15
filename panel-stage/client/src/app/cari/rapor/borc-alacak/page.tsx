@@ -263,7 +263,7 @@ export default function DebtCreditReportPage() {
 
                 {/* Summary Cards */}
                 <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid size={{ xs: 12, md: 3 }}>
+                    <Grid item xs={12} md={3}>
                         <Card sx={{
                             boxShadow: 'var(--shadow-sm)',
                             border: '1px solid var(--border)',
@@ -286,7 +286,7 @@ export default function DebtCreditReportPage() {
                         </Card>
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 3 }}>
+                    <Grid item xs={12} md={3}>
                         <Card sx={{
                             boxShadow: 'var(--shadow-sm)',
                             border: '1px solid var(--border)',
@@ -309,7 +309,7 @@ export default function DebtCreditReportPage() {
                         </Card>
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 3 }}>
+                    <Grid item xs={12} md={3}>
                         <Card sx={{
                             boxShadow: 'var(--shadow-sm)',
                             border: '1px solid var(--border)',
@@ -335,7 +335,7 @@ export default function DebtCreditReportPage() {
                         </Card>
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 3 }}>
+                    <Grid item xs={12} md={3}>
                         <Card sx={{
                             boxShadow: 'var(--shadow-sm)',
                             border: '1px solid var(--border)',
@@ -362,7 +362,7 @@ export default function DebtCreditReportPage() {
                 {/* Filters & Search */}
                 <Paper sx={{ p: 1.5, mb: 3, borderRadius: 'var(--radius)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
                     <Grid container spacing={1.5} alignItems="center">
-                        <Grid size={{ xs: 12, md: 3.5 }}>
+                        <Grid item xs={12} md={3.5}>
                             <TextField
                                 fullWidth
                                 size="small"
@@ -374,7 +374,7 @@ export default function DebtCreditReportPage() {
                                 }}
                             />
                         </Grid>
-                        <Grid size={{ xs: 12, md: 2 }}>
+                        <Grid item xs={12} md={2}>
                             <FormControl fullWidth size="small">
                                 <InputLabel>Cari Tipi</InputLabel>
                                 <Select
@@ -388,7 +388,7 @@ export default function DebtCreditReportPage() {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid size={{ xs: 12, md: 2 }}>
+                        <Grid item xs={12} md={2}>
                             <FormControl fullWidth size="small">
                                 <InputLabel>Durum</InputLabel>
                                 <Select
@@ -403,7 +403,7 @@ export default function DebtCreditReportPage() {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid size={{ xs: 12, md: 2 }}>
+                        <Grid item xs={12} md={2}>
                             <FormControl fullWidth size="small">
                                 <InputLabel>Satış Elemanı</InputLabel>
                                 <Select
@@ -418,7 +418,7 @@ export default function DebtCreditReportPage() {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid size={{ xs: 12, md: 2.5 }} sx={{ display: 'flex', justifyContent: 'flex-end', ml: 'auto' }}>
+                        <Grid item xs={12} md={2.5} sx={{ display: 'flex', justifyContent: 'flex-end', ml: 'auto' }}>
                             <Button
                                 fullWidth
                                 variant="outlined"

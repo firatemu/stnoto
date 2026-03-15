@@ -116,7 +116,7 @@ export default function AmbarToplamlariPage() {
             </Box>
 
             <Grid container spacing={3}>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid item xs={12} md={4}>
                     <Card sx={{ bgcolor: 'var(--card)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-sm)' }}>
                         <CardContent>
                             <Typography variant="subtitle2" color="var(--muted-foreground)" gutterBottom>
@@ -179,7 +179,7 @@ export default function AmbarToplamlariPage() {
                     </Card>
                 </Grid>
 
-                <Grid size={{ xs: 12, md: 8 }}>
+                <Grid item xs={12} md={8}>
                     <TableContainer component={Paper} sx={{ bgcolor: 'var(--card)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-sm)' }}>
                         <Table>
                             <TableHead sx={{ bgcolor: 'var(--muted)' }}>

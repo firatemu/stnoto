@@ -118,36 +118,25 @@ const createPosTahsilat = async (hesapId: string, data: any) => {
 };
 
 // Validation Schema
-// Validation Schema - Base types for form inputs (always strings/numbers from UI)
+// Validation Schema - Use z.string() for input the then transform to number
 const hareketSchema = z.object({
     hareketTipi: z.enum(['GELEN', 'GIDEN']),
-    tutar: z.any().transform(val => Number(val)).pipe(z.number().positive('Tutar pozitif olmalı')),
+    tutar: z.coerce.number().positive('Tutar pozitif olmalı'),
     aciklama: z.string().optional(),
     referansNo: z.string().optional(),
     tarih: z.string().optional(),
 });
 
-type HareketFormValues = {
-    hareketTipi: 'GELEN' | 'GIDEN';
-    tutar: number;
-    aciklama?: string;
-    referansNo?: string;
-    tarih?: string;
-};
+type HareketFormValues = z.infer<typeof hareketSchema>;
 
 const posHareketSchema = z.object({
-    tutar: z.any().transform(val => Number(val)).pipe(z.number().positive('Tutar pozitif olmalı')),
+    tutar: z.coerce.number().positive('Tutar pozitif olmalı'),
     aciklama: z.string().optional(),
     referansNo: z.string().optional(),
     tarih: z.string().optional(),
 });
 
-type PosHareketFormValues = {
-    tutar: number;
-    aciklama?: string;
-    referansNo?: string;
-    tarih?: string;
-};
+type PosHareketFormValues = z.infer<typeof posHareketSchema>;
 
 export default function HesapDetayPage() {
     const router = useRouter();
@@ -663,7 +652,7 @@ export default function HesapDetayPage() {
                     <Skeleton variant="rectangular" height={60} sx={{ mb: 2 }} />
                     <Grid container spacing={3}>
                         {[1, 2, 3].map(i => (
-                            <Grid key={i} size={{ xs: 12, md: 4 }}>
+                            <Grid key={i} item xs={12} md={4}>
                                 <Skeleton variant="rectangular" height={100} />
                             </Grid>
                         ))}
@@ -837,7 +826,7 @@ export default function HesapDetayPage() {
 
                 {/* Summary Cards */}
                 <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid size={{ xs: 12, md: 4 }}>
+                    <Grid item xs={12} md={4}>
                         <Card sx={{
                             borderRadius: 'var(--radius-md)',
                             border: '1px solid var(--border)',
@@ -854,7 +843,7 @@ export default function HesapDetayPage() {
                         </Card>
                     </Grid>
                     {hesap.hesapTipi === 'POS' && hesap.komisyonOrani && (
-                        <Grid size={{ xs: 12, md: 4 }}>
+                        <Grid item xs={12} md={4}>
                             <Card sx={{
                                 borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--border)',
@@ -872,7 +861,7 @@ export default function HesapDetayPage() {
                         </Grid>
                     )}
                     {hesap.hesapTipi === 'KREDI' && hesap.krediLimiti && (
-                        <Grid size={{ xs: 12, md: 4 }}>
+                        <Grid item xs={12} md={4}>
                             <Card sx={{
                                 borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--border)',
@@ -892,7 +881,7 @@ export default function HesapDetayPage() {
                     {hesap.hesapTipi === 'FIRMA_KREDI_KARTI' && (
                         <>
                             {hesap.kartLimiti && (
-                                <Grid size={{ xs: 12, md: 4 }}>
+                                <Grid item xs={12} md={4}>
                                     <Card sx={{
                                         borderRadius: 'var(--radius-md)',
                                         border: '1px solid var(--border)',
@@ -909,7 +898,7 @@ export default function HesapDetayPage() {
                                     </Card>
                                 </Grid>
                             )}
-                            <Grid size={{ xs: 12, md: 4 }}>
+                            <Grid item xs={12} md={4}>
                                 <Card sx={{
                                     borderRadius: 'var(--radius-md)',
                                     border: '1px solid var(--border)',
@@ -1036,7 +1025,7 @@ export default function HesapDetayPage() {
                                 />
 
                                 <Grid container spacing={2}>
-                                    <Grid size={{ xs: 6 }}>
+                                    <Grid item xs={6}>
                                         <Controller
                                             name="referansNo"
                                             control={control}
@@ -1045,7 +1034,7 @@ export default function HesapDetayPage() {
                                             )}
                                         />
                                     </Grid>
-                                    <Grid size={{ xs: 6 }}>
+                                    <Grid item xs={6}>
                                         <Controller
                                             name="tarih"
                                             control={control}
@@ -1095,17 +1084,17 @@ export default function HesapDetayPage() {
                                 {posHesaplama && (
                                     <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
                                         <Grid container spacing={2}>
-                                            <Grid size={{ xs: 4 }}>
+                                            <Grid item xs={4}>
                                                 <Typography variant="caption" color="text.secondary">Brüt Tutar</Typography>
                                                 <Typography fontWeight="600">{formatCurrency(posTutar)}</Typography>
                                             </Grid>
-                                            <Grid size={{ xs: 4 }}>
+                                            <Grid item xs={4}>
                                                 <Typography variant="caption" color="text.secondary">Komisyon</Typography>
                                                 <Typography fontWeight="600" color="error.main">
                                                     -{formatCurrency(posHesaplama.komisyon)}
                                                 </Typography>
                                             </Grid>
-                                            <Grid size={{ xs: 4 }}>
+                                            <Grid item xs={4}>
                                                 <Typography variant="caption" color="text.secondary">Net Tutar</Typography>
                                                 <Typography fontWeight="bold" color="success.main">
                                                     {formatCurrency(posHesaplama.net)}
@@ -1124,7 +1113,7 @@ export default function HesapDetayPage() {
                                 />
 
                                 <Grid container spacing={2}>
-                                    <Grid size={{ xs: 6 }}>
+                                    <Grid item xs={6}>
                                         <Controller
                                             name="referansNo"
                                             control={posControl}
@@ -1133,7 +1122,7 @@ export default function HesapDetayPage() {
                                             )}
                                         />
                                     </Grid>
-                                    <Grid size={{ xs: 6 }}>
+                                    <Grid item xs={6}>
                                         <Controller
                                             name="tarih"
                                             control={posControl}

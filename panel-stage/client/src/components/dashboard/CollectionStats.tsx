@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-    Box,
-    Card,
-    Typography,
-    Grid,
-    Stack,
-    Skeleton,
-} from '@mui/material';
+import { Paper, Box, Typography, Chip } from '@mui/material';
 import {
     TrendingUpOutlined,
     TrendingDownOutlined,
@@ -27,7 +20,6 @@ interface CollectionStatsProps {
 
 export default function CollectionStats({ data, period, loading }: CollectionStatsProps) {
     const netBalance = data.currentMonthCollection - data.currentMonthPayment;
-    const prevNetBalance = data.previousMonthCollection - data.previousMonthPayment;
 
     const collectionGrowth = data.previousMonthCollection > 0
         ? ((data.currentMonthCollection - data.previousMonthCollection) / data.previousMonthCollection) * 100
@@ -39,106 +31,96 @@ export default function CollectionStats({ data, period, loading }: CollectionSta
 
     const periodLabel = period === 'daily' ? 'Güne' : period === 'weekly' ? 'Haftaya' : 'Aya';
 
-    const statsCards = [
+    const statsItems = [
         {
-            title: `${period === 'daily' ? 'Günlük' : period === 'weekly' ? 'Haftalık' : 'Aylık'} Tahsilat`,
-            value: loading ? '...' : `₺${data.currentMonthCollection.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+            title: `${period === 'daily' ? 'GÜNLÜK' : period === 'weekly' ? 'HAFTALIK' : 'AYLIK'} TAHSİLAT`,
+            value: data.currentMonthCollection,
             icon: TrendingUpOutlined,
             color: '#10b981',
             trend: collectionGrowth,
-            trendLabel: `Geçen ${periodLabel} göre`,
+            formatValue: (val: number) => `₺${val.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
         },
         {
-            title: `${period === 'daily' ? 'Günlük' : period === 'weekly' ? 'Haftalık' : 'Aylık'} Ödeme`,
-            value: loading ? '...' : `₺${data.currentMonthPayment.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+            title: `${period === 'daily' ? 'GÜNLÜK' : period === 'weekly' ? 'HAFTALIK' : 'AYLIK'} ÖDEME`,
+            value: data.currentMonthPayment,
             icon: TrendingDownOutlined,
             color: '#ef4444',
             trend: paymentGrowth,
-            trendLabel: `Geçen ${periodLabel} göre`,
+            formatValue: (val: number) => `₺${val.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
         },
         {
-            title: `Net Akış (${period === 'daily' ? 'Bugün' : period === 'weekly' ? 'Bu Hafta' : 'Bu Ay'})`,
-            value: loading ? '...' : `₺${netBalance.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+            title: `NET AKIŞ`,
+            value: netBalance,
             icon: AccountBalanceWalletOutlined,
-            color: netBalance >= 0 ? '#3b82f6' : '#f59e0b',
-            trend: prevNetBalance !== 0 ? ((netBalance - prevNetBalance) / Math.abs(prevNetBalance || 1)) * 100 : 0,
-            trendLabel: 'Fark',
+            color: netBalance >= 0 ? 'var(--primary)' : '#f59e0b',
+            formatValue: (val: number) => `₺${val.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
         },
         {
-            title: 'Tahsilat Oranı',
-            value: loading ? '...' : `%${((data.currentMonthCollection / (data.currentMonthCollection + data.currentMonthPayment || 1)) * 100).toFixed(1)}`,
+            title: 'TAHSİLAT ORANI',
+            value: (data.currentMonthCollection / (data.currentMonthCollection + data.currentMonthPayment || 1)) * 100,
             icon: ShowChartOutlined,
             color: '#8b5cf6',
-            trend: 0,
-            trendLabel: 'Operasyonel veri',
+            formatValue: (val: number) => `%${val.toFixed(1)}`,
         },
     ];
 
     return (
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-            {statsCards.map((card, index) => (
-                <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={index}>
-                    <Card
+        <Paper
+            variant="outlined"
+            sx={{
+                display: 'flex',
+                alignItems: 'center',
+                mb: 2,
+                borderRadius: 2,
+                overflow: 'hidden',
+                borderColor: 'var(--border)',
+                bgcolor: 'var(--card)'
+            }}
+        >
+            {statsItems.map((item, index) => (
+                <Box
+                    key={index}
+                    sx={{
+                        flex: '1 1 120px',
+                        p: 1.5,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        borderRight: index < statsItems.length - 1 ? '1px solid var(--border)' : 'none',
+                        '&:hover': { bgcolor: 'rgba(0,0,0,0.01)' }
+                    }}
+                >
+                    <Typography
+                        variant="caption"
                         sx={{
-                            p: 3,
-                            position: 'relative',
-                            overflow: 'hidden',
-                            borderRadius: '16px',
-                            border: '1px solid var(--border)',
-                            background: 'var(--card)',
-                            boxShadow: 'var(--shadow-sm)',
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            '&:hover': {
-                                transform: 'translateY(-6px)',
-                                boxShadow: '0 12px 24px -10px rgba(0,0,0,0.1)',
-                                borderColor: card.color,
-                            },
+                            fontSize: '0.7rem',
+                            color: 'text.secondary',
+                            fontWeight: 600,
+                            textTransform: 'uppercase',
+                            mb: 0.5,
+                            letterSpacing: '0.02em'
                         }}
                     >
-                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                            <Box
+                        {item.title}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="body2" sx={{ fontSize: '0.9rem', fontWeight: 700, color: item.color === '#ef4444' ? '#ef4444' : 'text.primary' }}>
+                            {loading ? '...' : item.formatValue(item.value)}
+                        </Typography>
+                        {item.trend !== undefined && item.trend !== 0 && !loading && (
+                            <Typography
+                                variant="caption"
                                 sx={{
-                                    bgcolor: `color-mix(in srgb, ${card.color} 12%, transparent)`,
-                                    color: card.color,
-                                    borderRadius: '12px',
-                                    p: 1.25,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
+                                    fontSize: '0.65rem',
+                                    fontWeight: 700,
+                                    color: item.trend >= 0 ? '#10b981' : '#ef4444'
                                 }}
                             >
-                                <card.icon fontSize="small" />
-                            </Box>
-                            {card.trend !== 0 && (
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 0.5,
-                                        color: card.trend >= 0 ? '#10b981' : '#ef4444',
-                                        bgcolor: card.trend >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                        px: 1,
-                                        py: 0.5,
-                                        borderRadius: '8px'
-                                    }}
-                                >
-                                    <Typography variant="caption" fontWeight={700}>
-                                        {card.trend >= 0 ? '+' : ''}{card.trend.toFixed(1)}%
-                                    </Typography>
-                                </Box>
-                            )}
-                        </Stack>
-
-                        <Typography variant="h4" fontWeight={800} sx={{ mb: 0.5, letterSpacing: '-0.04em' }}>
-                            {loading ? <Skeleton width={100} /> : card.value}
-                        </Typography>
-
-                        <Typography variant="body2" color="text.secondary" fontWeight={600} sx={{ opacity: 0.8 }}>
-                            {card.title}
-                        </Typography>
-                    </Card>
-                </Grid>
+                                {item.trend >= 0 ? '↑' : '↓'}
+                            </Typography>
+                        )}
+                    </Box>
+                </Box>
             ))}
-        </Grid>
+        </Paper>
     );
 }

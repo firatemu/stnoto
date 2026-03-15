@@ -27,8 +27,30 @@ import {
     Collapse,
     InputAdornment,
 } from '@mui/material';
-import { Add, Visibility, Edit, Delete, Close, Cancel, Print, Undo, MoreVert, Search, Refresh, TrendingUp, TrendingDown, FileDownload, ExpandLess, ExpandMore } from '@mui/icons-material';
-import { GridColDef, GridPaginationModel, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
+import {
+    Add,
+    Visibility,
+    Edit,
+    Delete,
+    Close,
+    Cancel,
+    Print,
+    Undo,
+    MoreVert,
+    Search,
+    Refresh,
+    TrendingUp,
+    TrendingDown,
+    FileDownload,
+    ExpandLess,
+    ExpandMore,
+    CalendarToday,
+    Today,
+    DateRange,
+    FilterList
+} from '@mui/icons-material';
+import { GridColDef, GridPaginationModel, GridSortModel, GridFilterModel, DataGrid } from '@mui/x-data-grid';
+import { trTR } from '@mui/x-data-grid/locales';
 import axios from '@/lib/axios';
 import MainLayout from '@/components/Layout/MainLayout';
 import { useRouter } from 'next/navigation';
@@ -129,6 +151,7 @@ export default function SatisFaturalariPage() {
     const [filterStartDate, setFilterStartDate] = useState('');
     const [filterEndDate, setFilterEndDate] = useState('');
     const [filterDurum, setFilterDurum] = useState<string[]>([]);
+    const [showDateChips, setShowDateChips] = useState(true);
 
     // Dialog states
     const [openAdd, setOpenAdd] = useState(false);
@@ -241,6 +264,30 @@ export default function SatisFaturalariPage() {
         setFilterEndDate('');
         setFilterDurum([]);
         setSearchTerm('');
+        setShowDateChips(true);
+    };
+
+    const handleQuickDateFilter = (range: 'today' | 'week' | 'month') => {
+        const now = new Date();
+        let start: Date;
+
+        switch (range) {
+            case 'today':
+                start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                break;
+            case 'week':
+                const dayOfWeek = now.getDay();
+                const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+                start = new Date(now.setDate(diff));
+                break;
+            case 'month':
+                start = new Date(now.getFullYear(), now.getMonth(), 1);
+                break;
+        }
+
+        setFilterStartDate(start.toISOString().split('T')[0]);
+        setFilterEndDate(now.toISOString().split('T')[0]);
+        setShowDateChips(false);
     };
 
     const handleExportExcel = async () => {
@@ -625,17 +672,17 @@ export default function SatisFaturalariPage() {
                         fontSize: '0.75rem',
                         fontWeight: 600,
                         bgcolor: params.value === 'KAPALI' ? 'rgba(22, 163, 74, 0.1)' :
-                               params.value === 'ONAYLANDI' ? 'rgba(59, 130, 246, 0.1)' :
-                               params.value === 'ACIK' ? 'rgba(249, 115, 22, 0.1)' :
-                               params.value === 'IPTAL' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(100, 116, 139, 0.1)',
+                            params.value === 'ONAYLANDI' ? 'rgba(59, 130, 246, 0.1)' :
+                                params.value === 'ACIK' ? 'rgba(249, 115, 22, 0.1)' :
+                                    params.value === 'IPTAL' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(100, 116, 139, 0.1)',
                         color: params.value === 'KAPALI' ? '#16a34a' :
-                               params.value === 'ONAYLANDI' ? '#3b82f6' :
-                               params.value === 'ACIK' ? '#f97316' :
-                               params.value === 'IPTAL' ? '#ef4444' : '#64748b',
+                            params.value === 'ONAYLANDI' ? '#3b82f6' :
+                                params.value === 'ACIK' ? '#f97316' :
+                                    params.value === 'IPTAL' ? '#ef4444' : '#64748b',
                         border: params.value === 'KAPALI' ? '1px solid rgba(22, 163, 74, 0.3)' :
-                               params.value === 'ONAYLANDI' ? '1px solid rgba(59, 130, 246, 0.3)' :
-                               params.value === 'ACIK' ? '1px solid rgba(249, 115, 22, 0.3)' :
-                               params.value === 'IPTAL' ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(100, 116, 139, 0.3)',
+                            params.value === 'ONAYLANDI' ? '1px solid rgba(59, 130, 246, 0.3)' :
+                                params.value === 'ACIK' ? '1px solid rgba(249, 115, 22, 0.3)' :
+                                    params.value === 'IPTAL' ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(100, 116, 139, 0.3)',
                         borderRadius: '4px',
                     }}
                 />
@@ -961,7 +1008,7 @@ export default function SatisFaturalariPage() {
         );
     };
 
-    const toplamTutar = faturalar.reduce((sum, f) => sum + (f.genelToplam || 0), 0);
+    const toplamTutar = faturalar.reduce((sum, f) => sum + Number(f.genelToplam || 0), 0);
 
     return (
         <MainLayout>
@@ -1054,7 +1101,7 @@ export default function SatisFaturalariPage() {
 
             {/* Integrated Toolbar */}
             <Paper variant="outlined" sx={{ mb: 2, borderRadius: 2 }}>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, p: 2 }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, p: 2, alignItems: 'center' }}>
                     <TextField
                         size="small"
                         placeholder="Fatura No veya Cari ile ara..."
@@ -1080,6 +1127,134 @@ export default function SatisFaturalariPage() {
                             ),
                         }}
                     />
+
+                    {/* Hızlı Tarih Çipleri */}
+                    {showDateChips && (
+                        <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
+                            <Chip
+                                label="Bugün"
+                                size="small"
+                                onClick={() => handleQuickDateFilter('today')}
+                                sx={{
+                                    fontSize: '0.75rem',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    '&:hover': { bgcolor: 'rgba(59, 130, 246, 0.1)' },
+                                }}
+                                icon={<Today fontSize="small" sx={{ fontSize: '0.75rem' }} />}
+                            />
+                            <Chip
+                                label="Bu Hafta"
+                                size="small"
+                                onClick={() => handleQuickDateFilter('week')}
+                                sx={{
+                                    fontSize: '0.75rem',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    '&:hover': { bgcolor: 'rgba(59, 130, 246, 0.1)' },
+                                }}
+                                icon={<DateRange fontSize="small" sx={{ fontSize: '0.75rem' }} />}
+                            />
+                            <Chip
+                                label="Bu Ay"
+                                size="small"
+                                onClick={() => handleQuickDateFilter('month')}
+                                sx={{
+                                    fontSize: '0.75rem',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    '&:hover': { bgcolor: 'rgba(59, 130, 246, 0.1)' },
+                                }}
+                                icon={<CalendarToday fontSize="small" sx={{ fontSize: '0.75rem' }} />}
+                            />
+                        </Box>
+                    )}
+
+                    {/* Durum Filtreleri */}
+                    <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
+                        <FilterList fontSize="small" sx={{ color: '#64748b', fontSize: 16 }} />
+                        <Chip
+                            label="Beklemede"
+                            size="small"
+                            clickable
+                            onClick={() => {
+                                setFilterDurum(prev =>
+                                    prev.includes('ACIK')
+                                        ? prev.filter(d => d !== 'ACIK')
+                                        : [...prev, 'ACIK']
+                                );
+                            }}
+                            sx={{
+                                fontSize: '0.75rem',
+                                borderRadius: '4px',
+                                bgcolor: filterDurum.includes('ACIK') ? 'rgba(249, 115, 22, 0.15)' : 'rgba(100, 116, 139, 0.05)',
+                                color: filterDurum.includes('ACIK') ? '#f97316' : '#64748b',
+                                border: filterDurum.includes('ACIK') ? '1px solid rgba(249, 115, 22, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)',
+                                cursor: 'pointer',
+                            }}
+                        />
+                        <Chip
+                            label="Onaylandı"
+                            size="small"
+                            clickable
+                            onClick={() => {
+                                setFilterDurum(prev =>
+                                    prev.includes('ONAYLANDI')
+                                        ? prev.filter(d => d !== 'ONAYLANDI')
+                                        : [...prev, 'ONAYLANDI']
+                                );
+                            }}
+                            sx={{
+                                fontSize: '0.75rem',
+                                borderRadius: '4px',
+                                bgcolor: filterDurum.includes('ONAYLANDI') ? 'rgba(59, 130, 246, 0.15)' : 'rgba(100, 116, 139, 0.05)',
+                                color: filterDurum.includes('ONAYLANDI') ? '#3b82f6' : '#64748b',
+                                border: filterDurum.includes('ONAYLANDI') ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)',
+                                cursor: 'pointer',
+                            }}
+                        />
+                        <Chip
+                            label="Kapalı"
+                            size="small"
+                            clickable
+                            onClick={() => {
+                                setFilterDurum(prev =>
+                                    prev.includes('KAPALI')
+                                        ? prev.filter(d => d !== 'KAPALI')
+                                        : [...prev, 'KAPALI']
+                                );
+                            }}
+                            sx={{
+                                fontSize: '0.75rem',
+                                borderRadius: '4px',
+                                bgcolor: filterDurum.includes('KAPALI') ? 'rgba(22, 163, 74, 0.15)' : 'rgba(100, 116, 139, 0.05)',
+                                color: filterDurum.includes('KAPALI') ? '#16a34a' : '#64748b',
+                                border: filterDurum.includes('KAPALI') ? '1px solid rgba(22, 163, 74, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)',
+                                cursor: 'pointer',
+                            }}
+                        />
+                        <Chip
+                            label="İptal"
+                            size="small"
+                            clickable
+                            onClick={() => {
+                                setFilterDurum(prev =>
+                                    prev.includes('IPTAL')
+                                        ? prev.filter(d => d !== 'IPTAL')
+                                        : [...prev, 'IPTAL']
+                                );
+                            }}
+                            sx={{
+                                fontSize: '0.75rem',
+                                borderRadius: '4px',
+                                bgcolor: filterDurum.includes('IPTAL') ? 'rgba(239, 68, 68, 0.15)' : 'rgba(100, 116, 139, 0.05)',
+                                color: filterDurum.includes('IPTAL') ? '#ef4444' : '#64748b',
+                                border: filterDurum.includes('IPTAL') ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(100, 116, 139, 0.2)',
+                                cursor: 'pointer',
+                            }}
+                        />
+                    </Box>
+
                     <Button
                         size="small"
                         variant="text"
@@ -1155,51 +1330,48 @@ export default function SatisFaturalariPage() {
                 borderBottomRightRadius: 2,
                 overflow: 'hidden',
             }}>
-                <Box sx={{ height: 850, width: '100%' }}>
-                    {React.createElement(require('@mui/x-data-grid').DataGrid, {
-                        rows: faturalar,
-                        columns,
-                        loading,
-                        rowCount,
-                        paginationModel,
-                        onPaginationModelChange: setPaginationModel,
-                        sortModel,
-                        onSortModelChange: setSortModel,
-                        filterModel,
-                        onFilterModelChange: setFilterModel,
-                        pageSizeOptions: [25, 50, 100],
-                        checkboxSelection: false,
-                        disableRowSelectionOnClick: true,
-                        localeText: require('@mui/x-data-grid/locales/trTR').components.MuiDataGrid.defaultProps.localeText,
-                        sx: {
-                            border: 'none',
-                            borderRadius: 0,
-                            '& .MuiDataGrid-columnHeaders': {
-                                bgcolor: '#f8fafc',
-                                borderBottom: '2px solid #e2e8f0',
-                                '& .MuiDataGrid-columnHeaderTitle': {
-                                    fontWeight: 700,
-                                    fontSize: '0.8rem',
-                                    color: '#475569',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.04em',
-                                },
-                            },
-                            '& .MuiDataGrid-row': {
-                                '&:hover': { bgcolor: '#f0fdf4' },
-                                '&:nth-of-type(even)': { bgcolor: '#fafafa' },
-                            },
-                            '& .MuiDataGrid-cell': {
-                                borderBottom: '1px solid #f1f5f9',
-                                fontSize: '0.875rem',
-                            },
-                            '& .MuiDataGrid-footerContainer': {
-                                borderTop: '1px solid #e2e8f0',
-                                bgcolor: '#f8fafc',
+                <DataGrid
+                    rows={faturalar}
+                    columns={columns}
+                    loading={loading}
+                    paginationModel={paginationModel}
+                    onPaginationModelChange={setPaginationModel}
+                    sortModel={sortModel}
+                    onSortModelChange={setSortModel}
+                    filterModel={filterModel}
+                    onFilterModelChange={setFilterModel}
+                    pageSizeOptions={[25, 50, 100]}
+                    checkboxSelection={false}
+                    disableRowSelectionOnClick={true}
+                    localeText={trTR.components.MuiDataGrid.defaultProps.localeText}
+                    sx={{
+                        border: 'none',
+                        borderRadius: 0,
+                        '& .MuiDataGrid-columnHeaders': {
+                            bgcolor: '#f8fafc',
+                            borderBottom: '2px solid #e2e8f0',
+                            '& .MuiDataGrid-columnHeaderTitle': {
+                                fontWeight: 700,
+                                fontSize: '0.8rem',
+                                color: '#475569',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.04em',
                             },
                         },
-                    })}
-                </Box>
+                        '& .MuiDataGrid-row': {
+                            '&:hover': { bgcolor: '#f0fdf4' },
+                            '&:nth-of-type(even)': { bgcolor: '#fafafa' },
+                        },
+                        '& .MuiDataGrid-cell': {
+                            borderBottom: '1px solid #f1f5f9',
+                            fontSize: '0.875rem',
+                        },
+                        '& .MuiDataGrid-footerContainer': {
+                            borderTop: '1px solid #e2e8f0',
+                            bgcolor: '#f8fafc',
+                        },
+                    }}
+                />
             </Paper>
 
             {/* Menu */}

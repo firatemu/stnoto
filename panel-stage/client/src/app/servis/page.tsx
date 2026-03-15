@@ -117,14 +117,14 @@ export default function ServisHubPage() {
       {!isTechnician && (
         <Grid container spacing={2} sx={{ mb: 4 }}>
           {statsLoading ? (
-            <Grid size={12}>
+            <Grid item xs={12}>
               <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
                 <CircularProgress size={28} />
               </Box>
             </Grid>
           ) : stats ? (
             <>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
                 <Card
                   sx={{
                     borderRadius: 'var(--radius)',
@@ -147,7 +147,7 @@ export default function ServisHubPage() {
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
                 <Card
                   sx={{
                     borderRadius: 'var(--radius)',
@@ -170,7 +170,7 @@ export default function ServisHubPage() {
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
                 <Card
                   sx={{
                     borderRadius: 'var(--radius)',
@@ -193,7 +193,7 @@ export default function ServisHubPage() {
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
                 <Card
                   sx={{
                     borderRadius: 'var(--radius)',
@@ -225,7 +225,7 @@ export default function ServisHubPage() {
         {visibleItems.map((item, index) => {
           const IconComponent = item.icon;
           return (
-            <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid key={index} item xs={12} sm={6} md={4}>
               <Card
                 sx={{
                   borderRadius: 'var(--radius)',

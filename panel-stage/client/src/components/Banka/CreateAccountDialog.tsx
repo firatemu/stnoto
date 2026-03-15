@@ -190,7 +190,7 @@ export default function CreateAccountDialog({ open, onClose, onSuccess, bankaId,
                         {/* IBAN and Account No for VADESIZ, POS, KREDI */}
                         {(hesapTipi === 'VADESIZ' || hesapTipi === 'POS' || hesapTipi === 'KREDI') && (
                             <Grid container spacing={2}>
-                                <Grid size={{ xs: 12 }}>
+                                <Grid item xs={12}>
                                     <Controller
                                         name="iban"
                                         control={control}
@@ -199,7 +199,7 @@ export default function CreateAccountDialog({ open, onClose, onSuccess, bankaId,
                                         )}
                                     />
                                 </Grid>
-                                <Grid size={{ xs: 12 }}>
+                                <Grid item xs={12}>
                                     <Controller
                                         name="hesapNo"
                                         control={control}
@@ -214,7 +214,7 @@ export default function CreateAccountDialog({ open, onClose, onSuccess, bankaId,
                         {/* POS: Commission Rate and Terminal No */}
                         {hesapTipi === 'POS' && (
                             <Grid container spacing={2}>
-                                <Grid size={{ xs: 6 }}>
+                                <Grid item xs={6}>
                                     <Controller
                                         name="komisyonOrani"
                                         control={control}
@@ -232,7 +232,7 @@ export default function CreateAccountDialog({ open, onClose, onSuccess, bankaId,
                                         )}
                                     />
                                 </Grid>
-                                <Grid size={{ xs: 6 }}>
+                                <Grid item xs={6}>
                                     <Controller
                                         name="terminalNo"
                                         control={control}
@@ -277,7 +277,7 @@ export default function CreateAccountDialog({ open, onClose, onSuccess, bankaId,
                                     )}
                                 />
                                 <Grid container spacing={2}>
-                                    <Grid size={{ xs: 6 }}>
+                                    <Grid item xs={6}>
                                         <Controller
                                             name="hesapKesimGunu"
                                             control={control}
@@ -295,7 +295,7 @@ export default function CreateAccountDialog({ open, onClose, onSuccess, bankaId,
                                             )}
                                         />
                                     </Grid>
-                                    <Grid size={{ xs: 6 }}>
+                                    <Grid item xs={6}>
                                         <Controller
                                             name="sonOdemeGunu"
                                             control={control}

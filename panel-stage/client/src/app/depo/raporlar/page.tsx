@@ -249,7 +249,7 @@ export default function DepoRaporlarPage() {
             </Typography>
 
             <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid item xs={12} md={6}>
                 <Autocomplete
                   fullWidth
                   options={locations}
@@ -280,7 +280,7 @@ export default function DepoRaporlarPage() {
                   }}
                 />
               </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid item xs={12} md={6}>
                 {stockByLocation && (
                   <Card sx={{ bgcolor: '#e3f2fd' }}>
                     <CardContent>
@@ -379,7 +379,7 @@ export default function DepoRaporlarPage() {
             </Typography>
 
             <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid item xs={12} md={6}>
                 <Autocomplete
                   fullWidth
                   options={products}
@@ -410,7 +410,7 @@ export default function DepoRaporlarPage() {
                   }}
                 />
               </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid item xs={12} md={6}>
                 {locationsByProduct && (
                   <Card sx={{ bgcolor: '#e8f5e9' }}>
                     <CardContent>

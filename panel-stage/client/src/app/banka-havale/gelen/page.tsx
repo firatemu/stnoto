@@ -168,7 +168,7 @@ const HavaleDialog = memo(({
       <DialogContent>
         <Grid container spacing={2} sx={{ mt: 1 }}>
           {/* Tarih - En başta */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <TextField
               fullWidth
               required
@@ -181,7 +181,7 @@ const HavaleDialog = memo(({
           </Grid>
 
           {/* Banka Hesabı - Banka adı ve Hesap No / IBAN göster */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <Autocomplete
               fullWidth
               options={bankaHesaplari}
@@ -227,7 +227,7 @@ const HavaleDialog = memo(({
           </Grid>
 
           {/* Cari */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <Autocomplete
               fullWidth
               options={cariler}
@@ -263,7 +263,7 @@ const HavaleDialog = memo(({
           </Grid>
 
           {/* Tutar */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <TextField
               fullWidth
               required
@@ -289,7 +289,7 @@ const HavaleDialog = memo(({
           </Grid>
 
           {/* Referans No */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <TextField
               fullWidth
               label="Referans No"
@@ -300,7 +300,7 @@ const HavaleDialog = memo(({
           </Grid>
 
           {/* Açıklama */}
-          <Grid size={{ xs: 12 }}>
+          <Grid item xs={12}>
             <TextField
               fullWidth
               multiline
@@ -688,7 +688,7 @@ export default function GelenHavalePage() {
         {/* İstatistikler */}
         {stats && (
           <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid item xs={12} md={4}>
               <Card sx={{
                 bgcolor: 'color-mix(in srgb, var(--chart-2) 15%, transparent)',
                 borderLeft: '4px solid var(--chart-2)',
@@ -719,7 +719,7 @@ export default function GelenHavalePage() {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid item xs={12} md={4}>
               <Card sx={{
                 bgcolor: 'color-mix(in srgb, var(--chart-2) 15%, transparent)',
                 borderLeft: '4px solid var(--chart-2)',
@@ -750,7 +750,7 @@ export default function GelenHavalePage() {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid item xs={12} md={4}>
               <Card sx={{
                 bgcolor: 'color-mix(in srgb, var(--chart-2) 15%, transparent)',
                 borderLeft: '4px solid var(--chart-2)',
@@ -807,7 +807,7 @@ export default function GelenHavalePage() {
             Filtreler
           </Typography>
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <FormControl fullWidth size="small">
                 <InputLabel>Banka Hesabı</InputLabel>
                 <Select
@@ -824,7 +824,7 @@ export default function GelenHavalePage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <FormControl fullWidth size="small">
                 <InputLabel>Cari</InputLabel>
                 <Select
@@ -841,7 +841,7 @@ export default function GelenHavalePage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
                 size="small"
@@ -852,7 +852,7 @@ export default function GelenHavalePage() {
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
                 size="small"
@@ -1094,7 +1094,7 @@ export default function GelenHavalePage() {
             {selectedHavale && (
               <Box sx={{ mt: 2 }}>
                 <Grid container spacing={2}>
-                  <Grid size={{ xs: 6 }}>
+                  <Grid item xs={6}>
                     <Typography variant="caption" color="textSecondary">Banka Hesabı</Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 0.5 }}>
                       <Box sx={{
@@ -1126,7 +1126,7 @@ export default function GelenHavalePage() {
                       </Box>
                     </Box>
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
+                  <Grid item xs={6}>
                     <Typography variant="caption" color="textSecondary">Cari</Typography>
                     <Typography variant="body1" fontWeight={500}>
                       {selectedHavale.cari.unvan}
@@ -1135,39 +1135,39 @@ export default function GelenHavalePage() {
                       {selectedHavale.cari.cariKodu}
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
+                  <Grid item xs={6}>
                     <Typography variant="caption" color="textSecondary">Tutar</Typography>
                     <Typography variant="h5" sx={{ color: 'var(--chart-2)', fontWeight: 700 }}>
                       {formatCurrency(selectedHavale.tutar)}
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
+                  <Grid item xs={6}>
                     <Typography variant="caption" color="textSecondary">Tarih</Typography>
                     <Typography variant="body1" fontWeight={500}>
                       {formatDate(selectedHavale.tarih)}
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 6 }}>
+                  <Grid item xs={6}>
                     <Typography variant="caption" color="textSecondary">Referans No</Typography>
                     <Typography variant="body1">{selectedHavale.referansNo || '-'}</Typography>
                   </Grid>
-                  <Grid size={{ xs: 12 }}>
+                  <Grid item xs={12}>
                     <Typography variant="caption" color="textSecondary">Açıklama</Typography>
                     <Typography variant="body1">{selectedHavale.aciklama || '-'}</Typography>
                   </Grid>
-                  <Grid size={{ xs: 12 }}>
+                  <Grid item xs={12}>
                     <Box sx={{ bgcolor: '#f9fafb', p: 2, borderRadius: 1, mt: 2 }}>
                       <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
                         Kayıt Bilgileri
                       </Typography>
                       <Grid container spacing={2}>
-                        <Grid size={{ xs: 6 }}>
+                        <Grid item xs={6}>
                           <Typography variant="caption" color="textSecondary">Oluşturma Tarihi</Typography>
                           <Typography variant="body2" fontWeight={500}>
                             {formatDate(selectedHavale.createdAt)}
                           </Typography>
                         </Grid>
-                        <Grid size={{ xs: 6 }}>
+                        <Grid item xs={6}>
                           <Typography variant="caption" color="textSecondary">Güncelleme Tarihi</Typography>
                           <Typography variant="body2" fontWeight={500}>
                             {formatDate(selectedHavale.updatedAt)}
@@ -1182,7 +1182,7 @@ export default function GelenHavalePage() {
                           )}
                         </Grid>
                         {selectedHavale.createdByUser && (
-                          <Grid size={{ xs: 6 }}>
+                          <Grid item xs={6}>
                             <Typography variant="caption" color="textSecondary">Oluşturan Kullanıcı</Typography>
                             <Typography variant="body2">
                               {selectedHavale.createdByUser.fullName}
@@ -1193,7 +1193,7 @@ export default function GelenHavalePage() {
                           </Grid>
                         )}
                         {selectedHavale.updatedByUser && (
-                          <Grid size={{ xs: 6 }}>
+                          <Grid item xs={6}>
                             <Typography variant="caption" color="textSecondary">Güncelleyen Kullanıcı</Typography>
                             <Typography variant="body2">
                               {selectedHavale.updatedByUser.fullName}

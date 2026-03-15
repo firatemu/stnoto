@@ -203,7 +203,7 @@ export default function MalzemeHareketleriPage() {
 
       {/* İstatistik Kartları */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ bgcolor: 'color-mix(in srgb, var(--chart-3) 15%, transparent)', borderLeft: '4px solid var(--chart-3)' }}>
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -225,7 +225,7 @@ export default function MalzemeHareketleriPage() {
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ bgcolor: 'color-mix(in srgb, var(--destructive) 15%, transparent)', borderLeft: '4px solid var(--destructive)' }}>
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -247,7 +247,7 @@ export default function MalzemeHareketleriPage() {
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ bgcolor: 'color-mix(in srgb, var(--chart-1) 15%, transparent)', borderLeft: '4px solid var(--chart-1)' }}>
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -269,7 +269,7 @@ export default function MalzemeHareketleriPage() {
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ bgcolor: 'color-mix(in srgb, var(--chart-2) 15%, transparent)', borderLeft: '4px solid var(--chart-2)' }}>
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -295,7 +295,7 @@ export default function MalzemeHareketleriPage() {
       {/* Filtreler */}
       <Paper sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <Autocomplete
               fullWidth
               options={stoklar}
@@ -346,7 +346,7 @@ export default function MalzemeHareketleriPage() {
             />
           </Grid>
 
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <FormControl fullWidth>
               <InputLabel>Hareket Tipi</InputLabel>
               <Select

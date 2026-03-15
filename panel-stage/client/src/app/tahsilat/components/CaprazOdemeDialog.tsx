@@ -23,7 +23,7 @@ interface CaprazOdemeDialogProps {
     onClose: () => void;
     onSubmit: () => void;
     formData: CaprazOdemeFormData;
-    setFormData: (data: CaprazOdemeFormData) => void;
+    setFormData: React.Dispatch<React.SetStateAction<CaprazOdemeFormData>>;
     cariler: Cari[];
     loading: boolean;
     submitting: boolean;
@@ -81,7 +81,7 @@ const CaprazOdemeDialog: React.FC<CaprazOdemeDialogProps> = ({
             <DialogContent sx={{ mt: 3 }}>
                 <Grid container spacing={3}>
                     {/* Bilgilendirme */}
-                    <Grid size={12}>
+                    <Grid item xs={12}>
                         <Alert
                             severity="info"
                             icon={<SwapHoriz fontSize="inherit" />}
@@ -102,7 +102,7 @@ const CaprazOdemeDialog: React.FC<CaprazOdemeDialogProps> = ({
                     </Grid>
 
                     {/* Cari Seçimleri */}
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <Autocomplete
                             options={Array.isArray(cariler) ? cariler : []}
                             getOptionLabel={(option) => `${option.cariKodu} - ${option.unvan}`}
@@ -134,7 +134,7 @@ const CaprazOdemeDialog: React.FC<CaprazOdemeDialogProps> = ({
                         />
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <Autocomplete
                             options={Array.isArray(cariler) ? cariler.filter(c => c.id !== formData.tahsilatCariId) : []}
                             getOptionLabel={(option) => `${option.cariKodu} - ${option.unvan}`}
@@ -167,7 +167,7 @@ const CaprazOdemeDialog: React.FC<CaprazOdemeDialogProps> = ({
                     </Grid>
 
                     {/* Tutar ve Tarih */}
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             label="İşlem Tutarı"
@@ -182,7 +182,7 @@ const CaprazOdemeDialog: React.FC<CaprazOdemeDialogProps> = ({
                         />
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             label="İşlem Tarihi"
@@ -198,7 +198,7 @@ const CaprazOdemeDialog: React.FC<CaprazOdemeDialogProps> = ({
                     </Grid>
 
                     {/* Açıklama */}
-                    <Grid size={12}>
+                    <Grid item xs={12}>
                         <TextField
                             fullWidth
                             label="Açıklama"
@@ -215,7 +215,7 @@ const CaprazOdemeDialog: React.FC<CaprazOdemeDialogProps> = ({
 
                     {/* Hata Mesajları */}
                     {carilerError && (
-                        <Grid size={12}>
+                        <Grid item xs={12}>
                             <Alert severity="error">Cariler yüklenirken bir hata oluştu.</Alert>
                         </Grid>
                     )}

@@ -43,7 +43,6 @@ import {
     PieChart,
     Pie,
     Cell,
-    ResponsiveContainer,
     Tooltip as RechartsTooltip,
     Legend,
     BarChart,
@@ -51,8 +50,8 @@ import {
     XAxis,
     YAxis,
     CartesianGrid,
-    Label,
 } from 'recharts';
+import { ChartContainer } from '@/components/common';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -149,7 +148,7 @@ const VehicleFormDialog = memo(({
             </DialogTitle>
             <DialogContent sx={{ bgcolor: 'var(--background)' }}>
                 <Grid container spacing={2} sx={{ mt: 1 }}>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             required
@@ -159,7 +158,7 @@ const VehicleFormDialog = memo(({
                             onChange={(e) => onFormChange('plaka', e.target.value)}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             required
@@ -169,7 +168,7 @@ const VehicleFormDialog = memo(({
                             onChange={(e) => onFormChange('marka', e.target.value)}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             required
@@ -179,7 +178,7 @@ const VehicleFormDialog = memo(({
                             onChange={(e) => onFormChange('model', e.target.value)}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             type="number"
@@ -189,7 +188,7 @@ const VehicleFormDialog = memo(({
                             onChange={(e) => onFormChange('yil', e.target.value ? parseInt(e.target.value, 10) : '')}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             className="form-control-textfield"
@@ -198,7 +197,7 @@ const VehicleFormDialog = memo(({
                             onChange={(e) => onFormChange('saseno', e.target.value)}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             className="form-control-textfield"
@@ -207,7 +206,7 @@ const VehicleFormDialog = memo(({
                             onChange={(e) => onFormChange('motorNo', e.target.value)}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             type="date"
@@ -218,7 +217,7 @@ const VehicleFormDialog = memo(({
                             InputLabelProps={{ shrink: true }}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             className="form-control-textfield"
@@ -227,7 +226,7 @@ const VehicleFormDialog = memo(({
                             onChange={(e) => onFormChange('aracTipi', e.target.value)}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             className="form-control-textfield"
@@ -236,7 +235,7 @@ const VehicleFormDialog = memo(({
                             onChange={(e) => onFormChange('yakitTipi', e.target.value)}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <FormControl fullWidth className="form-control-select">
                             <InputLabel>Zimmetli Personel</InputLabel>
                             <Select
@@ -255,7 +254,7 @@ const VehicleFormDialog = memo(({
                             </Select>
                         </FormControl>
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <FormControlLabel
                             control={
                                 <Switch
@@ -268,7 +267,7 @@ const VehicleFormDialog = memo(({
                             sx={{ color: 'var(--foreground)', ml: 1, mt: 1 }}
                         />
                     </Grid>
-                    <Grid size={12}>
+                    <Grid item xs={12}>
                         <TextField
                             fullWidth
                             label="Notlar"
@@ -804,7 +803,7 @@ export default function SirketAraclariPage() {
 
                 {/* Dashboard Section */}
                 <Grid container spacing={3} sx={{ mb: 4 }}>
-                    <Grid size={{ xs: 12, md: 4 }}>
+                    <Grid item xs={12} md={4}>
                         <Card sx={{
                             p: 3,
                             height: '100%',
@@ -834,7 +833,7 @@ export default function SirketAraclariPage() {
                         </Card>
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 4 }}>
+                    <Grid item xs={12} md={4}>
                         <Card sx={{
                             p: 2,
                             height: '100%',
@@ -846,40 +845,38 @@ export default function SirketAraclariPage() {
                             <Typography variant="subtitle2" sx={{ p: 1, color: 'var(--foreground)', fontWeight: 700 }}>
                                 Masraf Dağılımı
                             </Typography>
-                            <Box sx={{ height: 200, width: '100%' }}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={dashboardData.categoryChartData}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={60}
-                                            outerRadius={80}
-                                            paddingAngle={5}
-                                            dataKey="value"
-                                        >
-                                            {dashboardData.categoryChartData.map((_: any, index: number) => (
-                                                <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                                            ))}
-                                        </Pie>
-                                        <RechartsTooltip
-                                            formatter={(value: number) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value)}
-                                            contentStyle={{ borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--card)' }}
-                                        />
-                                        <Legend
-                                            layout="vertical"
-                                            align="right"
-                                            verticalAlign="middle"
-                                            iconType="circle"
-                                            wrapperStyle={{ fontSize: '12px', paddingLeft: '20px' }}
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </Box>
+                            <ChartContainer height={200}>
+                                <PieChart>
+                                    <Pie
+                                        data={dashboardData.categoryChartData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {dashboardData.categoryChartData.map((_: any, index: number) => (
+                                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <RechartsTooltip
+                                        formatter={(value: number) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value)}
+                                        contentStyle={{ borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--card)' }}
+                                    />
+                                    <Legend
+                                        layout="vertical"
+                                        align="right"
+                                        verticalAlign="middle"
+                                        iconType="circle"
+                                        wrapperStyle={{ fontSize: '12px', paddingLeft: '20px' }}
+                                    />
+                                </PieChart>
+                            </ChartContainer>
                         </Card>
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 4 }}>
+                    <Grid item xs={12} md={4}>
                         <Card sx={{
                             p: 2,
                             height: '100%',
@@ -891,27 +888,25 @@ export default function SirketAraclariPage() {
                             <Typography variant="subtitle2" sx={{ p: 1, color: 'var(--foreground)', fontWeight: 700 }}>
                                 En Masraflı Araçlar
                             </Typography>
-                            <Box sx={{ height: 200, width: '100%' }}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={dashboardData.vehicleChartData} layout="vertical">
-                                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
-                                        <XAxis type="number" hide />
-                                        <YAxis
-                                            dataKey="name"
-                                            type="category"
-                                            width={80}
-                                            axisLine={false}
-                                            tickLine={false}
-                                            tick={{ fontSize: 11, fontWeight: 600, fill: 'var(--foreground)' }}
-                                        />
-                                        <RechartsTooltip
-                                            formatter={(value: number) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value)}
-                                            contentStyle={{ borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--card)' }}
-                                        />
-                                        <Bar dataKey="value" fill="var(--primary)" radius={[0, 4, 4, 0]} barSize={20} />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </Box>
+                            <ChartContainer height={200}>
+                                <BarChart data={dashboardData.vehicleChartData} layout="vertical">
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
+                                    <XAxis type="number" hide />
+                                    <YAxis
+                                        dataKey="name"
+                                        type="category"
+                                        width={80}
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fontSize: 11, fontWeight: 600, fill: 'var(--foreground)' }}
+                                    />
+                                    <RechartsTooltip
+                                        formatter={(value: number) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value)}
+                                        contentStyle={{ borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--card)' }}
+                                    />
+                                    <Bar dataKey="value" fill="var(--primary)" radius={[0, 4, 4, 0]} barSize={20} />
+                                </BarChart>
+                            </ChartContainer>
                         </Card>
                     </Grid>
                 </Grid>

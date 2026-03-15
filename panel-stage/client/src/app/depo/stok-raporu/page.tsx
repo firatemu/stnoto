@@ -173,7 +173,7 @@ export default function AmbarStokRaporuPage() {
             Ambar Stok Raporu
           </Typography>
           <Button
-            variant="outline"
+            variant="outlined"
             startIcon={<Download />}
             onClick={handleExport}
             sx={{
@@ -189,7 +189,7 @@ export default function AmbarStokRaporuPage() {
         <Card sx={{ bgcolor: 'var(--card)', mb: 3, borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-sm)' }}>
           <CardContent>
             <Grid container spacing={3} alignItems="center">
-              <Grid size={{ xs: 12, md: 4 }}>
+              <Grid item xs={12} md={4}>
                 <TextField
                   fullWidth
                   placeholder="Ürün adı veya kodu ile ara..."
@@ -201,7 +201,7 @@ export default function AmbarStokRaporuPage() {
                   sx={{ '& .MuiInputBase-root': { borderRadius: 'var(--radius)' } }}
                 />
               </Grid>
-              <Grid size={{ xs: 12, md: 3 }}>
+              <Grid item xs={12} md={3}>
                 <TextField
                   fullWidth
                   type="date"
@@ -215,7 +215,7 @@ export default function AmbarStokRaporuPage() {
                   sx={{ '& .MuiInputBase-root': { borderRadius: 'var(--radius)' } }}
                 />
               </Grid>
-              <Grid size={{ xs: 12, md: 5 }}>
+              <Grid item xs={12} md={5}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'flex-end' }}>
                   <Box sx={{ textAlign: 'right' }}>
                     <Typography variant="caption" color="var(--muted-foreground)" display="block">

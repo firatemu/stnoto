@@ -26,10 +26,10 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
   Cell,
 } from 'recharts';
 import axios from '@/lib/axios';
+import { ChartContainer } from '@/components/common';
 
 type ServisStats = {
   workOrders?: {
@@ -85,12 +85,12 @@ export default function ServisRaporlarPage() {
 
   const chartData = stats?.workOrders?.byStatus
     ? Object.entries(stats.workOrders.byStatus)
-        .filter(([, v]) => v > 0)
-        .map(([status, count]) => ({
-          name: STATUS_LABELS[status] ?? status,
-          count,
-          fill: STATUS_COLORS[status] ?? 'var(--primary)',
-        }))
+      .filter(([, v]) => v > 0)
+      .map(([status, count]) => ({
+        name: STATUS_LABELS[status] ?? status,
+        count,
+        fill: STATUS_COLORS[status] ?? 'var(--primary)',
+      }))
     : [];
 
   if (loading) {
@@ -108,7 +108,7 @@ export default function ServisRaporlarPage() {
       </Typography>
 
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
             <CardContent sx={{ py: 2, px: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -125,7 +125,7 @@ export default function ServisRaporlarPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
             <CardContent sx={{ py: 2, px: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -142,7 +142,7 @@ export default function ServisRaporlarPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
             <CardContent sx={{ py: 2, px: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -159,7 +159,7 @@ export default function ServisRaporlarPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
             <CardContent sx={{ py: 2, px: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -188,7 +188,7 @@ export default function ServisRaporlarPage() {
           </Typography>
         ) : (
           <Box sx={{ height: 280 }}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ChartContainer height={280}>
               <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 80, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis type="number" tick={{ fill: 'var(--muted-foreground)' }} />
@@ -207,13 +207,13 @@ export default function ServisRaporlarPage() {
                   ))}
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </Box>
         )}
       </Paper>
 
       <Grid container spacing={2} sx={{ mt: 2 }}>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2, borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
             <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
               Durum Özeti
@@ -256,7 +256,7 @@ export default function ServisRaporlarPage() {
             )}
           </Paper>
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid item xs={12} md={6}>
           <Paper sx={{ p: 2, borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
             <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
               Gelir Özeti

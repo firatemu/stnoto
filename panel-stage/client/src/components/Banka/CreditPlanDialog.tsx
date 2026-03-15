@@ -463,19 +463,19 @@ export default function CreditPlanDialog({ open, onClose, onUpdate, kredi }: Cre
             <DialogContent sx={{ p: 3, mt: 1 }}>
                 {/* Summary Header Cards */}
                 <Grid container spacing={2} sx={{ mb: 4 }}>
-                    <Grid size={{ xs: 12, md: 4 }}>
+                    <Grid item xs={12} md={4}>
                         <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
                             <Typography variant="caption" color="text.secondary" fontWeight="600">ANA PARA</Typography>
                             <Typography variant="h6" fontWeight="700" color="primary">{formatCurrency(kredi.tutar)}</Typography>
                         </Paper>
                     </Grid>
-                    <Grid size={{ xs: 12, md: 4 }}>
+                    <Grid item xs={12} md={4}>
                         <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
                             <Typography variant="caption" color="text.secondary" fontWeight="600">PLANLANAN TOPLAM</Typography>
                             <Typography variant="h6" fontWeight="700" color="success.main">{formatCurrency(totalPlanned)}</Typography>
                         </Paper>
                     </Grid>
-                    <Grid size={{ xs: 12, md: 4 }}>
+                    <Grid item xs={12} md={4}>
                         <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider', bgcolor: alpha('#f59e0b', 0.05) }}>
                             <Typography variant="caption" color="text.secondary" fontWeight="600">FAİZ YÜKÜ</Typography>
                             <Typography variant="h6" fontWeight="700" color="warning.main">
@@ -512,7 +512,7 @@ export default function CreditPlanDialog({ open, onClose, onUpdate, kredi }: Cre
                     {isAdding && (
                         <Paper sx={{ p: 2, border: '2px dashed', borderColor: 'primary.main', bgcolor: alpha('#2563eb', 0.02) }}>
                             <Grid container spacing={2} alignItems="center">
-                                <Grid size={{ xs: 12, sm: 5 }}>
+                                <Grid item xs={12} sm={5}>
                                     <TextField
                                         label="Vade Tarihi"
                                         type="date"
@@ -523,7 +523,7 @@ export default function CreditPlanDialog({ open, onClose, onUpdate, kredi }: Cre
                                         onChange={(e) => setEditValues({ ...editValues, vadeTarihi: e.target.value })}
                                     />
                                 </Grid>
-                                <Grid size={{ xs: 12, sm: 4 }}>
+                                <Grid item xs={12} sm={4}>
                                     <TextField
                                         label="Taksit Tutarı"
                                         type="number"
@@ -533,7 +533,7 @@ export default function CreditPlanDialog({ open, onClose, onUpdate, kredi }: Cre
                                         onChange={(e) => setEditValues({ ...editValues, tutar: e.target.value })}
                                     />
                                 </Grid>
-                                <Grid size={{ xs: 12, sm: 3 }} sx={{ display: 'flex', gap: 1 }}>
+                                <Grid item xs={12} sm={3} sx={{ display: 'flex', gap: 1 }}>
                                     <Button fullWidth variant="contained" color="primary" onClick={handleAdd}>Ekle</Button>
                                     <Button fullWidth variant="outlined" color="inherit" onClick={() => setIsAdding(false)}>İptal</Button>
                                 </Grid>
@@ -560,12 +560,12 @@ export default function CreditPlanDialog({ open, onClose, onUpdate, kredi }: Cre
                             }}
                         >
                             <Grid container spacing={2} alignItems="center">
-                                <Grid size={{ xs: 1 }}>
+                                <Grid item xs={1}>
                                     <Typography variant="h6" color="text.secondary" fontWeight="800" sx={{ opacity: 0.3 }}>
                                         {index + 1}
                                     </Typography>
                                 </Grid>
-                                <Grid size={{ xs: 11, sm: 4 }}>
+                                <Grid item xs={11} sm={4}>
                                     {editingId === plan.id ? (
                                         <TextField
                                             type="date"
@@ -581,7 +581,7 @@ export default function CreditPlanDialog({ open, onClose, onUpdate, kredi }: Cre
                                         </Box>
                                     )}
                                 </Grid>
-                                <Grid size={{ xs: 6, sm: 3 }}>
+                                <Grid item xs={6} sm={3}>
                                     {editingId === plan.id ? (
                                         <TextField
                                             type="number"
@@ -594,7 +594,7 @@ export default function CreditPlanDialog({ open, onClose, onUpdate, kredi }: Cre
                                         <Typography fontWeight="700" color="primary">{formatCurrency(plan.tutar)}</Typography>
                                     )}
                                 </Grid>
-                                <Grid size={{ xs: 6, sm: 2 }}>
+                                <Grid item xs={6} sm={2}>
                                     <Chip
                                         label={plan.durum === 'ODENDI' ? 'Ödendi' : 'Bekliyor'}
                                         size="small"
@@ -603,7 +603,7 @@ export default function CreditPlanDialog({ open, onClose, onUpdate, kredi }: Cre
                                         sx={{ borderRadius: 1.5, fontWeight: 700, fontSize: '0.7rem' }}
                                     />
                                 </Grid>
-                                <Grid size={{ xs: 12, sm: 2 }} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                                <Grid item xs={12} sm={2} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                                     {plan.durum !== 'ODENDI' && (
                                         editingId === plan.id ? (
                                             <>

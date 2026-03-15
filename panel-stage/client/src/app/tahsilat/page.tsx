@@ -37,6 +37,7 @@ import {
   Pagination,
   ToggleButton,
   ToggleButtonGroup,
+  alpha,
 } from '@mui/material';
 import {
   Add,
@@ -81,6 +82,9 @@ import MainLayout from '@/components/Layout/MainLayout';
 import axios from '@/lib/axios';
 import CaprazOdemeDialog from './components/CaprazOdemeDialog';
 import TahsilatFormDialog from './components/TahsilatFormDialog';
+import PremiumStatCard from './components/PremiumStatCard';
+import PremiumWidget from './components/PremiumWidget';
+import { ChartContainer } from '@/components/common';
 import { TahsilatFormData, CaprazOdemeFormData, Cari, Kasa, BankaHesap, SatisElemani } from './types';
 
 
@@ -178,7 +182,7 @@ const KasaDetayContent: React.FC<KasaDetayContentProps> = ({ kasaId }) => {
           Kasa Bilgileri
         </Typography>
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <Typography variant="body2" color="text.secondary">
               Kasa Adı
             </Typography>
@@ -186,7 +190,7 @@ const KasaDetayContent: React.FC<KasaDetayContentProps> = ({ kasaId }) => {
               {kasaDetay.kasaAdi}
             </Typography>
           </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <Typography variant="body2" color="text.secondary">
               Kasa Tipi
             </Typography>
@@ -194,7 +198,7 @@ const KasaDetayContent: React.FC<KasaDetayContentProps> = ({ kasaId }) => {
               {kasaDetay.kasaTipi}
             </Typography>
           </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <Typography variant="body2" color="text.secondary">
               Bakiye
             </Typography>
@@ -1149,7 +1153,8 @@ export default function TahsilatPage() {
     return { pie: pieData, kasa: kasaData, trend: trendData };
   }, [filteredTahsilatlar, getOdemeTipiLabel, trendPeriod]);
 
-  const CHART_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#6366f1'];
+  // Daha canlı ve modern renk paleti
+  const CHART_COLORS = ['#3b82f6', '#10b981', '#6366f1', '#f43f5e', '#f59e0b', '#8b5cf6'];
 
   const columns = useMemo<GridColDef<Tahsilat>[]>(() => [
     {
@@ -1286,7 +1291,7 @@ export default function TahsilatPage() {
         if (!row.kasa) {
           let label = '-';
           if (row.odemeTipi === 'KREDI_KARTI') label = '💳 POS';
-          else if (row.odemeTipi === 'BANKA_HAVALESI') label = '🏦 Havale/EFT';
+          else if (row.odemeTipi as string === 'BANKA_HAVALESI') label = '🏦 Havale/EFT';
           else if (row.firmaKrediKarti) label = '💳 Firma Kredi Kartı';
           else if (row.tip === 'TAHSILAT' && !row.odemeTipi) label = 'Çapraz Ödeme'; // Çapraz ödemede odemeTipi null olabilir veya özel bir şey olabilir
 
@@ -1602,213 +1607,184 @@ export default function TahsilatPage() {
         </Box>
 
         {/* İstatistik Kartları */}
-        {isMobile ? (
-          <Box
-            sx={{
-              display: 'flex',
-              gap: 2,
-              overflowX: 'auto',
-              pb: 2,
-              mb: 2,
-              mx: -2,
-              px: 2,
-              scrollSnapType: 'x mandatory',
-              '&::-webkit-scrollbar': { display: 'none' },
-              msOverflowStyle: 'none',
-              scrollbarWidth: 'none',
-            }}
-          >
-            {statsFetching
-              ? [1, 2, 3, 4].map((i) => (
-                <Box key={i} sx={{ minWidth: '85%', scrollSnapAlign: 'center', flexShrink: 0 }}>
-                  <Card sx={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', borderRadius: 2 }}>
-                    <CardContent sx={{ p: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Skeleton variant="circular" width={40} height={40} />
-                        <Box sx={{ flex: 1 }}>
-                          <Skeleton variant="text" width="80%" sx={{ mb: 1 }} />
-                          <Skeleton variant="text" width="60%" height={32} />
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Box>
-              ))
-              : statCards.map((card) => (
-                <Box key={card.id} sx={{ minWidth: '85%', scrollSnapAlign: 'center', flexShrink: 0 }}>
-                  <Card
-                    sx={{
-                      background: card.gradient,
-                      color: 'white',
-                      boxShadow: `0 4px 6px rgba(${card.shadowColor}, 0.3)`,
-                      borderRadius: 2,
-                    }}
-                  >
-                    <CardContent sx={{ p: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        {card.icon}
-                        <Box>
-                          <Typography variant="body2" sx={{ opacity: 0.9, whiteSpace: 'nowrap' }}>
-                            {card.title}
-                          </Typography>
-                          <Typography variant="h5" fontWeight="bold">
-                            {formatCurrency(card.value)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Box>
-              ))}
-          </Box>
-        ) : (
-          <Grid container spacing={3} sx={{ mb: 3 }}>
-            {statsFetching
-              ? [1, 2, 3, 4].map((i) => (
-                <Grid key={i} size={{ xs: 6, md: 6, lg: 3 }}>
-                  <Card sx={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Skeleton variant="circular" width={40} height={40} />
-                        <Box sx={{ flex: 1 }}>
-                          <Skeleton variant="text" width="80%" sx={{ mb: 1 }} />
-                          <Skeleton variant="text" width="60%" height={32} />
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))
-              : statCards.map((card) => (
-                <Grid key={card.id} size={{ xs: 6, md: 6, lg: 3 }}>
-                  <Card
-                    sx={{
-                      background: card.gradient,
-                      color: 'white',
-                      boxShadow: `0 4px 6px rgba(${card.shadowColor}, 0.3)`,
-                      transition: 'all 0.3s ease-in-out',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        transform: 'translateY(-4px) scale(1.02)',
-                        boxShadow: `0 8px 16px rgba(${card.shadowColor}, 0.4)`,
-                      },
-                    }}
-                  >
-                    <CardContent sx={{ p: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        {card.icon}
-                        <Box>
-                          <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                            {card.title}
-                          </Typography>
-                          <Typography variant="h5" fontWeight="bold">
-                            {formatCurrency(card.value)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-          </Grid>
-        )}
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          {statsFetching ? (
+            [1, 2, 3, 4].map((i) => (
+              <Grid key={i} item xs={12} sm={6} lg={3}>
+                <Skeleton variant="rounded" height={120} sx={{ borderRadius: '16px' }} />
+              </Grid>
+            ))
+          ) : (
+            statCards.map((card) => (
+              <Grid key={card.id} item xs={12} sm={6} lg={3}>
+                <PremiumStatCard
+                  title={card.title}
+                  value={card.value}
+                  icon={
+                    card.id === 'toplam-tahsilat' ? AccountBalance :
+                      card.id === 'toplam-odeme' ? Payments :
+                        card.id === 'nakit-tahsilat' ? AttachMoney :
+                          CreditCard
+                  }
+                  color={card.id === 'toplam-odeme' ? '#f43f5e' : card.id === 'toplam-tahsilat' ? '#3b82f6' : card.id === 'nakit-tahsilat' ? '#10b981' : '#8b5cf6'}
+                  formatValue={formatCurrency}
+                />
+              </Grid>
+            ))
+          )}
+        </Grid>
 
         {/* Grafikler (Sadece veri varsa ve loading değilse göster) */}
         {!statsFetching && (chartData.pie.length > 0 || chartData.trend.length > 0) && (
-          <Grid container spacing={3} sx={{ mb: 3 }}>
-            {/* Pie Chart: Ödeme ve Kasa Dağılımı (Tablı) */}
-            <Grid size={{ xs: 12, md: 12, lg: 4 }}>
-              <Card sx={{ height: '100%', minHeight: 450, boxShadow: '0 4px 6px rgba(0,0,0,0.05)', borderRadius: 2 }}>
-                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            {/* Pay Chart */}
+            <Grid item xs={12} md={12} lg={4}>
+              <PremiumWidget
+                title={chartTab === 0 ? 'Ödeme Yöntemi Dağılımı' : 'Kasa/Banka Dağılımı'}
+                headerAction={
                   <Tabs
                     value={chartTab}
                     onChange={(e, v) => setChartTab(v)}
-                    variant="fullWidth"
-                    textColor="primary"
-                    indicatorColor="primary"
+                    sx={{
+                      minHeight: 32,
+                      '& .MuiTab-root': {
+                        minWidth: 50,
+                        minHeight: 32,
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        borderRadius: '6px',
+                        transition: 'all 0.2s',
+                        '&.Mui-selected': {
+                          color: '#3b82f6',
+                        }
+                      },
+                      '& .MuiTabs-indicator': {
+                        height: 2,
+                        borderRadius: '2px',
+                        backgroundColor: '#3b82f6',
+                      }
+                    }}
                   >
-                    <Tab label="Ödeme Tipi" />
-                    <Tab label="Kasa Dağılımı" />
+                    <Tab label="Tip" />
+                    <Tab label="Kasa" />
                   </Tabs>
-                </Box>
-                <CardContent>
-                  <Typography variant="subtitle1" fontWeight={600} gutterBottom align="center" sx={{ mb: 2 }}>
-                    {chartTab === 0 ? 'Ödeme Yöntemi Dağılımı' : 'Kasa/Banka Dağılımı'}
-                  </Typography>
-                  <Box sx={{ height: 300, position: 'relative' }}>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie
-                          data={chartTab === 0 ? chartData.pie : chartData.kasa}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={90}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
-                          {(chartTab === 0 ? chartData.pie : chartData.kasa).map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <RechartsTooltip
-                          formatter={(value) => formatCurrency(value as number)}
-                          contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                }
+              >
+                <ChartContainer height={240}>
+                  <PieChart>
+                    <Pie
+                      data={chartTab === 0 ? chartData.pie : chartData.kasa}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={80}
+                      paddingAngle={6}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {(chartTab === 0 ? chartData.pie : chartData.kasa).map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={CHART_COLORS[index % CHART_COLORS.length]}
+                          style={{ filter: `drop-shadow(0px 4px 8px ${alpha(CHART_COLORS[index % CHART_COLORS.length], 0.2)})` }}
                         />
-                        <Legend verticalAlign="bottom" height={36} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </CardContent>
-              </Card>
+                      ))}
+                    </Pie>
+                    <RechartsTooltip
+                      formatter={(value) => formatCurrency(value as number)}
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: 'none',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                        padding: '8px'
+                      }}
+                      itemStyle={{ fontWeight: 600, fontSize: '0.75rem' }}
+                    />
+                    <Legend
+                      verticalAlign="bottom"
+                      height={32}
+                      iconType="circle"
+                      wrapperStyle={{ paddingTop: '15px', fontSize: '0.75rem', fontWeight: 600 }}
+                    />
+                  </PieChart>
+                </ChartContainer>
+              </PremiumWidget>
             </Grid>
 
-            {/* Bar Chart: Tahsilat Trendi */}
-            <Grid size={{ xs: 12, md: 12, lg: 8 }}>
-              <Card sx={{ height: '100%', minHeight: 450, boxShadow: '0 4px 6px rgba(0,0,0,0.05)', borderRadius: 2 }}>
-                <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider' }}>
-                  <Typography variant="h6" fontWeight={600}>İşlem Trendi</Typography>
+            {/* Trend Chart */}
+            <Grid item xs={12} md={12} lg={8}>
+              <PremiumWidget
+                title="İşlem Trendi"
+                subtitle="Periyodik giriş ve çıkış dengesi"
+                headerAction={
                   <ToggleButtonGroup
                     value={trendPeriod}
                     exclusive
                     onChange={(e, val) => val && setTrendPeriod(val)}
                     size="small"
-                    color="primary"
+                    sx={{
+                      '& .MuiToggleButton-root': {
+                        px: 1.5,
+                        py: 0.3,
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        textTransform: 'none',
+                        borderRadius: '6px !important',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        mx: 0.3,
+                        '&.Mui-selected': {
+                          bgcolor: alpha('#3b82f6', 0.1),
+                          color: '#3b82f6',
+                          borderColor: alpha('#3b82f6', 0.2),
+                          '&:hover': {
+                            bgcolor: alpha('#3b82f6', 0.2),
+                          }
+                        }
+                      }
+                    }}
                   >
                     <ToggleButton value="WEEKLY">Haftalık</ToggleButton>
                     <ToggleButton value="MONTHLY">Aylık</ToggleButton>
                   </ToggleButtonGroup>
+                }
+              >
+                <Box sx={{ height: 280 }}>
+                  <ChartContainer height={280}>
+                    <BarChart data={chartData.trend} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" strokeOpacity={0.3} />
+                      <XAxis
+                        dataKey="displayDate"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: 'var(--muted-foreground)', fontSize: 10, fontWeight: 700 }}
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: 'var(--muted-foreground)', fontSize: 10, fontWeight: 700 }}
+                        tickFormatter={(value) => `₺${(value / 1000).toFixed(0)}k`}
+                      />
+                      <RechartsTooltip
+                        formatter={(value) => formatCurrency(value as number)}
+                        contentStyle={{
+                          borderRadius: 12,
+                          border: 'none',
+                          boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                          padding: '10px'
+                        }}
+                        cursor={{ fill: alpha('#3b82f6', 0.03), radius: 6 }}
+                      />
+                      <Legend
+                        iconType="circle"
+                        wrapperStyle={{ paddingTop: '15px', fontSize: '0.75rem', fontWeight: 600 }}
+                      />
+                      <Bar dataKey="tahsilat" name="Tahsilat" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={20} />
+                      <Bar dataKey="odeme" name="Ödeme" fill="#f43f5e" radius={[4, 4, 0, 0]} maxBarSize={20} />
+                    </BarChart>
+                  </ChartContainer>
                 </Box>
-                <CardContent>
-                  <Box sx={{ height: 300, mt: 2 }}>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={chartData.trend} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                        <XAxis
-                          dataKey="displayDate"
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fill: '#6b7280', fontSize: 12 }}
-                        />
-                        <YAxis
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fill: '#6b7280', fontSize: 12 }}
-                          tickFormatter={(value) => `₺${value / 1000}k`}
-                        />
-                        <RechartsTooltip
-                          formatter={(value) => formatCurrency(value as number)}
-                          contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                          cursor={{ fill: 'rgba(0,0,0,0.04)' }}
-                        />
-                        <Legend />
-                        <Bar dataKey="tahsilat" name="Tahsilat" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={50} />
-                        <Bar dataKey="odeme" name="Ödeme" fill="#ef4444" radius={[4, 4, 0, 0]} maxBarSize={50} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </CardContent>
-              </Card>
+              </PremiumWidget>
             </Grid>
           </Grid>
         )}
@@ -1957,143 +1933,147 @@ export default function TahsilatPage() {
 
 
         {/* Tarih Filtresi (Mobile: Drawer, Desktop: Accordion) */}
-        {isMobile ? (
-          <Drawer
-            anchor="bottom"
-            open={openFilterDrawer}
-            onClose={() => setOpenFilterDrawer(false)}
-            PaperProps={{
-              sx: {
-                borderRadius: '16px 16px 0 0',
-                maxHeight: '85vh'
-              }
-            }}
-          >
-            <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default' }}>
-              <Typography variant="h6" fontWeight={600}>Filtrele</Typography>
-              <IconButton onClick={() => setOpenFilterDrawer(false)} edge="end">
-                <Close />
-              </IconButton>
-            </Box>
-
-            <Box sx={{ p: 2, overflowY: 'auto' }}>
-              {filterContent}
-            </Box>
-
-            <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'background.default' }}>
-              <Button
-                fullWidth
-                variant="contained"
-                size="large"
-                onClick={() => setOpenFilterDrawer(false)}
-                sx={{
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                  fontWeight: 600
-                }}
-              >
-                Uygula
-              </Button>
-            </Box>
-          </Drawer>
-        ) : (
-          <Accordion
-            defaultExpanded
-            sx={{
-              mb: 3,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-              '&:before': { display: 'none' },
-              borderRadius: '4px !important',
-            }}
-          >
-            <AccordionSummary
-              expandIcon={<ExpandMore />}
-              sx={{
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.02)',
-                },
+        {
+          isMobile ? (
+            <Drawer
+              anchor="bottom"
+              open={openFilterDrawer}
+              onClose={() => setOpenFilterDrawer(false)}
+              PaperProps={{
+                sx: {
+                  borderRadius: '16px 16px 0 0',
+                  maxHeight: '85vh'
+                }
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="subtitle1" fontWeight={600}>
-                  📅 Tarih Filtreleri
-                </Typography>
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails>
-              {filterContent}
-            </AccordionDetails>
-          </Accordion>
-        )}
-
-        {/* Aktif Filtreler */}
-        {(searchQuery || dateRange.start || dateRange.end || quickFilter !== 'TÜMÜ') && (
-          <Paper sx={{ p: 2, mb: 3, bgcolor: 'var(--muted)', boxShadow: 'var(--shadow-md)' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                <Typography variant="subtitle2" fontWeight={600} color="text.secondary">
-                  Aktif Filtreler:
-                </Typography>
-
-                {searchQuery && (
-                  <Chip
-                    label={`Arama: "${searchQuery}"`}
-                    onDelete={() => setSearchQuery('')}
-                    color="primary"
-                    size="small"
-                    sx={{ fontWeight: 500 }}
-                  />
-                )}
-
-                {quickFilter && quickFilter !== 'TÜMÜ' && (
-                  <Chip
-                    label={`Tarih: ${quickFilter === 'BUGÜN' ? 'Bugün' :
-                      quickFilter === 'BU_HAFTA' ? 'Bu Hafta' :
-                        quickFilter === 'BU_AY' ? 'Bu Ay' :
-                          quickFilter === 'BU_YIL' ? 'Bu Yıl' : quickFilter
-                      }`}
-                    onDelete={() => handleQuickFilter('TÜMÜ')}
-                    color="secondary"
-                    size="small"
-                    sx={{ fontWeight: 500 }}
-                  />
-                )}
-
-                {(dateRange.start || dateRange.end) && (
-                  <Chip
-                    label={`Özel Tarih: ${dateRange.start || '...'} - ${dateRange.end || '...'}`}
-                    onDelete={() => {
-                      setDateRange({ start: '', end: '' });
-                      setQuickFilter('TÜMÜ');
-                    }}
-                    color="info"
-                    size="small"
-                    sx={{ fontWeight: 500 }}
-                  />
-                )}
+              <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default' }}>
+                <Typography variant="h6" fontWeight={600}>Filtrele</Typography>
+                <IconButton onClick={() => setOpenFilterDrawer(false)} edge="end">
+                  <Close />
+                </IconButton>
               </Box>
 
-              <Button
-                size="small"
-                variant="outlined"
-                color="error"
-                onClick={() => {
-                  setSearchQuery('');
-                  setDateRange({ start: '', end: '' });
-                  setQuickFilter('TÜMÜ');
-                }}
+              <Box sx={{ p: 2, overflowY: 'auto' }}>
+                {filterContent}
+              </Box>
+
+              <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'background.default' }}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  size="large"
+                  onClick={() => setOpenFilterDrawer(false)}
+                  sx={{
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                    fontWeight: 600
+                  }}
+                >
+                  Uygula
+                </Button>
+              </Box>
+            </Drawer>
+          ) : (
+            <Accordion
+              defaultExpanded
+              sx={{
+                mb: 3,
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                '&:before': { display: 'none' },
+                borderRadius: '4px !important',
+              }}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMore />}
                 sx={{
-                  transition: 'all 0.2s',
                   '&:hover': {
-                    transform: 'scale(1.05)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.02)',
                   },
                 }}
               >
-                Tümünü Temizle
-              </Button>
-            </Box>
-          </Paper>
-        )}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    📅 Tarih Filtreleri
+                  </Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                {filterContent}
+              </AccordionDetails>
+            </Accordion>
+          )
+        }
+
+        {/* Aktif Filtreler */}
+        {
+          (searchQuery || dateRange.start || dateRange.end || quickFilter !== 'TÜMÜ') && (
+            <Paper sx={{ p: 2, mb: 3, bgcolor: 'var(--muted)', boxShadow: 'var(--shadow-md)' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                  <Typography variant="subtitle2" fontWeight={600} color="text.secondary">
+                    Aktif Filtreler:
+                  </Typography>
+
+                  {searchQuery && (
+                    <Chip
+                      label={`Arama: "${searchQuery}"`}
+                      onDelete={() => setSearchQuery('')}
+                      color="primary"
+                      size="small"
+                      sx={{ fontWeight: 500 }}
+                    />
+                  )}
+
+                  {quickFilter && quickFilter !== 'TÜMÜ' && (
+                    <Chip
+                      label={`Tarih: ${quickFilter === 'BUGÜN' ? 'Bugün' :
+                        quickFilter === 'BU_HAFTA' ? 'Bu Hafta' :
+                          quickFilter === 'BU_AY' ? 'Bu Ay' :
+                            quickFilter === 'BU_YIL' ? 'Bu Yıl' : quickFilter
+                        }`}
+                      onDelete={() => handleQuickFilter('TÜMÜ')}
+                      color="secondary"
+                      size="small"
+                      sx={{ fontWeight: 500 }}
+                    />
+                  )}
+
+                  {(dateRange.start || dateRange.end) && (
+                    <Chip
+                      label={`Özel Tarih: ${dateRange.start || '...'} - ${dateRange.end || '...'}`}
+                      onDelete={() => {
+                        setDateRange({ start: '', end: '' });
+                        setQuickFilter('TÜMÜ');
+                      }}
+                      color="info"
+                      size="small"
+                      sx={{ fontWeight: 500 }}
+                    />
+                  )}
+                </Box>
+
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setDateRange({ start: '', end: '' });
+                    setQuickFilter('TÜMÜ');
+                  }}
+                  sx={{
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                    },
+                  }}
+                >
+                  Tümünü Temizle
+                </Button>
+              </Box>
+            </Paper>
+          )
+        }
 
         {/* Butonlar */}
         <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2, mb: 3 }}>
@@ -2168,190 +2148,192 @@ export default function TahsilatPage() {
         </Box>
 
         {/* Tablo / Mobil Kart Görünümü */}
-        {isMobile ? (
-          <Stack spacing={2}>
-            {(tahsilatLoading || tahsilatFetching) && filteredTahsilatlar.length === 0 ? (
-              [1, 2, 3].map((i) => (
-                <Card key={i}>
-                  <CardContent>
-                    <Skeleton variant="text" width="60%" height={32} sx={{ mb: 1 }} />
-                    <Skeleton variant="text" width="40%" height={20} sx={{ mb: 2 }} />
-                    <Skeleton variant="rectangular" height={40} sx={{ borderRadius: 1 }} />
-                  </CardContent>
-                </Card>
-              ))
-            ) : filteredTahsilatlar.length > 0 ? (
-              <>
-                {filteredTahsilatlar.slice(0, mobilePage * 20).map((row) => (
-                  <Card key={row.id} sx={{ boxShadow: '0 2px 4px rgba(0,0,0,0.05)', borderRadius: 2 }}>
-                    <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-                        <Box>
-                          <Typography variant="subtitle2" fontWeight={700} sx={{ lineHeight: 1.2 }}>
-                            {row.cari.unvan}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {row.cari.cariKodu}
-                          </Typography>
-                        </Box>
-                        <Typography
-                          variant="subtitle1"
-                          fontWeight={700}
-                          color={row.tip === 'TAHSILAT' ? 'success.main' : 'error.main'}
-                        >
-                          {formatCurrency(row.tutar)}
-                        </Typography>
-                      </Box>
-
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1.5 }}>
-                        <Chip
-                          icon={getOdemeTipiIcon(row.odemeTipi)}
-                          label={getOdemeTipiLabel(row.odemeTipi)}
-                          size="small"
-                          variant="outlined"
-                          sx={{ borderRadius: 1 }}
-                        />
-                        {row.kasa ? (
-                          <Chip label={row.kasa.kasaAdi} size="small" variant="outlined" sx={{ borderRadius: 1 }} />
-                        ) : row.bankaHesap ? (
-                          <Chip label={`${row.bankaHesap.bankaAdi || 'Banka'} > ${row.bankaHesap.hesapAdi}`} size="small" variant="outlined" sx={{ borderRadius: 1 }} />
-                        ) : row.firmaKrediKarti ? (
-                          <Chip label={row.firmaKrediKarti.kartAdi} size="small" variant="outlined" sx={{ borderRadius: 1 }} />
-                        ) : (
-                          <Chip label="Çapraz Ödeme" size="small" variant="outlined" sx={{ borderRadius: 1 }} />
-                        )}
-                      </Box>
-
-                      {row.aciklama && (
-                        <Box sx={{ bgcolor: 'action.hover', p: 1, borderRadius: 1, mb: 1.5 }}>
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                            {row.aciklama}
-                          </Typography>
-                        </Box>
-                      )}
-
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
-                        <Typography variant="caption" color="text.secondary">
-                          {new Date(row.tarih).toLocaleDateString('tr-TR')}
-                        </Typography>
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => window.open(`/tahsilat/print/${row.id}`, '_blank', 'noopener,noreferrer')}
-                          >
-                            <Print fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => openDeleteConfirmation(row)}
-                            disabled={actionLoading}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
-                        </Box>
-                      </Box>
+        {
+          isMobile ? (
+            <Stack spacing={2}>
+              {(tahsilatLoading || tahsilatFetching) && filteredTahsilatlar.length === 0 ? (
+                [1, 2, 3].map((i) => (
+                  <Card key={i}>
+                    <CardContent>
+                      <Skeleton variant="text" width="60%" height={32} sx={{ mb: 1 }} />
+                      <Skeleton variant="text" width="40%" height={20} sx={{ mb: 2 }} />
+                      <Skeleton variant="rectangular" height={40} sx={{ borderRadius: 1 }} />
                     </CardContent>
                   </Card>
-                ))}
+                ))
+              ) : filteredTahsilatlar.length > 0 ? (
+                <>
+                  {filteredTahsilatlar.slice(0, mobilePage * 20).map((row) => (
+                    <Card key={row.id} sx={{ boxShadow: '0 2px 4px rgba(0,0,0,0.05)', borderRadius: 2 }}>
+                      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                          <Box>
+                            <Typography variant="subtitle2" fontWeight={700} sx={{ lineHeight: 1.2 }}>
+                              {row.cari.unvan}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {row.cari.cariKodu}
+                            </Typography>
+                          </Box>
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight={700}
+                            color={row.tip === 'TAHSILAT' ? 'success.main' : 'error.main'}
+                          >
+                            {formatCurrency(row.tutar)}
+                          </Typography>
+                        </Box>
 
-                {filteredTahsilatlar.length > mobilePage * 20 && (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, pb: 2 }}>
-                    <Button
-                      variant="outlined"
-                      onClick={() => setMobilePage(prev => prev + 1)}
-                      fullWidth
-                      sx={{
-                        borderRadius: 2,
-                        textTransform: 'none',
-                        fontWeight: 600,
-                        py: 1.5,
-                        borderColor: 'divider',
-                        color: 'text.secondary',
-                        '&:hover': {
-                          borderColor: 'primary.main',
-                          color: 'primary.main',
-                          bgcolor: 'rgba(59, 130, 246, 0.04)'
-                        }
-                      }}
-                    >
-                      Daha Fazla Göster ({filteredTahsilatlar.length - mobilePage * 20} kayıt daha)
-                    </Button>
-                  </Box>
-                )}
-              </>
-            ) : (
-              <Box sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
-                <DataGridNoRowsOverlay />
-              </Box>
-            )}
-          </Stack>
-        ) : (
-          <Paper sx={{ p: 1, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
-            <DataGrid<Tahsilat>
-              rows={filteredTahsilatlar}
-              columns={columns}
-              loading={tahsilatLoading || tahsilatFetching || actionLoading}
-              autoHeight
-              density={denseMode ? 'compact' : 'standard'}
-              disableRowSelectionOnClick
-              pageSizeOptions={[25, 50, 100]}
-              initialState={{
-                pagination: {
-                  paginationModel: { page: 0, pageSize: 25 },
-                },
-                columns: {
-                  columnVisibilityModel: {
-                    cariKodu: isLargeDesktop,
-                    kasaTipi: isLargeDesktop,
-                    kartAdi: isLargeDesktop,
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1.5 }}>
+                          <Chip
+                            icon={getOdemeTipiIcon(row.odemeTipi)}
+                            label={getOdemeTipiLabel(row.odemeTipi)}
+                            size="small"
+                            variant="outlined"
+                            sx={{ borderRadius: 1 }}
+                          />
+                          {row.kasa ? (
+                            <Chip label={row.kasa.kasaAdi} size="small" variant="outlined" sx={{ borderRadius: 1 }} />
+                          ) : row.bankaHesap ? (
+                            <Chip label={`${row.bankaHesap.bankaAdi || 'Banka'} > ${row.bankaHesap.hesapAdi}`} size="small" variant="outlined" sx={{ borderRadius: 1 }} />
+                          ) : row.firmaKrediKarti ? (
+                            <Chip label={row.firmaKrediKarti.kartAdi} size="small" variant="outlined" sx={{ borderRadius: 1 }} />
+                          ) : (
+                            <Chip label="Çapraz Ödeme" size="small" variant="outlined" sx={{ borderRadius: 1 }} />
+                          )}
+                        </Box>
+
+                        {row.aciklama && (
+                          <Box sx={{ bgcolor: 'action.hover', p: 1, borderRadius: 1, mb: 1.5 }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                              {row.aciklama}
+                            </Typography>
+                          </Box>
+                        )}
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(row.tarih).toLocaleDateString('tr-TR')}
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => window.open(`/tahsilat/print/${row.id}`, '_blank', 'noopener,noreferrer')}
+                            >
+                              <Print fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => openDeleteConfirmation(row)}
+                              disabled={actionLoading}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  ))}
+
+                  {filteredTahsilatlar.length > mobilePage * 20 && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, pb: 2 }}>
+                      <Button
+                        variant="outlined"
+                        onClick={() => setMobilePage(prev => prev + 1)}
+                        fullWidth
+                        sx={{
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          fontWeight: 600,
+                          py: 1.5,
+                          borderColor: 'divider',
+                          color: 'text.secondary',
+                          '&:hover': {
+                            borderColor: 'primary.main',
+                            color: 'primary.main',
+                            bgcolor: 'rgba(59, 130, 246, 0.04)'
+                          }
+                        }}
+                      >
+                        Daha Fazla Göster ({filteredTahsilatlar.length - mobilePage * 20} kayıt daha)
+                      </Button>
+                    </Box>
+                  )}
+                </>
+              ) : (
+                <Box sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
+                  <DataGridNoRowsOverlay />
+                </Box>
+              )}
+            </Stack>
+          ) : (
+            <Paper sx={{ p: 1, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
+              <DataGrid<Tahsilat>
+                rows={filteredTahsilatlar}
+                columns={columns}
+                loading={tahsilatLoading || tahsilatFetching || actionLoading}
+                autoHeight
+                density={denseMode ? 'compact' : 'standard'}
+                disableRowSelectionOnClick
+                pageSizeOptions={[25, 50, 100]}
+                initialState={{
+                  pagination: {
+                    paginationModel: { page: 0, pageSize: 25 },
                   },
-                },
-              }}
-              sx={{
-                border: 'none',
-                '& .MuiDataGrid-columnHeaders': {
-                  background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                  borderRadius: '8px 8px 0 0',
-                  borderBottom: '2px solid #dee2e6',
-                },
-                '& .MuiDataGrid-columnHeaderTitle': {
-                  fontWeight: 700,
-                },
-                '& .MuiDataGrid-row': {
-                  transition: 'all 0.2s ease-in-out',
-                  '&:nth-of-type(odd)': {
-                    backgroundColor: '#fafafa',
+                  columns: {
+                    columnVisibilityModel: {
+                      cariKodu: isLargeDesktop,
+                      kasaTipi: isLargeDesktop,
+                      kartAdi: isLargeDesktop,
+                    },
                   },
-                  '&:nth-of-type(even)': {
-                    backgroundColor: '#ffffff',
+                }}
+                sx={{
+                  border: 'none',
+                  '& .MuiDataGrid-columnHeaders': {
+                    background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    borderRadius: '8px 8px 0 0',
+                    borderBottom: '2px solid #dee2e6',
                   },
-                  '&:hover': {
-                    backgroundColor: '#f0f9ff !important',
-                    transform: 'scale(1.001)',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
-                    cursor: 'pointer',
+                  '& .MuiDataGrid-columnHeaderTitle': {
+                    fontWeight: 700,
                   },
-                },
-                '& .MuiDataGrid-cell': {
-                  borderBottom: '1px solid #f0f0f0',
-                  fontSize: '0.875rem',
-                },
-                '& .MuiDataGrid-footerContainer': {
-                  borderTop: '2px solid #dee2e6',
-                  backgroundColor: '#f8f9fa',
-                },
-              }}
-              slots={{
-                noRowsOverlay: DataGridNoRowsOverlay,
-              }}
-            />
-          </Paper>
-        )}
-      </Box>
+                  '& .MuiDataGrid-row': {
+                    transition: 'all 0.2s ease-in-out',
+                    '&:nth-of-type(odd)': {
+                      backgroundColor: '#fafafa',
+                    },
+                    '&:nth-of-type(even)': {
+                      backgroundColor: '#ffffff',
+                    },
+                    '&:hover': {
+                      backgroundColor: '#f0f9ff !important',
+                      transform: 'scale(1.001)',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+                      cursor: 'pointer',
+                    },
+                  },
+                  '& .MuiDataGrid-cell': {
+                    borderBottom: '1px solid #f0f0f0',
+                    fontSize: '0.875rem',
+                  },
+                  '& .MuiDataGrid-footerContainer': {
+                    borderTop: '2px solid #dee2e6',
+                    backgroundColor: '#f8f9fa',
+                  },
+                }}
+                slots={{
+                  noRowsOverlay: DataGridNoRowsOverlay,
+                }}
+              />
+            </Paper>
+          )
+        }
+      </Box >
 
       {/* FAB - Yeni Ekle (Sadece Mobil) */}
       {
@@ -2417,7 +2399,7 @@ export default function TahsilatPage() {
         onClose={() => setOpenCaprazOdemeDialog(false)}
         onSubmit={handleCaprazOdeme}
         formData={caprazOdemeFormData}
-        setFormData={setCaprazOdemeFormData}
+        setFormData={setCaprazOdemeFormData as any}
         cariler={cariler as Cari[]}
         loading={carilerFetching}
         submitting={actionLoading}
@@ -2458,7 +2440,7 @@ export default function TahsilatPage() {
         </DialogContent>
       </Dialog>
 
-    </MainLayout>
+    </MainLayout >
   );
 }
 
