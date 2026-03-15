@@ -42,22 +42,62 @@ services:
     networks:
       - app_net
 
-  # --- Applications (Optional: Run via Docker or Local Node) ---
-  # If you want to run apps in Docker, uncomment these. 
-  # Otherwise, run them via 'npm run dev' on your host machine for better performance.
+  # --- Applications (Run in Docker for local development) ---
+  
+  backend:
+    build:
+      context: ../api-stage/server
+      dockerfile: Dockerfile
+    container_name: otomuhasebe-backend-local
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:localpassword@postgres:5432/otomuhasebe_local
+      - JWT_SECRET=local_secret_key
+      - HIZLI_API_KEY=9785bcc39536
+      - HIZLI_SECRET_KEY=9785bcc3953673cfb92246398b25449ad25e
+      - HIZLI_USERNAME=hizlitest
+      - HIZLI_PASSWORD=Test.1234
+      - HIZLI_WSDL=https://econnecttest.hizliteknoloji.com.tr/Services/HizliService.svc?wsdl
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin123
+      - MINIO_BUCKET=otomuhasebe
+      - REDIS_URL=redis://redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
+      - CORS_ORIGINS=http://localhost:3010,http://localhost:3000
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    networks:
+      - app_net
+    volumes:
+      - ../api-stage/server/uploads:/app/server/uploads
+    command: npm run start:dev
 
-  # backend:
-  #   build:
-  #     context: ./api-stage
-  #     dockerfile: server/Dockerfile
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - DATABASE_URL=postgresql://postgres:localpassword@postgres:5432/otomuhasebe_local
-  #   depends_on:
-  #     - postgres
-  #   networks:
-  #     - app_net
+  frontend:
+    build:
+      context: ../panel-stage/client
+      dockerfile: Dockerfile
+    container_name: otomuhasebe-frontend-local
+    restart: unless-stopped
+    ports:
+      - "3010:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
+      - API_PROXY_TARGET=http://localhost:3000
+    depends_on:
+      - backend
+    networks:
+      - app_net
+    command: npm run dev:fast
 
 networks:
   app_net:

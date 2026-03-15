@@ -10,10 +10,10 @@ import {
   useState,
 } from 'react';
 
-const IDLE_TIMEOUT_MS = 60 * 60 * 1000; // 1 saat
+const IDLE_TIMEOUT_MS = 12 * 60 * 60 * 1000; // 12 saat
 const CHECK_INTERVAL_MS = 60 * 1000; // 1 dakikada bir kontrol
 const THROTTLE_MS = 800; // mousemove/scroll için throttle
-const WARNING_BEFORE_MS = 5 * 60 * 1000; // 5 dakika önce uyarı (55. dakika)
+const WARNING_BEFORE_MS = 5 * 60 * 1000; // 5 dakika önce uyarı (11 saat 55. dakika)
 
 function useThrottledCallback<T extends (...args: any[]) => void>(
   callback: T,
@@ -134,7 +134,7 @@ export default function InactivityTracker() {
     <Snackbar
       open={showWarning}
       autoHideDuration={null}
-      onClose={() => {}}
+      onClose={() => { }}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       sx={{ bottom: { xs: 80, sm: 24 } }}
     >

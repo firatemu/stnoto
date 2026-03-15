@@ -41,6 +41,8 @@ services:
     image: ghcr.io/firatemu/stnoto-backend:latest
     container_name: stnoto-api
     restart: always
+    working_dir: /app/server
+    command: ["node", "dist/main.js"]
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -52,6 +54,14 @@ services:
       - minio
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.10'
+          memory: 128M
 
   frontend:
     image: ghcr.io/firatemu/stnoto-frontend:latest
@@ -60,12 +70,21 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - HOSTNAME=0.0.0.0
     env_file:
       - .env
     depends_on:
       - backend
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
   caddy:
     image: caddy:2-alpine

@@ -510,7 +510,7 @@ export default function SatisIadeFaturalariPage() {
         maxWidth="lg"
         fullWidth
       >
-        <DialogTitle component="div" sx={{ fontWeight: 'bold' }} component="div">
+        <DialogTitle component="div" sx={{ fontWeight: 'bold' }}>
           {openAdd ? 'Yeni Satış İade Faturası' : 'Satış İade Faturası Düzenle'}
         </DialogTitle>
         <DialogContent>
@@ -1024,7 +1024,7 @@ export default function SatisIadeFaturalariPage() {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle component="div" sx={{ fontWeight: 'bold' }} component="div">
+        <DialogTitle component="div" sx={{ fontWeight: 'bold' }}>
           Fatura Detayı
         </DialogTitle>
         <DialogContent>
@@ -1211,7 +1211,7 @@ export default function SatisIadeFaturalariPage() {
 
       {/* Delete Dialog */}
       <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
-        <DialogTitle component="div" sx={{ fontWeight: 'bold' }} component="div">Fatura Sil</DialogTitle>
+        <DialogTitle component="div" sx={{ fontWeight: 'bold' }}>Fatura Sil</DialogTitle>
         <DialogContent>
           <Typography>
             <strong>{selectedFatura?.faturaNo}</strong> nolu faturayı silmek istediğinizden emin misiniz?

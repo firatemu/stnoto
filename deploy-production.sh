@@ -51,10 +51,14 @@ else
 fi
 echo ""
 
-# Step 3: Build local images
+# Step 3: Build local images (sequential to avoid memory pressure on VPS)
 echo -e "${YELLOW}[3/6] Building local production images...${NC}"
-docker compose -f $COMPOSE_BASE -f $COMPOSE_PROD build --parallel
-echo -e "${GREEN}✓ Images built successfully${NC}"
+echo -e "${YELLOW}  Building backend first...${NC}"
+docker compose -f $COMPOSE_BASE -f $COMPOSE_PROD build backend
+echo -e "${GREEN}  ✓ Backend image built successfully${NC}"
+echo -e "${YELLOW}  Building frontend next...${NC}"
+docker compose -f $COMPOSE_BASE -f $COMPOSE_PROD build frontend
+echo -e "${GREEN}✓ All images built successfully${NC}"
 echo ""
 
 # Step 4: Run database migrations

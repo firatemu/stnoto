@@ -244,8 +244,8 @@ function FaturaArsivContent() {
 
         {/* Tabs */}
         <Paper sx={{ mb: 2 }}>
-          <Tabs 
-            value={activeTab} 
+          <Tabs
+            value={activeTab}
             onChange={(_, value) => {
               setActiveTab(value);
               const params = new URLSearchParams(searchParams.toString());
@@ -260,8 +260,8 @@ function FaturaArsivContent() {
               },
             }}
           >
-            <Tab 
-              label="💜 Satış Faturaları" 
+            <Tab
+              label="💜 Satış Faturaları"
               value="SATIS"
               sx={{
                 '&.Mui-selected': {
@@ -269,8 +269,8 @@ function FaturaArsivContent() {
                 },
               }}
             />
-            <Tab 
-              label="🟠 Satın Alma Faturaları" 
+            <Tab
+              label="🟠 Satın Alma Faturaları"
               value="ALIS"
               sx={{
                 '&.Mui-selected': {
@@ -425,7 +425,7 @@ function FaturaArsivContent() {
 
         {/* View Dialog */}
         <Dialog open={openView} onClose={() => setOpenView(false)} maxWidth="lg" fullWidth>
-          <DialogTitle component="div" sx={{ fontWeight: 'bold', borderBottom: '1px solid #e0e0e0' }} component="div">
+          <DialogTitle component="div" sx={{ fontWeight: 'bold', borderBottom: '1px solid #e0e0e0' }}>
             Fatura Detayı (Silinmiş)
           </DialogTitle>
           <DialogContent>
@@ -436,11 +436,11 @@ function FaturaArsivContent() {
             ) : selectedFatura ? (
               <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
                 <Box>
-                  <Chip 
-                    label="SİLİNMİŞ" 
-                    color="error" 
-                    size="small" 
-                    sx={{ mb: 2, fontWeight: 600 }} 
+                  <Chip
+                    label="SİLİNMİŞ"
+                    color="error"
+                    size="small"
+                    sx={{ mb: 2, fontWeight: 600 }}
                   />
                   <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
                     <Box sx={{ flex: 1, minWidth: 220 }}>
@@ -561,7 +561,7 @@ function FaturaArsivContent() {
             updateUrl(params);
           }}
         >
-          <DialogTitle component="div" sx={{ fontWeight: 'bold' }} component="div">Fatura Geri Yükle</DialogTitle>
+          <DialogTitle component="div" sx={{ fontWeight: 'bold' }}>Fatura Geri Yükle</DialogTitle>
           <DialogContent>
             <Typography>
               <strong>{selectedFatura?.faturaNo}</strong> nolu faturayı geri yüklemek istediğinizden emin misiniz?

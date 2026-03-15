@@ -10,3 +10,5 @@ yarn-error.log*
 .env*.local
 .cache
 prisma/migrations
+package-lock.json
+pnpm-lock.yaml

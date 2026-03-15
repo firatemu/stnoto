@@ -1,12 +1,15 @@
 # Dockerfile.staging.prod
 FROM node:20-alpine AS base
+RUN corepack enable
 
 # Install dependencies only when needed
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app/server
 COPY server/package*.json ./
-RUN npm install --legacy-peer-deps
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    corepack enable pnpm && \
+    pnpm install
 
 # Build the source code
 FROM base AS builder
@@ -33,8 +36,8 @@ COPY --from=builder /app/server/dist ./dist
 # We copy node_modules from builder because it already has the generated prisma client
 # but then we prune it to keep only production dependencies
 COPY --from=builder /app/server/node_modules ./node_modules
-RUN npm prune --omit=dev --legacy-peer-deps
+RUN pnpm prune --prod
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start:prod"]
+CMD ["pnpm", "run", "start:prod"]

@@ -350,28 +350,13 @@ function ReceiptTemplate({
         alignItems: 'center'
       }}>
         <Stack direction="row" spacing={2} alignItems="center">
-          {fullLogoUrl ? (
+          {fullLogoUrl && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={fullLogoUrl}
               alt="Logo"
               style={{ height: isLandscape ? '40px' : '50px', objectFit: 'contain' }}
             />
-          ) : (
-            <Box sx={{
-              width: isLandscape ? 40 : 50,
-              height: isLandscape ? 40 : 50,
-              bgcolor: colors.accent,
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 1,
-              fontWeight: 'bold',
-              fontSize: isLandscape ? '1rem' : '1.2rem'
-            }}>
-              {tenant?.name?.substring(0, 2).toUpperCase() || 'OM'}
-            </Box>
           )}
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, color: colors.primary, lineHeight: 1.2 }}>

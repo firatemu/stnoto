@@ -1,45 +1,53 @@
-# Stage 1: Dependencies
-FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
+  # Production Dockerfile for Next.js
+  # ---- Build stage ----
+  FROM node:20-alpine AS builder
 
-# Install dependencies based on the preferred package manager
-COPY package.json pnpm-lock.yaml* ./
-RUN corepack enable && pnpm i --frozen-lockfile
+  # Install libc6-compat for better compatibility
+  RUN apk add --no-cache libc6-compat
 
-# Stage 2: Builder
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+  WORKDIR /app
 
-# Disable telemetry during build
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+  # Install dependencies
+  COPY package.json ./
+  RUN npm install --legacy-peer-deps
 
-RUN corepack enable && pnpm run build
+  # Copy source code
+  COPY . .
 
-# Stage 3: Runner
-FROM node:20-alpine AS runner
-WORKDIR /app
+  # Disable telemetry
+  ENV NEXT_TELEMETRY_DISABLED=1
+  ENV NODE_ENV=production
+  ENV NODE_OPTIONS=--max-old-space-size=4096
 
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED 1
+  # Build application
+  RUN npm run build
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+  # ---- Production stage ----
+  FROM node:20-alpine AS runner
 
-# Automatically leverage output traces to reduce image size
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+  # Install libc6-compat for better compatibility
+  RUN apk add --no-cache libc6-compat
 
-USER nextjs
+  WORKDIR /app
 
-EXPOSE 3000
+  ENV NODE_ENV=production
+  ENV NEXT_TELEMETRY_DISABLED=1
 
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
+  # Create non-root user
+  RUN addgroup --system --gid 1001 nodejs
+  RUN adduser --system --uid 1001 nextjs
 
-# server.js is created by next build from the standalone output
-CMD ["node", "server.js"]
+  # Copy built application
+  COPY --from=builder /app/public ./public
+  COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+  COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+  USER nextjs
+
+  EXPOSE 3000
+
+  ENV PORT=3000
+  ENV HOSTNAME="0.0.0.0"
+
+  # Production mode command - NO HMR
+  CMD ["node", "server.js"]

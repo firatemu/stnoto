@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./api-stage
+      dockerfile: server/Dockerfile.staging.prod
+  
+  frontend:
+    build:
+      context: ./panel-stage/client
+      dockerfile: Dockerfile.staging.prod
+      args:
+        NEXT_PUBLIC_API_BASE_URL: https://api.stnoto.com
+        API_PROXY_TARGET: http://stnoto-api:3000

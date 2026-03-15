@@ -1092,7 +1092,7 @@ export default function AlisFaturalariPage() {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle component="div" sx={{ fontWeight: 'bold' }} component="div">
+        <DialogTitle component="div" sx={{ fontWeight: 'bold' }}>
           Fatura Detayı
         </DialogTitle>
         <DialogContent>
@@ -1279,7 +1279,7 @@ export default function AlisFaturalariPage() {
 
       {/* Delete Dialog */}
       <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
-        <DialogTitle component="div" sx={{ fontWeight: 'bold' }} component="div">Fatura Sil</DialogTitle>
+        <DialogTitle component="div" sx={{ fontWeight: 'bold' }}>Fatura Sil</DialogTitle>
         <DialogContent>
           <Typography>
             <strong>{selectedFatura?.faturaNo}</strong> nolu faturayı silmek istediğinizden emin misiniz?
@@ -1496,7 +1496,6 @@ export default function AlisFaturalariPage() {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Box>
-    </MainLayout >
+    </MainLayout>
   );
 }
