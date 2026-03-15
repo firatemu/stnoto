@@ -23,7 +23,7 @@ ENV API_PROXY_TARGET=$API_PROXY_TARGET
 ENV NODE_ENV=production
 
 # Memory limit to prevent OOM during build on limited VPS resources
-RUN NODE_OPTIONS='--max-old-space-size=3072' npx next build
+RUN NODE_OPTIONS='--max-old-space-size=2048' npx next build
 
 FROM base AS runner
 WORKDIR /app/client

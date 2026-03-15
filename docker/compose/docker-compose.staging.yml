@@ -34,9 +34,9 @@ services:
       NEXT_PUBLIC_API_BASE_URL: https://staging-api.otomuhasebe.com
       NODE_ENV: production
       API_PROXY_TARGET: "http://backend-staging:3000"
-      NODE_OPTIONS: "--max-old-space-size=768"
-    mem_limit: 1024m
-    cpus: "1.25"
+      NODE_OPTIONS: "--max-old-space-size=1536"
+    mem_limit: 2048m
+    cpus: "1.5"
     networks: [ app_net ]
     healthcheck:
       test: [ "CMD", "wget", "-qO-", "http://0.0.0.0:3000/" ]
