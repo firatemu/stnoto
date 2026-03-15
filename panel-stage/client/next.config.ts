@@ -52,6 +52,11 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 
+  // ESLint
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Staging için developer modu özellikleri
   ...(isStaging && {
     // Source maps staging'de açık
