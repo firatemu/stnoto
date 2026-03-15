@@ -1024,6 +1024,6 @@ export default function SirketAraclariPage() {
                     </Alert>
                 </Snackbar>
             </Box>
-        </MainLayout >
+        </MainLayout>
     );
 }

@@ -486,6 +486,6 @@ export default function BankaPage() {
                     bankaAdi={selectedBankaForAccount?.ad || ''}
                 />
             </Container>
-        </MainLayout >
+        </MainLayout>
     );
 }

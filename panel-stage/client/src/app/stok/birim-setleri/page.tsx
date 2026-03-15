@@ -362,7 +362,7 @@ export default function BirimSetleriPage() {
 
       {/* Ana Birim Ekleme/Düzenleme Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle component="div" sx={{ bgcolor: '#191970', color: 'white' }} component="div">
+        <DialogTitle component="div" sx={{ bgcolor: '#191970', color: 'white' }}>
           {editingBirimSeti ? 'Ana Birim Düzenle' : 'Yeni Birim Seti Ekle'}
         </DialogTitle>
         <DialogContent>
@@ -390,7 +390,7 @@ export default function BirimSetleriPage() {
 
             <Paper sx={{ p: 2, bgcolor: '#fff3cd', border: '1px solid #ffc107' }}>
               <Typography variant="caption" color="text.secondary">
-                <strong>Not:</strong> Ana birimi oluşturduktan sonra "Alt Birim Ekle" butonu ile 
+                <strong>Not:</strong> Ana birimi oluşturduktan sonra "Alt Birim Ekle" butonu ile
                 alt birimleri ve çevrim katsayılarını tanımlayabilirsiniz.
               </Typography>
             </Paper>
@@ -417,7 +417,7 @@ export default function BirimSetleriPage() {
 
       {/* Alt Birim Ekleme/Düzenleme Dialog */}
       <Dialog open={openAltBirimDialog} onClose={handleCloseAltBirimDialog} maxWidth="sm" fullWidth>
-        <DialogTitle component="div" sx={{ bgcolor: '#191970', color: 'white' }} component="div">
+        <DialogTitle component="div" sx={{ bgcolor: '#191970', color: 'white' }}>
           {selectedBirimSeti && (
             <Box>
               {editingAltBirim ? 'Alt Birim Düzenle' : 'Yeni Alt Birim Ekle'}
@@ -444,9 +444,9 @@ export default function BirimSetleriPage() {
               label="Çevrim Katsayısı"
               type="number"
               value={altBirimFormData.cevrimKatsayisi}
-              onChange={(e) => setAltBirimFormData({ 
-                ...altBirimFormData, 
-                cevrimKatsayisi: parseFloat(e.target.value) || 1 
+              onChange={(e) => setAltBirimFormData({
+                ...altBirimFormData,
+                cevrimKatsayisi: parseFloat(e.target.value) || 1
               })}
               required
               helperText={`1 ${selectedBirimSeti?.anaBirimAdi} = ${altBirimFormData.cevrimKatsayisi} ${altBirimFormData.altBirimAdi || 'Alt Birim'}`}

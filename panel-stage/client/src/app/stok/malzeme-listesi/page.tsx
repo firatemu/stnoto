@@ -1578,7 +1578,7 @@ export default function MalzemeListesiPage() {
             </FormControl>
           </Grid>
         </Grid>
-      </Paper >
+      </Paper>
 
       <Paper sx={{ width: '100%', bgcolor: 'var(--card)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
         <MaterialSearchBar
@@ -2165,7 +2165,7 @@ export default function MalzemeListesiPage() {
           </Button>
         </DialogActions>
       </Dialog>
-    </MainLayout >
+    </MainLayout>
   );
 }
 

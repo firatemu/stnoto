@@ -518,6 +518,6 @@ export default function DebtCreditReportPage() {
                     </Box>
                 </TableContainer>
             </Box>
-        </MainLayout >
+        </MainLayout>
     );
 }

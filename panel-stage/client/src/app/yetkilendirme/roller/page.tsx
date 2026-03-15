@@ -228,7 +228,7 @@ export default function RolesPage() {
 
             {/* Create Dialog */}
             <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="sm" fullWidth>
-                <DialogTitle component="div" sx={{ pb: 1 }} component="div">Yeni Rol Oluştur</DialogTitle>
+                <DialogTitle component="div" sx={{ pb: 1 }}>Yeni Rol Oluştur</DialogTitle>
                 <DialogContent>
                     <DialogContentText sx={{ mb: 2 }}>
                         Yeni bir rol oluşturun. Daha sonra detay sayfasından izinlerini ayarlayabilirsiniz.

@@ -203,7 +203,7 @@ export default function POSTransferPage() {
               </Box>
               <Typography variant="body2">
                 1 günden eski {ozet.adet} adet kredi kartı tahsilatı transfer edilmeyi bekliyor.
-                Transfer işlemi sonrasında <strong>{formatCurrency(ozet.toplamNetTutar)}</strong> tutarında 
+                Transfer işlemi sonrasında <strong>{formatCurrency(ozet.toplamNetTutar)}</strong> tutarında
                 virman hareketi <strong>{kasa.bagliKasa?.kasaAdi}</strong> hesabına aktarılacaktır.
               </Typography>
             </Paper>
@@ -300,7 +300,7 @@ export default function POSTransferPage() {
 
         {/* Confirm Dialog */}
         <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)} maxWidth="sm" fullWidth>
-          <DialogTitle component="div" sx={{ fontWeight: 'bold' }} component="div">
+          <DialogTitle component="div" sx={{ fontWeight: 'bold' }}>
             Transfer Onayı
           </DialogTitle>
           <DialogContent>
@@ -345,9 +345,9 @@ export default function POSTransferPage() {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenConfirm(false)}>İptal</Button>
-            <Button 
-              onClick={handleTransfer} 
-              variant="contained" 
+            <Button
+              onClick={handleTransfer}
+              variant="contained"
               color="success"
               disabled={transferring}
               startIcon={transferring ? <CircularProgress size={16} /> : <SwapHoriz />}

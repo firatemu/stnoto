@@ -93,7 +93,7 @@ const AracFormDialog = React.memo(({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle component="div" sx={{ bgcolor: '#191970', color: 'white', fontSize: '1.25rem', py: 2 }} component="div">
+      <DialogTitle component="div" sx={{ bgcolor: '#191970', color: 'white', fontSize: '1.25rem', py: 2 }}>
         {editingArac ? '✏️ Araç Düzenle' : '➕ Yeni Araç Ekle'}
       </DialogTitle>
       <DialogContent sx={{ mt: 3 }}>
@@ -541,8 +541,8 @@ export default function AracPage() {
                         arac.yakitTipi === 'Benzin'
                           ? 'error'
                           : arac.yakitTipi === 'Dizel'
-                          ? 'warning'
-                          : 'success'
+                            ? 'warning'
+                            : 'success'
                       }
                       variant="filled"
                     />

@@ -1224,7 +1224,7 @@ export default function GidenHavalePage() {
           </Alert>
         </Snackbar>
       </Box>
-    </MainLayout >
+    </MainLayout>
   );
 }
 

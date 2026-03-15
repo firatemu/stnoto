@@ -481,7 +481,7 @@ export default function UrunEslestirmePage() {
           fullWidth
           PaperProps={{ sx: { borderRadius: 'var(--radius-lg)' } }}
         >
-          <DialogTitle component="div" sx={{ borderBottom: '1px solid var(--border)', pb: 2 }} component="div">
+          <DialogTitle component="div" sx={{ borderBottom: '1px solid var(--border)', pb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <LinkIcon color="primary" />
               <Box>

@@ -2458,7 +2458,7 @@ export default function TahsilatPage() {
         </DialogContent>
       </Dialog>
 
-    </MainLayout >
+    </MainLayout>
   );
 }
 

@@ -962,7 +962,7 @@ export default function MasrafPage() {
             },
           }}
         >
-          <DialogTitle component="div" sx={{ color: 'var(--foreground)', borderBottom: '1px solid var(--border)' }} component="div">Silme Onayı</DialogTitle>
+          <DialogTitle component="div" sx={{ color: 'var(--foreground)', borderBottom: '1px solid var(--border)' }}>Silme Onayı</DialogTitle>
           <DialogContent sx={{ bgcolor: 'var(--background)' }}>
             <Typography sx={{ color: 'var(--foreground)' }}>
               Bu masraf kaydını silmek istediğinizden emin misiniz?
@@ -1225,7 +1225,7 @@ export default function MasrafPage() {
             },
           }}
         >
-          <DialogTitle component="div" sx={{ color: 'var(--foreground)', borderBottom: '1px solid var(--border)' }} component="div">Kategori Silme Onayı</DialogTitle>
+          <DialogTitle component="div" sx={{ color: 'var(--foreground)', borderBottom: '1px solid var(--border)' }}>Kategori Silme Onayı</DialogTitle>
           <DialogContent sx={{ bgcolor: 'var(--background)' }}>
             <Typography sx={{ color: 'var(--foreground)' }}>
               Bu kategoriyi silmek istediğinizden emin misiniz?
