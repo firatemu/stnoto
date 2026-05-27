@@ -94,6 +94,8 @@ import { TahsilatFormData, CaprazOdemeFormData, Cari, Kasa, BankaHesap, SatisEle
 
 interface Tahsilat {
   id: string;
+  belgeNo?: string | null;
+  caprazBelgeNo?: string | null;
   tip: 'TAHSILAT' | 'ODEME';
   tutar: number;
   tarih: string;
@@ -1165,6 +1167,20 @@ export default function TahsilatPage() {
         return (
           <Typography variant="body2">
             {new Date(row.tarih).toLocaleDateString('tr-TR')}
+          </Typography>
+        );
+      },
+    },
+    {
+      field: 'belgeNo',
+      headerName: 'Belge No',
+      width: 120,
+      sortable: true,
+      renderCell: (params: GridRenderCellParams) => {
+        const row = params.row as Tahsilat;
+        return (
+          <Typography variant="body2" fontWeight={600}>
+            {row.belgeNo || '-'}
           </Typography>
         );
       },

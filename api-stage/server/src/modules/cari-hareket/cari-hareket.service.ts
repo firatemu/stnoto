@@ -255,6 +255,286 @@ export class CariHareketService {
     return Buffer.from(buffer);
   }
 
+  async exportDetailedExcel(query: EkstreQueryDto): Promise<Buffer> {
+    const { cari, hareketler } = await this.getEkstre(query);
+
+    if (!cari) {
+      throw new NotFoundException('Cari bulunamadı');
+    }
+
+    const tenantSettings = await this.prisma.tenantSettings.findUnique({
+      where: { tenantId: cari.tenantId || '' },
+    });
+
+    const invoiceNos = Array.from(
+      new Set(
+        hareketler
+          .filter((h) => h.belgeTipi === 'FATURA' && !!h.belgeNo)
+          .map((h) => h.belgeNo as string),
+      ),
+    );
+
+    const faturalar = invoiceNos.length
+      ? await this.prisma.fatura.findMany({
+          where: { faturaNo: { in: invoiceNos } },
+          include: { kalemler: { include: { stok: true } }, cari: true },
+        })
+      : [];
+
+    const faturaByNo = new Map(faturalar.map((f) => [f.faturaNo, f]));
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Detaylı Cari Ekstresi');
+
+    worksheet.mergeCells('A1:M1');
+    worksheet.getCell('A1').value = tenantSettings?.companyName || 'OTOMUHASEBE ERP';
+    worksheet.getCell('A1').font = { size: 14, bold: true, color: { argb: 'FF1F2937' } };
+
+    worksheet.mergeCells('A2:M2');
+    worksheet.getCell('A2').value = 'DETAYLI CARİ HESAP EKSTRESİ';
+    worksheet.getCell('A2').font = { size: 18, bold: true, color: { argb: 'FF527575' } };
+    worksheet.getCell('A2').alignment = { horizontal: 'center' };
+
+    worksheet.getCell('A4').value = 'Cari Ünvan:';
+    worksheet.getCell('B4').value = cari.unvan;
+    worksheet.getCell('A4').font = { bold: true };
+    worksheet.getCell('A5').value = 'Cari Kodu:';
+    worksheet.getCell('B5').value = cari.cariKodu;
+    worksheet.getCell('A5').font = { bold: true };
+    worksheet.getCell('D4').value = 'Tarih:';
+    worksheet.getCell('E4').value = new Date().toLocaleDateString('tr-TR');
+    worksheet.getCell('D4').font = { bold: true };
+
+    // Header
+    worksheet.addRow([]);
+    const headerRow = worksheet.addRow([
+      'Tarih',
+      'Belge Tipi',
+      'Belge No',
+      'Açıklama',
+      'Borç',
+      'Alacak',
+      'Bakiye',
+      'Stok Kodu',
+      'Stok Adı',
+      'Miktar',
+      'Birim Fiyat',
+      'KDV%',
+      'Satır Tutar',
+    ]);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.eachCell((cell) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF527575' } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      };
+    });
+
+    const moneyFmt = '#,##0.00 ₺';
+
+    for (const h of hareketler) {
+      const row = worksheet.addRow([
+        new Date(h.tarih).toLocaleDateString('tr-TR'),
+        h.belgeTipi || '-',
+        h.belgeNo || '-',
+        h.aciklama,
+        h.tip === 'BORC' ? Number(h.tutar) : null,
+        h.tip === 'ALACAK' ? Number(h.tutar) : null,
+        Number(h.bakiye),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ]);
+      row.getCell(5).numFmt = moneyFmt;
+      row.getCell(6).numFmt = moneyFmt;
+      row.getCell(7).numFmt = moneyFmt;
+      row.getCell(5).font = { color: { argb: 'FFEF4444' } };
+      row.getCell(6).font = { color: { argb: 'FF10B981' } };
+      row.getCell(7).font = { bold: true };
+
+      if (h.belgeTipi === 'FATURA' && h.belgeNo) {
+        const fatura = faturaByNo.get(h.belgeNo);
+        if (fatura?.kalemler?.length) {
+          for (const k of fatura.kalemler as any[]) {
+            const itemRow = worksheet.addRow([
+              null,
+              'FATURA_KALEMI',
+              fatura.faturaNo,
+              null,
+              null,
+              null,
+              null,
+              k?.stok?.stokKodu || null,
+              k?.stok?.stokAdi || null,
+              k?.miktar ?? null,
+              Number(k?.birimFiyat || 0),
+              k?.kdvOrani ?? null,
+              Number(k?.tutar || 0),
+            ]);
+            itemRow.getCell(11).numFmt = moneyFmt;
+            itemRow.getCell(13).numFmt = moneyFmt;
+          }
+        }
+      }
+    }
+
+    worksheet.columns = [
+      { width: 12 },
+      { width: 14 },
+      { width: 18 },
+      { width: 50 },
+      { width: 14 },
+      { width: 14 },
+      { width: 14 },
+      { width: 14 },
+      { width: 32 },
+      { width: 10 },
+      { width: 14 },
+      { width: 8 },
+      { width: 14 },
+    ];
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    return Buffer.from(buffer);
+  }
+
+  async exportDetailedPdf(query: EkstreQueryDto): Promise<Buffer> {
+    const { cari, hareketler } = await this.getEkstre(query);
+
+    if (!cari) {
+      throw new NotFoundException('Cari bulunamadı');
+    }
+
+    const tenantSettings = await this.prisma.tenantSettings.findUnique({
+      where: { tenantId: cari.tenantId || '' },
+    });
+
+    const invoiceNos = Array.from(
+      new Set(
+        hareketler
+          .filter((h) => h.belgeTipi === 'FATURA' && !!h.belgeNo)
+          .map((h) => h.belgeNo as string),
+      ),
+    );
+
+    const faturalar = invoiceNos.length
+      ? await this.prisma.fatura.findMany({
+          where: { faturaNo: { in: invoiceNos } },
+          include: { kalemler: { include: { stok: true } } },
+        })
+      : [];
+
+    const faturaByNo = new Map(faturalar.map((f) => [f.faturaNo, f]));
+
+    const vfs = require('pdfmake/build/vfs_fonts.js');
+    const fonts = {
+      Roboto: {
+        normal: Buffer.from(vfs['Roboto-Regular.ttf'], 'base64'),
+        bold: Buffer.from(vfs['Roboto-Medium.ttf'] || vfs['Roboto-Regular.ttf'], 'base64'),
+        italics: Buffer.from(vfs['Roboto-Italic.ttf'] || vfs['Roboto-Regular.ttf'], 'base64'),
+      },
+    };
+    const printer = new PdfPrinter(fonts);
+
+    const rows: any[] = [];
+    rows.push([
+      { text: 'Tarih', bold: true },
+      { text: 'Belge Tipi', bold: true },
+      { text: 'Belge No', bold: true },
+      { text: 'Açıklama', bold: true },
+      { text: 'Borç', bold: true },
+      { text: 'Alacak', bold: true },
+      { text: 'Bakiye', bold: true },
+      { text: 'Stok Kodu', bold: true },
+      { text: 'Stok Adı', bold: true },
+      { text: 'Miktar', bold: true },
+      { text: 'Birim Fiyat', bold: true },
+      { text: 'KDV%', bold: true },
+      { text: 'Satır Tutar', bold: true },
+    ]);
+
+    const fmtMoney = (n: any) =>
+      `₺${Number(n || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`;
+
+    for (const h of hareketler) {
+      rows.push([
+        new Date(h.tarih).toLocaleDateString('tr-TR'),
+        h.belgeTipi || '-',
+        h.belgeNo || '-',
+        h.aciklama || '',
+        h.tip === 'BORC' ? fmtMoney(h.tutar) : '',
+        h.tip === 'ALACAK' ? fmtMoney(h.tutar) : '',
+        fmtMoney(h.bakiye),
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+      ]);
+
+      if (h.belgeTipi === 'FATURA' && h.belgeNo) {
+        const fatura = faturaByNo.get(h.belgeNo);
+        if (fatura?.kalemler?.length) {
+          for (const k of fatura.kalemler as any[]) {
+            rows.push([
+              '',
+              'FATURA_KALEMI',
+              fatura.faturaNo,
+              '',
+              '',
+              '',
+              '',
+              k?.stok?.stokKodu || '',
+              k?.stok?.stokAdi || '',
+              String(k?.miktar ?? ''),
+              fmtMoney(k?.birimFiyat),
+              String(k?.kdvOrani ?? ''),
+              fmtMoney(k?.tutar),
+            ]);
+          }
+        }
+      }
+    }
+
+    const docDefinition: TDocumentDefinitions = {
+      pageSize: 'A4',
+      pageOrientation: 'landscape',
+      pageMargins: [24, 24, 24, 24],
+      content: [
+        { text: tenantSettings?.companyName || 'OTOMUHASEBE ERP', fontSize: 12, bold: true, margin: [0, 0, 0, 6] },
+        { text: 'DETAYLI CARİ HESAP EKSTRESİ', fontSize: 16, bold: true, margin: [0, 0, 0, 10] },
+        { text: `Cari: ${cari.unvan} (${cari.cariKodu})`, fontSize: 10, margin: [0, 0, 0, 10] },
+        {
+          table: {
+            headerRows: 1,
+            widths: [55, 55, 60, '*', 55, 55, 55, 55, 90, 35, 55, 35, 55],
+            body: rows,
+          },
+          layout: 'lightHorizontalLines',
+          fontSize: 7,
+        },
+      ],
+      defaultStyle: { font: 'Roboto' },
+    };
+
+    const pdfDoc = printer.createPdfKitDocument(docDefinition);
+    const chunks: Buffer[] = [];
+    return await new Promise<Buffer>((resolve, reject) => {
+      pdfDoc.on('data', (chunk: Buffer) => chunks.push(chunk));
+      pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
+      pdfDoc.on('error', (err: any) => reject(err));
+      pdfDoc.end();
+    });
+  }
+
   async exportPdf(query: EkstreQueryDto): Promise<Buffer> {
     const { cari, hareketler } = await this.getEkstre(query);
 

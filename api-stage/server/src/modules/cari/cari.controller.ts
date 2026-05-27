@@ -71,6 +71,26 @@ export class CariController {
     res.end(buffer);
   }
 
+  @Get(':id/ekstre/export/excel-detayli')
+  async exportEkstreDetailedExcel(
+    @Param('id') id: string,
+    @Query('baslangicTarihi') baslangicTarihi: string,
+    @Query('bitisTarihi') bitisTarihi: string,
+    @Res() res: Response
+  ) {
+    const buffer = await this.cariHareketService.exportDetailedExcel({
+      cariId: id,
+      baslangicTarihi,
+      bitisTarihi,
+    });
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': 'attachment; filename=cari-ekstre-detayli.xlsx',
+      'Content-Length': buffer.length,
+    });
+    res.end(buffer);
+  }
+
   @Get(':id/ekstre/export/pdf')
   async exportEkstrePdf(
     @Param('id') id: string,
@@ -86,6 +106,26 @@ export class CariController {
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'attachment; filename=cari-ekstre.pdf',
+      'Content-Length': buffer.length,
+    });
+    res.end(buffer);
+  }
+
+  @Get(':id/ekstre/export/pdf-detayli')
+  async exportEkstreDetailedPdf(
+    @Param('id') id: string,
+    @Query('baslangicTarihi') baslangicTarihi: string,
+    @Query('bitisTarihi') bitisTarihi: string,
+    @Res() res: Response
+  ) {
+    const buffer = await this.cariHareketService.exportDetailedPdf({
+      cariId: id,
+      baslangicTarihi,
+      bitisTarihi,
+    });
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename=cari-ekstre-detayli.pdf',
       'Content-Length': buffer.length,
     });
     res.end(buffer);

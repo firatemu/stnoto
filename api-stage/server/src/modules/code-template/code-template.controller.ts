@@ -26,6 +26,11 @@ export class CodeTemplateController {
     return this.codeTemplateService.create(createDto);
   }
 
+  @Post('seed-defaults')
+  seedDefaults() {
+    return this.codeTemplateService.ensureDefaultTemplates();
+  }
+
   @Get('next-code/:module')
   async getNextCode(@Param('module') module: ModuleType) {
     try {

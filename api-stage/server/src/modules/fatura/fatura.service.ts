@@ -489,6 +489,76 @@ export class FaturaService {
     return fatura;
   }
 
+  async findByFaturaNo(faturaNo: string) {
+    const tenantId = await this.tenantResolver.resolveForQuery();
+
+    const fatura = await this.prisma.fatura.findFirst({
+      where: {
+        faturaNo,
+        ...(tenantId ? { tenantId } : {}),
+      },
+      include: {
+        cari: true,
+        irsaliye: {
+          select: {
+            id: true,
+            irsaliyeNo: true,
+            kaynakSiparis: {
+              select: {
+                id: true,
+                siparisNo: true,
+              },
+            },
+          },
+        },
+        kalemler: {
+          include: { stok: true },
+        },
+        createdByUser: {
+          select: {
+            id: true,
+            fullName: true,
+            username: true,
+          },
+        },
+        updatedByUser: {
+          select: {
+            id: true,
+            fullName: true,
+            username: true,
+          },
+        },
+        deletedByUser: {
+          select: {
+            id: true,
+            fullName: true,
+            username: true,
+          },
+        },
+        logs: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                fullName: true,
+                username: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+      },
+    });
+
+    if (!fatura) {
+      throw new NotFoundException(`Fatura bulunamadı: ${faturaNo}`);
+    }
+
+    return fatura;
+  }
+
   async create(
     createFaturaDto: CreateFaturaDto,
     userId?: string,

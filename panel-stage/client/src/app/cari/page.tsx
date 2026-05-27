@@ -29,7 +29,7 @@ import {
   Menu,
   TablePagination,
 } from '@mui/material';
-import { Add, Edit, Delete, Search, Visibility, Close, Receipt, ToggleOn, ToggleOff, AccountBalance, MoreVert, Refresh } from '@mui/icons-material';
+import { Add, Edit, Delete, Search, Visibility, Close, Receipt, ToggleOn, ToggleOff, AccountBalance, MoreVert, Refresh, ContactPage } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/Layout/MainLayout';
 import CariForm from '@/components/CariForm';
@@ -645,9 +645,25 @@ export default function CariPage() {
 
           return [
             <MenuItem
-              key="statement"
+              key="incele"
               onClick={() => {
                 router.push(`/cari/${cari.id}`);
+                handleMenuClose();
+              }}
+              sx={{
+                gap: 1.5,
+                py: 1,
+                '&:hover': { bgcolor: 'color-mix(in srgb, var(--chart-1) 10%, transparent)' }
+              }}
+            >
+              <Visibility fontSize="small" sx={{ color: 'var(--chart-1)' }} />
+              <Typography variant="body2" sx={{ color: 'var(--foreground)' }}>İncele</Typography>
+            </MenuItem>,
+
+            <MenuItem
+              key="ekstre"
+              onClick={() => {
+                router.push(`/cari/${cari.id}?tab=hareketler`);
                 handleMenuClose();
               }}
               sx={{
@@ -661,7 +677,7 @@ export default function CariPage() {
             </MenuItem>,
 
             <MenuItem
-              key="view"
+              key="ozet"
               onClick={() => {
                 openViewDialog(cari);
                 handleMenuClose();
@@ -669,11 +685,11 @@ export default function CariPage() {
               sx={{
                 gap: 1.5,
                 py: 1,
-                '&:hover': { bgcolor: 'color-mix(in srgb, var(--chart-1) 10%, transparent)' }
+                '&:hover': { bgcolor: 'color-mix(in srgb, var(--muted) 30%, transparent)' }
               }}
             >
-              <Visibility fontSize="small" sx={{ color: 'var(--chart-1)' }} />
-              <Typography variant="body2" sx={{ color: 'var(--foreground)' }}>İncele</Typography>
+              <ContactPage fontSize="small" sx={{ color: 'var(--muted-foreground)' }} />
+              <Typography variant="body2" sx={{ color: 'var(--foreground)' }}>Özet</Typography>
             </MenuItem>,
 
             <MenuItem

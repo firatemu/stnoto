@@ -114,6 +114,12 @@ export class FaturaController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('by-no/:faturaNo')
+  async findByNo(@Param('faturaNo') faturaNo: string) {
+    return this.faturaService.findByFaturaNo(faturaNo);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
     @Body() createFaturaDto: CreateFaturaDto,

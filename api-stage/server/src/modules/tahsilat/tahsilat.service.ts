@@ -6,15 +6,59 @@ import {
 import { PrismaService } from '../../common/prisma.service';
 import { CreateTahsilatDto } from './dto/create-tahsilat.dto';
 import { CreateCaprazOdemeDto } from './dto/create-capraz-odeme.dto';
-import { TahsilatTip, OdemeTipi, KasaHareketTipi } from '@prisma/client';
+import {
+  TahsilatTip,
+  OdemeTipi,
+  KasaHareketTipi,
+  ModuleType,
+  BelgeTipi,
+} from '@prisma/client';
 import { TenantResolverService } from '../../common/services/tenant-resolver.service';
+import { CodeTemplateService } from '../code-template/code-template.service';
 
 @Injectable()
 export class TahsilatService {
   constructor(
     private prisma: PrismaService,
     private tenantResolver: TenantResolverService,
+    private codeTemplateService: CodeTemplateService,
   ) { }
+
+  private cariBelgeTipi(tip: TahsilatTip): BelgeTipi {
+    return tip === 'TAHSILAT' ? 'TAHSILAT' : 'ODEME';
+  }
+
+  private async resolveTahsilatRecord(idOrBelgeNo: string) {
+    const tenantId = await this.tenantResolver.resolveForQuery();
+    const where: any = {
+      deletedAt: null,
+      OR: [{ id: idOrBelgeNo }, { belgeNo: idOrBelgeNo }],
+    };
+
+    if (tenantId) {
+      where.AND = [
+        ...(where.AND || []),
+        { OR: [{ tenantId }, { tenantId: null }] },
+      ];
+    }
+
+    const tahsilat = await this.prisma.tahsilat.findFirst({
+      where,
+      include: {
+        cari: true,
+        kasa: true,
+        fatura: true,
+        bankaHesap: true,
+        firmaKrediKarti: true,
+      },
+    });
+
+    if (!tahsilat) {
+      throw new NotFoundException('Tahsilat kaydı bulunamadı');
+    }
+
+    return tahsilat;
+  }
 
   async create(createDto: CreateTahsilatDto, userId: string) {
     const tenantId = await this.tenantResolver.resolveForCreate();
@@ -75,12 +119,18 @@ export class TahsilatService {
       }
     }
 
+    const belgeNo = await this.codeTemplateService.getNextCode(
+      createDto.tip === 'TAHSILAT' ? ModuleType.TAHSILAT : ModuleType.ODEME,
+    );
+    const cariBelgeTipi = this.cariBelgeTipi(createDto.tip);
+
     return await this.prisma.$transaction(async (tx) => {
       // Tahsilat kaydı oluştur
       const tahsilat = await tx.tahsilat.create({
         data: {
           cariId: createDto.cariId,
           tenantId: tenantId,
+          belgeNo,
           faturaId: createDto.faturaId,
           serviceInvoiceId: createDto.serviceInvoiceId,
           tip: createDto.tip,
@@ -137,8 +187,8 @@ export class TahsilatService {
           aciklama:
             createDto.aciklama ||
             `${createDto.odemeTipi} ile ${createDto.tip.toLowerCase()}`,
-          belgeTipi: 'TAHSILAT',
-          belgeNo: tahsilat.id,
+          belgeTipi: cariBelgeTipi,
+          belgeNo: belgeNo,
         },
       });
 
@@ -169,8 +219,8 @@ export class TahsilatService {
             hareketTipi,
             tutar: createDto.tutar,
             bakiye: yeniKasaBakiye,
-            belgeTipi: 'TAHSILAT',
-            belgeNo: tahsilat.id,
+            belgeTipi: cariBelgeTipi,
+            belgeNo: belgeNo,
             cariId: createDto.cariId,
             aciklama: createDto.aciklama,
             tarih: createDto.tarih ? new Date(createDto.tarih) : new Date(),
@@ -221,11 +271,21 @@ export class TahsilatService {
 
     // Kasa kontrolü yapılmaz - Çapraz ödemede para kasaya girmez
 
+    const caprazBelgeNo = await this.codeTemplateService.getNextCode(
+      ModuleType.CAPRAZ_ODEME,
+    );
+    const tahsilatBelgeNo = await this.codeTemplateService.getNextCode(
+      ModuleType.TAHSILAT,
+    );
+    const odemeBelgeNo = await this.codeTemplateService.getNextCode(
+      ModuleType.ODEME,
+    );
+
     return await this.prisma.$transaction(async (tx) => {
       const tarih = createDto.tarih ? new Date(createDto.tarih) : new Date();
       const aciklama =
         createDto.aciklama ||
-        `Çapraz ödeme: ${tahsilatCari.unvan} -> ${odemeCari.unvan}`;
+        `Çapraz ödeme (${caprazBelgeNo}): ${tahsilatCari.unvan} -> ${odemeCari.unvan}`;
       // Çapraz ödemede ödeme tipi opsiyonel, varsayılan olarak KREDI_KARTI kullanılır (para kasaya girmez)
       const odemeTipi = createDto.odemeTipi || 'KREDI_KARTI';
 
@@ -234,6 +294,8 @@ export class TahsilatService {
         data: {
           cariId: createDto.tahsilatCariId,
           tenantId: tenantId,
+          belgeNo: tahsilatBelgeNo,
+          caprazBelgeNo,
           tip: 'TAHSILAT',
           tutar: createDto.tutar,
           tarih,
@@ -253,6 +315,8 @@ export class TahsilatService {
         data: {
           cariId: createDto.odemeCariId,
           tenantId: tenantId,
+          belgeNo: odemeBelgeNo,
+          caprazBelgeNo,
           tip: 'ODEME',
           tutar: createDto.tutar,
           tarih,
@@ -325,7 +389,7 @@ export class TahsilatService {
           bakiye: tahsilatCariYeniBakiye,
           aciklama: aciklama,
           belgeTipi: 'TAHSILAT',
-          belgeNo: tahsilat.id,
+          belgeNo: tahsilatBelgeNo,
         },
       });
 
@@ -338,8 +402,8 @@ export class TahsilatService {
           tutar: createDto.tutar,
           bakiye: odemeCariYeniBakiye,
           aciklama: aciklama,
-          belgeTipi: 'TAHSILAT',
-          belgeNo: odeme.id,
+          belgeTipi: 'ODEME',
+          belgeNo: odemeBelgeNo,
         },
       });
 
@@ -491,26 +555,15 @@ export class TahsilatService {
     };
   }
 
-  async findOne(id: string) {
-    const tahsilat = await this.prisma.tahsilat.findFirst({
-      where: { id, deletedAt: null },
-      include: {
-        cari: true,
-        kasa: true,
-        fatura: true,
-      },
-    });
+  async findOne(idOrBelgeNo: string) {
+    const tahsilat = await this.resolveTahsilatRecord(idOrBelgeNo);
+    const belgeRef = tahsilat.belgeNo || tahsilat.id;
 
-    if (!tahsilat) {
-      throw new NotFoundException('Tahsilat kaydı bulunamadı');
-    }
-
-    // Get the balance at the time of transaction from CariHareket
     const hareket = await this.prisma.cariHareket.findFirst({
       where: {
-        belgeTipi: 'TAHSILAT',
-        belgeNo: id,
         cariId: tahsilat.cariId,
+        belgeNo: { in: [belgeRef, tahsilat.id] },
+        belgeTipi: { in: ['TAHSILAT', 'ODEME'] },
       },
       select: { bakiye: true },
     });
@@ -615,7 +668,9 @@ export class TahsilatService {
   }
 
   async delete(id: string) {
-    const tahsilat = await this.findOne(id);
+    const tahsilat = await this.resolveTahsilatRecord(id);
+    const belgeRef = tahsilat.belgeNo || tahsilat.id;
+    const belgeRefs = [...new Set([belgeRef, tahsilat.id])];
 
     return await this.prisma.$transaction(async (tx) => {
       // Cari bakiyesini geri al
@@ -652,8 +707,8 @@ export class TahsilatService {
         // Kasa hareketini sil
         await tx.kasaHareket.deleteMany({
           where: {
-            belgeTipi: 'TAHSILAT',
-            belgeNo: id,
+            belgeNo: { in: belgeRefs },
+            belgeTipi: { in: ['TAHSILAT', 'ODEME'] },
           },
         });
       }
@@ -661,14 +716,15 @@ export class TahsilatService {
       // Cari hareketini sil
       await tx.cariHareket.deleteMany({
         where: {
-          belgeTipi: 'TAHSILAT',
-          belgeNo: id,
+          cariId: tahsilat.cariId,
+          belgeNo: { in: belgeRefs },
+          belgeTipi: { in: ['TAHSILAT', 'ODEME'] },
         },
       });
 
       // Tahsilat kaydını soft-delete yap
       await tx.tahsilat.update({
-        where: { id },
+        where: { id: tahsilat.id },
         data: {
           deletedAt: new Date(),
         },

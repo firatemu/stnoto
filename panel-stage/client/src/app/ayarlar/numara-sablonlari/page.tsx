@@ -23,6 +23,7 @@ import {
   Alert,
   Snackbar,
   Grid,
+  ListSubheader,
 } from '@mui/material';
 import {
   DataGrid,
@@ -36,6 +37,8 @@ import {
   Refresh,
   Info,
   Settings,
+  Close,
+  Tag,
 } from '@mui/icons-material';
 import MainLayout from '@/components/Layout/MainLayout';
 import axios from '@/lib/axios';
@@ -54,18 +57,69 @@ interface CodeTemplate {
 }
 
 const moduleOptions = [
-  { value: 'WAREHOUSE', label: 'Depo' },
-  { value: 'CASHBOX', label: 'Kasa' },
-  { value: 'PERSONNEL', label: 'Personel' },
-  { value: 'PRODUCT', label: 'Ürün/Stok' },
-  { value: 'CUSTOMER', label: 'Cari/Müşteri' },
-  { value: 'INVOICE_SALES', label: 'Satış Faturası' },
-  { value: 'INVOICE_PURCHASE', label: 'Alış Faturası' },
-  { value: 'ORDER_SALES', label: 'Satış Siparişi' },
-  { value: 'ORDER_PURCHASE', label: 'Satın Alma Siparişi' },
-  { value: 'INVENTORY_COUNT', label: 'Sayım' },
-  { value: 'TEKLIF', label: 'Teklif' },
+  { value: 'WAREHOUSE', label: 'Depo', group: 'Stok & Depo' },
+  { value: 'PRODUCT', label: 'Ürün / Stok', group: 'Stok & Depo' },
+  { value: 'INVENTORY_COUNT', label: 'Sayım', group: 'Stok & Depo' },
+  { value: 'WAREHOUSE_TRANSFER', label: 'Depo Transfer Fişi', group: 'Stok & Depo' },
+  { value: 'CUSTOMER', label: 'Cari / Müşteri', group: 'Cari & Finans' },
+  { value: 'CASHBOX', label: 'Kasa', group: 'Cari & Finans' },
+  { value: 'TAHSILAT', label: 'Tahsilat Belgesi', group: 'Cari & Finans' },
+  { value: 'ODEME', label: 'Ödeme Belgesi', group: 'Cari & Finans' },
+  { value: 'CAPRAZ_ODEME', label: 'Çapraz Ödeme', group: 'Cari & Finans' },
+  { value: 'INVOICE_SALES', label: 'Satış Faturası', group: 'Fatura & İrsaliye' },
+  { value: 'INVOICE_PURCHASE', label: 'Alış Faturası', group: 'Fatura & İrsaliye' },
+  { value: 'DELIVERY_NOTE_SALES', label: 'Satış İrsaliyesi', group: 'Fatura & İrsaliye' },
+  { value: 'DELIVERY_NOTE_PURCHASE', label: 'Alış İrsaliyesi', group: 'Fatura & İrsaliye' },
+  { value: 'SERVICE_INVOICE', label: 'Servis Faturası', group: 'Fatura & İrsaliye' },
+  { value: 'ORDER_SALES', label: 'Satış Siparişi', group: 'Sipariş & Teklif' },
+  { value: 'ORDER_PURCHASE', label: 'Satın Alma Siparişi', group: 'Sipariş & Teklif' },
+  { value: 'TEKLIF', label: 'Teklif', group: 'Sipariş & Teklif' },
+  { value: 'PERSONNEL', label: 'Personel', group: 'İnsan Kaynakları & Servis' },
+  { value: 'TECHNICIAN', label: 'Teknisyen', group: 'İnsan Kaynakları & Servis' },
+  { value: 'WORK_ORDER', label: 'İş Emri', group: 'İnsan Kaynakları & Servis' },
 ];
+
+const MODULE_DEFAULTS: Record<
+  string,
+  { name: string; prefix: string; digitCount: number; includeYear?: boolean }
+> = {
+  WAREHOUSE: { name: 'Depo Kodu', prefix: 'D', digitCount: 3 },
+  CASHBOX: { name: 'Kasa Kodu', prefix: 'K', digitCount: 3 },
+  PERSONNEL: { name: 'Personel Kodu', prefix: 'P', digitCount: 4 },
+  PRODUCT: { name: 'Ürün Kodu', prefix: 'ST', digitCount: 4 },
+  CUSTOMER: { name: 'Cari Kodu', prefix: 'C', digitCount: 4 },
+  INVOICE_SALES: { name: 'Satış Faturası No', prefix: 'SF', digitCount: 9, includeYear: true },
+  INVOICE_PURCHASE: { name: 'Alış Faturası No', prefix: 'AF', digitCount: 5 },
+  ORDER_SALES: { name: 'Satış Siparişi No', prefix: 'SS', digitCount: 5 },
+  ORDER_PURCHASE: { name: 'Satın Alma Siparişi No', prefix: 'SA', digitCount: 5 },
+  INVENTORY_COUNT: { name: 'Sayım No', prefix: 'SY', digitCount: 5 },
+  TEKLIF: { name: 'Teklif No', prefix: 'TK', digitCount: 5 },
+  DELIVERY_NOTE_SALES: { name: 'Satış İrsaliyesi No', prefix: 'SI', digitCount: 5 },
+  DELIVERY_NOTE_PURCHASE: { name: 'Alış İrsaliyesi No', prefix: 'AI', digitCount: 5 },
+  WAREHOUSE_TRANSFER: { name: 'Depo Transfer Fişi No', prefix: 'TRF', digitCount: 6 },
+  TECHNICIAN: { name: 'Teknisyen Kodu', prefix: 'T', digitCount: 3 },
+  WORK_ORDER: { name: 'İş Emri No', prefix: 'IE', digitCount: 5 },
+  SERVICE_INVOICE: { name: 'Servis Faturası No', prefix: 'SRV', digitCount: 5 },
+  TAHSILAT: { name: 'Tahsilat Belge No', prefix: 'TH', digitCount: 6 },
+  ODEME: { name: 'Ödeme Belge No', prefix: 'OD', digitCount: 6 },
+  CAPRAZ_ODEME: { name: 'Çapraz Ödeme Belge No', prefix: 'CAP', digitCount: 6 },
+};
+
+const moduleGroups = Array.from(new Set(moduleOptions.map((o) => o.group)));
+
+function buildPreviewCode(data: {
+  prefix: string;
+  digitCount: number;
+  currentValue: number;
+  includeYear?: boolean;
+}) {
+  const next = data.currentValue + 1;
+  const padded = String(next).padStart(data.digitCount, '0');
+  if (data.includeYear) {
+    return `${data.prefix}${new Date().getFullYear()}${padded}`;
+  }
+  return `${data.prefix}${padded}`;
+}
 
 // Template Form Dialog Component - Local State ile Ping Sorunu Çözümü
 interface TemplateFormDialogProps {
@@ -107,10 +161,27 @@ const TemplateFormDialog = memo(({
     setLocalFormData(initialFormData);
   }, [initialFormData]);
 
+  const applyModuleDefaults = useCallback((module: string) => {
+    const defaults = MODULE_DEFAULTS[module];
+    if (!defaults) return;
+    setLocalFormData((prev) => ({
+      ...prev,
+      module,
+      name: defaults.name,
+      prefix: defaults.prefix,
+      digitCount: defaults.digitCount,
+      includeYear: defaults.includeYear ?? false,
+    }));
+  }, []);
+
   // Local değişiklik fonksiyonu - Sadece dialog re-render olur
   const handleLocalChange = useCallback((field: string, value: any) => {
+    if (field === 'module' && !editingTemplate) {
+      applyModuleDefaults(value);
+      return;
+    }
     setLocalFormData((prev) => ({ ...prev, [field]: value }));
-  }, []);
+  }, [applyModuleDefaults, editingTemplate]);
 
   // Local submit - Parent'a sadece burada veri gönderilir
   const handleLocalSubmit = useCallback(() => {
@@ -120,122 +191,170 @@ const TemplateFormDialog = memo(({
   // Hook'lar bittikten SONRA conditional return
   if (!open) return null;
 
+  const isSalesInvoice = localFormData.module === 'INVOICE_SALES';
+  const previewCode = localFormData.prefix && localFormData.digitCount > 0
+    ? buildPreviewCode(localFormData)
+    : '';
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle component="div">
-        {editingTemplate ? 'Şablon Düzenle' : 'Yeni Şablon Ekle'}
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--border)',
+          bgcolor: 'var(--card)',
+          overflow: 'hidden',
+        },
+      }}
+    >
+      <DialogTitle
+        component="div"
+        sx={{
+          m: 0,
+          p: 2.5,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: 'linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 75%, #000) 100%)',
+          color: 'var(--primary-foreground)',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Tag />
+          <Box>
+            <Typography variant="h6" fontWeight={800} lineHeight={1.2}>
+              {editingTemplate ? 'Şablon Düzenle' : 'Yeni Şablon Ekle'}
+            </Typography>
+            <Typography variant="caption" sx={{ opacity: 0.9 }}>
+              Otomatik numara üretim kurallarını tanımlayın
+            </Typography>
+          </Box>
+        </Box>
+        <IconButton onClick={onClose} size="small" sx={{ color: 'inherit' }}>
+          <Close />
+        </IconButton>
       </DialogTitle>
-      <DialogContent>
-        <Box sx={{ mt: 2 }}>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12 }}>
-              <FormControl fullWidth disabled={!!editingTemplate}>
-                <InputLabel>Modül</InputLabel>
+
+      <DialogContent sx={{ p: 3, bgcolor: 'var(--background)' }}>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 7 }}>
+            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 'var(--radius-md)' }}>
+              <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+                1. Modül
+              </Typography>
+              <FormControl fullWidth disabled={!!editingTemplate} size="small">
+                <InputLabel>Modül seçin</InputLabel>
                 <Select
                   value={localFormData.module}
-                  label="Modül"
-                  onChange={(e) => {
-                    const module = e.target.value;
-                    handleLocalChange('module', module);
-                    // Satış faturaları için otomatik ayarlar
-                    if (module === 'INVOICE_SALES') {
-                      handleLocalChange('includeYear', true);
-                      handleLocalChange('digitCount', 9);
-                      // Prefix'i 3 karakterle sınırla
-                      if (localFormData.prefix.length > 3) {
-                        handleLocalChange('prefix', localFormData.prefix.slice(0, 3));
-                      }
-                    }
-                  }}
+                  label="Modül seçin"
+                  onChange={(e) => handleLocalChange('module', e.target.value)}
                 >
-                  {moduleOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
+                  {moduleGroups.map((group) => (
+                    <React.Fragment key={group}>
+                      <ListSubheader sx={{ fontWeight: 700, lineHeight: '32px' }}>
+                        {group}
+                      </ListSubheader>
+                      {moduleOptions
+                        .filter((o) => o.group === group)
+                        .map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
+                    </React.Fragment>
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
 
-            <Grid size={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                label="Şablon Adı"
-                value={localFormData.name}
-                onChange={(e) => handleLocalChange('name', e.target.value)}
-                placeholder="Örn: Depo Kodu"
-              />
-            </Grid>
+              <Divider sx={{ my: 2 }} />
 
-            <Grid size={{ xs: 6 }}>
-              <TextField
-                fullWidth
-                label="Ön Ek"
-                value={localFormData.prefix}
-                onChange={(e) => {
-                  const value = e.target.value.toUpperCase();
-                  // Satış faturaları için 3 karakter sınırı
-                  const maxLength = localFormData.module === 'INVOICE_SALES' && localFormData.includeYear ? 3 : 5;
-                  handleLocalChange('prefix', value.slice(0, maxLength));
-                }}
-                placeholder={localFormData.module === 'INVOICE_SALES' && localFormData.includeYear ? "Örn: AZM (3 karakter)" : "Örn: D, K, ST"}
-                inputProps={{ maxLength: localFormData.module === 'INVOICE_SALES' && localFormData.includeYear ? 3 : 5 }}
-                helperText={localFormData.module === 'INVOICE_SALES' && localFormData.includeYear ? "Satış faturaları için 3 karakter girin" : undefined}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 6 }}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Hane Sayısı"
-                value={localFormData.digitCount}
-                onChange={(e) => handleLocalChange('digitCount', parseInt(e.target.value) || 3)}
-                inputProps={{ min: 1, max: 10 }}
-                disabled={localFormData.module === 'INVOICE_SALES' && localFormData.includeYear}
-                helperText={localFormData.module === 'INVOICE_SALES' && localFormData.includeYear ? "Satış faturaları için otomatik 9 hane" : undefined}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Başlangıç Değeri"
-                value={localFormData.currentValue}
-                onChange={(e) => handleLocalChange('currentValue', parseInt(e.target.value) || 0)}
-                inputProps={{ min: 0 }}
-                helperText="Mevcut sayaç değeri"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={localFormData.includeYear || false}
-                    onChange={(e) => {
-                      const includeYear = e.target.checked;
-                      handleLocalChange('includeYear', includeYear);
-                      // Satış faturaları için otomatik ayarlar
-                      if (localFormData.module === 'INVOICE_SALES' && includeYear) {
-                        handleLocalChange('digitCount', 9);
-                        // Prefix'i 3 karakterle sınırla
-                        if (localFormData.prefix.length > 3) {
-                          handleLocalChange('prefix', localFormData.prefix.slice(0, 3));
-                        }
-                      }
-                    }}
-                  />
-                }
-                label="Yıl Bilgisi Ekle"
-              />
-              <Typography variant="caption" color="text.secondary" sx={{ ml: 4, display: 'block', mt: 0.5 }}>
-                Format: {localFormData.includeYear ? 'ÖnEk + Yıl + Sayı (örn: AZM2025000000001)' : 'ÖnEk + Sayı (örn: D001)'}
+              <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+                2. Kod formatı
               </Typography>
-            </Grid>
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Şablon adı"
+                    value={localFormData.name}
+                    onChange={(e) => handleLocalChange('name', e.target.value)}
+                    placeholder="Örn: Satış Faturası No"
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Ön ek"
+                    value={localFormData.prefix}
+                    onChange={(e) => {
+                      const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                      const maxLength = isSalesInvoice && localFormData.includeYear ? 3 : 8;
+                      handleLocalChange('prefix', value.slice(0, maxLength));
+                    }}
+                    inputProps={{ maxLength: isSalesInvoice && localFormData.includeYear ? 3 : 8 }}
+                    helperText={isSalesInvoice && localFormData.includeYear ? 'Satış faturası: en fazla 3 karakter' : undefined}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="number"
+                    label="Hane sayısı"
+                    value={localFormData.digitCount}
+                    onChange={(e) => handleLocalChange('digitCount', parseInt(e.target.value, 10) || 1)}
+                    inputProps={{ min: 1, max: 12 }}
+                    disabled={isSalesInvoice && localFormData.includeYear}
+                    helperText={isSalesInvoice && localFormData.includeYear ? 'Yıl dahil formatta 9 hane kullanılır' : undefined}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={localFormData.includeYear || false}
+                        onChange={(e) => {
+                          const includeYear = e.target.checked;
+                          setLocalFormData((prev) => {
+                            const next = { ...prev, includeYear };
+                            if (prev.module === 'INVOICE_SALES' && includeYear) {
+                              next.digitCount = 9;
+                              next.prefix = prev.prefix.slice(0, 3);
+                            }
+                            return next;
+                          });
+                        }}
+                      />
+                    }
+                    label="Yıl bilgisi ekle (ÖnEk + Yıl + Sıra)"
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+          </Grid>
 
-            <Grid size={{ xs: 12 }}>
+          <Grid size={{ xs: 12, md: 5 }}>
+            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 'var(--radius-md)', height: '100%' }}>
+              <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+                3. Sayaç ve durum
+              </Typography>
+              <TextField
+                fullWidth
+                size="small"
+                type="number"
+                label="Başlangıç değeri (sayaç)"
+                value={localFormData.currentValue}
+                onChange={(e) => handleLocalChange('currentValue', parseInt(e.target.value, 10) || 0)}
+                inputProps={{ min: 0 }}
+                helperText="Bir sonraki üretilecek kod = başlangıç + 1"
+                sx={{ mb: 2 }}
+              />
               <FormControlLabel
                 control={
                   <Switch
@@ -243,33 +362,43 @@ const TemplateFormDialog = memo(({
                     onChange={(e) => handleLocalChange('isActive', e.target.checked)}
                   />
                 }
-                label="Aktif"
+                label="Şablon aktif"
               />
-            </Grid>
 
-            {localFormData.prefix && localFormData.digitCount > 0 && (
-              <Grid size={{ xs: 12 }}>
-                <Alert severity="success">
-                  <Typography variant="body2">
-                    <strong>Önizleme:</strong>{' '}
-                    {localFormData.includeYear
-                      ? `${localFormData.prefix}${new Date().getFullYear()}${String(localFormData.currentValue + 1).padStart(localFormData.digitCount, '0')}`
-                      : `${localFormData.prefix}${String(localFormData.currentValue + 1).padStart(localFormData.digitCount, '0')}`}
+              {previewCode && (
+                <Box
+                  sx={{
+                    mt: 3,
+                    p: 2,
+                    borderRadius: 'var(--radius-md)',
+                    bgcolor: 'color-mix(in srgb, var(--chart-2) 12%, transparent)',
+                    border: '1px dashed color-mix(in srgb, var(--chart-2) 40%, transparent)',
+                  }}
+                >
+                  <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                    Sonraki kod önizlemesi
                   </Typography>
-                </Alert>
-              </Grid>
-            )}
+                  <Typography variant="h6" fontWeight={800} sx={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
+                    {previewCode}
+                  </Typography>
+                </Box>
+              )}
+            </Paper>
           </Grid>
-        </Box>
+        </Grid>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>İptal</Button>
+
+      <DialogActions sx={{ px: 3, py: 2, bgcolor: 'var(--muted)', borderTop: '1px solid var(--border)' }}>
+        <Button onClick={onClose} sx={{ textTransform: 'none', fontWeight: 600 }}>
+          İptal
+        </Button>
         <Button
           onClick={handleLocalSubmit}
           variant="contained"
           disabled={!localFormData.module || !localFormData.name || !localFormData.prefix}
+          sx={{ textTransform: 'none', fontWeight: 700, minWidth: 120 }}
         >
-          {editingTemplate ? 'Güncelle' : 'Ekle'}
+          {editingTemplate ? 'Güncelle' : 'Kaydet'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -382,6 +511,18 @@ export default function NumaraSablonlariPage() {
   const fetchTemplates = useCallback(async () => {
     try {
       setLoading(true);
+      try {
+        const seedRes = await axios.post('/code-template/seed-defaults');
+        const created: string[] = seedRes.data?.created || [];
+        if (created.length > 0) {
+          showSnackbar(
+            `${created.length} eksik modül şablonu oluşturuldu`,
+            'success',
+          );
+        }
+      } catch {
+        // seed hatası listeyi engellemesin
+      }
       const response = await axios.get('/code-template');
       setTemplates(response.data);
     } catch (error: any) {

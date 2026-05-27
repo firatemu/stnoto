@@ -972,6 +972,8 @@ model FaturaKalemi {
 model Tahsilat {
   id                 String            @id @default(uuid())
   tenantId           String?
+  belgeNo            String?
+  caprazBelgeNo      String?
   cariId             String
   faturaId           String?
   serviceInvoiceId   String?
@@ -1001,9 +1003,11 @@ model Tahsilat {
   satisElemaniId    String?
   satisElemani      SatisElemani?    @relation(fields: [satisElemaniId], references: [id])
 
+  @@unique([tenantId, belgeNo])
   @@index([tenantId])
   @@index([tenantId, deletedAt])
   @@index([tenantId, tarih])
+  @@index([belgeNo])
   @@map("tahsilatlar")
 }
 
@@ -2953,6 +2957,9 @@ enum ModuleType {
   TECHNICIAN
   WORK_ORDER
   SERVICE_INVOICE
+  TAHSILAT
+  ODEME
+  CAPRAZ_ODEME
 }
 
 enum IrsaliyeKaynakTip {

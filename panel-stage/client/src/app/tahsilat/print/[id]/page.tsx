@@ -21,6 +21,8 @@ import { numberToTurkishText } from '@/lib/number-to-text';
 
 interface TahsilatDetail {
   id: string;
+  belgeNo?: string | null;
+  caprazBelgeNo?: string | null;
   tip: 'TAHSILAT' | 'ODEME';
   tutar: number;
   tarih: string;
@@ -131,7 +133,7 @@ export default function TahsilatPrintPage() {
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: tahsilat ? `Makbuz-${receiptNo(tahsilat.id)}` : 'Tahsilat-Makbuzu',
+    documentTitle: tahsilat ? `Makbuz-${receiptNo(tahsilat)}` : 'Tahsilat-Makbuzu',
   });
 
   const handleDownloadPDF = async () => {
@@ -162,7 +164,7 @@ export default function TahsilatPrintPage() {
       const pdfHeight = pdf.internal.pageSize.getHeight();
 
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-      pdf.save(`Makbuz-${receiptNo(tahsilat.id)}.pdf`);
+      pdf.save(`Makbuz-${receiptNo(tahsilat)}.pdf`);
     } catch (error) {
       console.error('PDF oluşturulamadı:', error);
       alert('PDF oluşturulurken bir hata oluştu: ' + (error instanceof Error ? error.message : String(error)));
@@ -282,8 +284,8 @@ export default function TahsilatPrintPage() {
   );
 }
 
-function receiptNo(id: string) {
-  return id.slice(0, 8).toUpperCase();
+function receiptNo(t: { belgeNo?: string | null; id: string }) {
+  return t.belgeNo || t.id.slice(0, 8).toUpperCase();
 }
 
 function ReceiptTemplate({
@@ -303,7 +305,7 @@ function ReceiptTemplate({
   const width = paperSize === 'A4' ? '210mm' : paperSize === 'A5' ? '148mm' : '210mm';
   const height = paperSize === 'A4' ? '297mm' : paperSize === 'A5' ? '210mm' : '148mm';
   const fontSize = paperSize === 'A4' ? '10pt' : isLandscape ? '8.5pt' : '9pt';
-  const makbuzNo = receiptNo(tahsilat.id);
+  const makbuzNo = receiptNo(tahsilat);
   const amountInWords = numberToTurkishText(tahsilat.tutar);
 
   // Design tokens

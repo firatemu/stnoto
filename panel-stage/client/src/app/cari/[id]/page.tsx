@@ -49,6 +49,8 @@ import {
   FileDownload,
   Print,
   PictureAsPdf,
+  ExpandMore,
+  ExpandLess,
   TableChart,
   TrendingUp,
   TrendingDown,
@@ -65,7 +67,7 @@ import {
   Block,
   Info,
 } from '@mui/icons-material';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import MainLayout from '@/components/Layout/MainLayout';
 import axios from '@/lib/axios';
 import { eventHub } from '@/lib/eventHub';
@@ -155,6 +157,7 @@ function TabPanel(props: { children?: React.ReactNode; index: number; value: num
 export default function CariDetayPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const cariId = params.id as string;
 
   const [cari, setCari] = useState<Cari | null>(null);
@@ -172,6 +175,12 @@ export default function CariDetayPage() {
   const [baslangicTarihi, setBaslangicTarihi] = useState('');
   const [bitisTarihi, setBitisTarihi] = useState('');
 
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+  const [detailLoadingByRow, setDetailLoadingByRow] = useState<Record<string, boolean>>({});
+  const [detailDataByRow, setDetailDataByRow] = useState<
+    Record<string, { type: 'FATURA' | 'TAHSILAT'; data: any }>
+  >({});
+
   const [formData, setFormData] = useState({
     tip: 'BORC' as 'BORC' | 'ALACAK' | 'DEVIR',
     tutar: '',
@@ -184,6 +193,14 @@ export default function CariDetayPage() {
   useEffect(() => {
     fetchCari();
   }, [cariId]);
+
+  useEffect(() => {
+    if (searchParams.get('tab') === 'hareketler') {
+      setTabValue(2);
+    } else {
+      setTabValue(0);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchHareketler();
@@ -273,6 +290,159 @@ export default function CariDetayPage() {
     setOpenIncele(true);
   };
 
+  const isDetailSupported = (hareket: CariHareket) => {
+    if (!hareket.belgeTipi || !hareket.belgeNo) return false;
+    return (
+      hareket.belgeTipi === 'FATURA' ||
+      hareket.belgeTipi === 'TAHSILAT' ||
+      hareket.belgeTipi === 'ODEME'
+    );
+  };
+
+  const fetchDetailForHareket = async (hareket: CariHareket) => {
+    if (!hareket.belgeTipi || !hareket.belgeNo) return;
+
+    setDetailLoadingByRow((prev) => ({ ...prev, [hareket.id]: true }));
+    try {
+      if (hareket.belgeTipi === 'FATURA') {
+        const res = await axios.get(`/fatura/by-no/${encodeURIComponent(hareket.belgeNo)}`);
+        setDetailDataByRow((prev) => ({ ...prev, [hareket.id]: { type: 'FATURA', data: res.data } }));
+      } else if (hareket.belgeTipi === 'TAHSILAT' || hareket.belgeTipi === 'ODEME') {
+        const res = await axios.get(`/tahsilat/${encodeURIComponent(hareket.belgeNo)}`);
+        setDetailDataByRow((prev) => ({ ...prev, [hareket.id]: { type: 'TAHSILAT', data: res.data } }));
+      }
+    } catch (error) {
+      console.error('Detay yüklenemedi:', error);
+      showSnackbar('Detay yüklenemedi', 'error');
+    } finally {
+      setDetailLoadingByRow((prev) => ({ ...prev, [hareket.id]: false }));
+    }
+  };
+
+  const toggleDetail = async (hareket: CariHareket) => {
+    if (!isDetailSupported(hareket)) {
+      handleIncele(hareket);
+      return;
+    }
+
+    const nextExpanded = expandedRowId === hareket.id ? null : hareket.id;
+    setExpandedRowId(nextExpanded);
+
+    if (nextExpanded && !detailDataByRow[hareket.id] && !detailLoadingByRow[hareket.id]) {
+      await fetchDetailForHareket(hareket);
+    }
+  };
+
+  const renderDetailPanel = (hareket: CariHareket) => {
+    const loading = !!detailLoadingByRow[hareket.id];
+    const detail = detailDataByRow[hareket.id];
+
+    if (loading) {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 2 }}>
+          <CircularProgress size={18} />
+          <Typography variant="body2" color="text.secondary">Detay yükleniyor...</Typography>
+        </Box>
+      );
+    }
+
+    if (!detail) {
+      return (
+        <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+          Detay bulunamadı.
+        </Typography>
+      );
+    }
+
+    if (detail.type === 'TAHSILAT') {
+      const t = detail.data;
+      return (
+        <Box sx={{ py: 2 }}>
+          <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 1 }}>
+            {t?.tip === 'ODEME' ? 'Ödeme' : 'Tahsilat'} Detayı
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={4}>
+              <Typography variant="caption" color="text.secondary">Belge No</Typography>
+              <Typography variant="body2" fontWeight={700}>{t?.belgeNo || t?.id || '-'}</Typography>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography variant="caption" color="text.secondary">Tip</Typography>
+              <Typography variant="body2" fontWeight={700}>{t?.tip || '-'}</Typography>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography variant="caption" color="text.secondary">Tutar</Typography>
+              <Typography variant="body2" fontWeight={700}>₺{Number(t?.tutar || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</Typography>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography variant="caption" color="text.secondary">Tarih</Typography>
+              <Typography variant="body2" fontWeight={700}>{t?.tarih ? new Date(t.tarih).toLocaleDateString('tr-TR') : '-'}</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="caption" color="text.secondary">Açıklama</Typography>
+              <Typography variant="body2">{t?.aciklama || '-'}</Typography>
+            </Grid>
+          </Grid>
+        </Box>
+      );
+    }
+
+    const f = detail.data;
+    return (
+      <Box sx={{ py: 2 }}>
+        <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 1 }}>
+          Fatura Detayı ({f?.faturaNo || '-'})
+        </Typography>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid item xs={12} md={3}>
+            <Typography variant="caption" color="text.secondary">Tip</Typography>
+            <Typography variant="body2" fontWeight={700}>{f?.faturaTipi || '-'}</Typography>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Typography variant="caption" color="text.secondary">Durum</Typography>
+            <Typography variant="body2" fontWeight={700}>{f?.durum || '-'}</Typography>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Typography variant="caption" color="text.secondary">Tarih</Typography>
+            <Typography variant="body2" fontWeight={700}>{f?.tarih ? new Date(f.tarih).toLocaleDateString('tr-TR') : '-'}</Typography>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Typography variant="caption" color="text.secondary">Genel Toplam</Typography>
+            <Typography variant="body2" fontWeight={800}>₺{Number(f?.genelToplam || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</Typography>
+          </Grid>
+        </Grid>
+
+        <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 1 }}>Kalemler</Typography>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 700 }}>Stok</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700 }}>Miktar</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700 }}>Birim Fiyat</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700 }}>KDV%</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 700 }}>Tutar</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {(f?.kalemler || []).map((k: any) => (
+              <TableRow key={k.id}>
+                <TableCell>
+                  <Typography variant="body2" fontWeight={700}>
+                    {k?.stok?.stokKodu ? `${k.stok.stokKodu} - ${k.stok.stokAdi}` : (k?.stok?.stokAdi || '-')}
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">{k?.miktar ?? '-'}</TableCell>
+                <TableCell align="right">₺{Number(k?.birimFiyat || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</TableCell>
+                <TableCell align="right">{k?.kdvOrani ?? '-'}</TableCell>
+                <TableCell align="right">₺{Number(k?.tutar || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Box>
+    );
+  };
+
   const handleExportExcel = async () => {
     try {
       showSnackbar('Excel indiriliyor...', 'info');
@@ -295,6 +465,28 @@ export default function CariDetayPage() {
     }
   };
 
+  const handleExportDetailedExcel = async () => {
+    try {
+      showSnackbar('Detaylı Excel indiriliyor...', 'info');
+      const response = await axios.get(`/cari/${cariId}/ekstre/export/excel-detayli`, {
+        params: { baslangicTarihi, bitisTarihi },
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Cari_Ekstre_Detayli_${cari?.unvan}_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      showSnackbar('Detaylı Excel başarıyla indirildi', 'success');
+    } catch (error) {
+      console.error('Detaylı Excel indirme hatası:', error);
+      showSnackbar('Detaylı Excel indirilirken hata oluştu', 'error');
+    }
+  };
+
   const handleExportPdf = async () => {
     try {
       showSnackbar('PDF hazırlanıyor...', 'info');
@@ -314,6 +506,28 @@ export default function CariDetayPage() {
     } catch (error) {
       console.error('PDF indirme hatası:', error);
       showSnackbar('PDF indirilirken hata oluştu', 'error');
+    }
+  };
+
+  const handleExportDetailedPdf = async () => {
+    try {
+      showSnackbar('Detaylı PDF hazırlanıyor...', 'info');
+      const response = await axios.get(`/cari/${cariId}/ekstre/export/pdf-detayli`, {
+        params: { baslangicTarihi, bitisTarihi },
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Cari_Ekstre_Detayli_${cari?.unvan}_${new Date().toISOString().split('T')[0]}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      showSnackbar('Detaylı PDF başarıyla indirildi', 'success');
+    } catch (error) {
+      console.error('Detaylı PDF indirme hatası:', error);
+      showSnackbar('Detaylı PDF indirilirken hata oluştu', 'error');
     }
   };
 
@@ -792,12 +1006,32 @@ export default function CariDetayPage() {
             <Button
               variant="outlined"
               fullWidth={isMobile}
+              startIcon={<FileDownload />}
+              onClick={handleExportDetailedExcel}
+              color="success"
+              sx={{ textTransform: 'none', fontWeight: 600 }}
+            >
+              Detaylı Excel
+            </Button>
+            <Button
+              variant="outlined"
+              fullWidth={isMobile}
               startIcon={<PictureAsPdf />}
               onClick={handleExportPdf}
               color="error"
               sx={{ textTransform: 'none', fontWeight: 600 }}
             >
               PDF
+            </Button>
+            <Button
+              variant="outlined"
+              fullWidth={isMobile}
+              startIcon={<PictureAsPdf />}
+              onClick={handleExportDetailedPdf}
+              color="error"
+              sx={{ textTransform: 'none', fontWeight: 600 }}
+            >
+              Detaylı PDF
             </Button>
             <IconButton
               sx={{ display: isMobile ? 'none' : 'inline-flex', border: '1px solid var(--border)' }}
@@ -864,40 +1098,56 @@ export default function CariDetayPage() {
                     </TableRow>
                   ) : (
                     hareketler.map((hareket: CariHareket) => (
-                      <TableRow key={hareket.id} hover>
-                        <TableCell>
-                          {new Date(hareket.tarih).toLocaleDateString('tr-TR')}
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={getTipLabel(hareket.tip)}
-                            color={getTipColor(hareket.tip)}
-                            size="small"
-                            sx={{ fontWeight: 600 }}
-                          />
-                        </TableCell>
-                        <TableCell>{hareket.belgeNo || '-'}</TableCell>
-                        <TableCell>{hareket.aciklama}</TableCell>
-                        <TableCell align="right" sx={{ color: '#ef4444', fontWeight: 600 }}>
-                          {hareket.tip === 'BORC' ? `₺${parseFloat(hareket.tutar).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '-'}
-                        </TableCell>
-                        <TableCell align="right" sx={{ color: '#10b981', fontWeight: 600 }}>
-                          {hareket.tip === 'ALACAK' ? `₺${parseFloat(hareket.tutar).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '-'}
-                        </TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 800 }}>
-                          ₺{parseFloat(hareket.bakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                        </TableCell>
-                        <TableCell align="center">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => handleIncele(hareket)}
-                            title="İncele"
-                          >
-                            <Visibility fontSize="small" />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
+                      <React.Fragment key={hareket.id}>
+                        <TableRow
+                          hover
+                          sx={{
+                            cursor: isDetailSupported(hareket) ? 'pointer' : 'default',
+                          }}
+                          onClick={() => toggleDetail(hareket)}
+                        >
+                          <TableCell>
+                            {new Date(hareket.tarih).toLocaleDateString('tr-TR')}
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={getTipLabel(hareket.tip)}
+                              color={getTipColor(hareket.tip)}
+                              size="small"
+                              sx={{ fontWeight: 600 }}
+                            />
+                          </TableCell>
+                          <TableCell>{hareket.belgeNo || '-'}</TableCell>
+                          <TableCell>{hareket.aciklama}</TableCell>
+                          <TableCell align="right" sx={{ color: '#ef4444', fontWeight: 600 }}>
+                            {hareket.tip === 'BORC' ? `₺${parseFloat(hareket.tutar).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '-'}
+                          </TableCell>
+                          <TableCell align="right" sx={{ color: '#10b981', fontWeight: 600 }}>
+                            {hareket.tip === 'ALACAK' ? `₺${parseFloat(hareket.tutar).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '-'}
+                          </TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 800 }}>
+                            ₺{parseFloat(hareket.bakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                          </TableCell>
+                          <TableCell align="center" onClick={(e) => e.stopPropagation()}>
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => toggleDetail(hareket)}
+                              title={isDetailSupported(hareket) ? 'Detay' : 'İncele'}
+                            >
+                              {expandedRowId === hareket.id ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+
+                        {expandedRowId === hareket.id && (
+                          <TableRow>
+                            <TableCell colSpan={8} sx={{ bgcolor: 'color-mix(in srgb, var(--muted) 40%, transparent)' }}>
+                              {renderDetailPanel(hareket)}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
                     ))
                   )}
                 </TableBody>

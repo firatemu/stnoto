@@ -11,23 +11,39 @@ import { CreateCodeTemplateDto } from './dto/create-code-template.dto';
 import { UpdateCodeTemplateDto } from './dto/update-code-template.dto';
 import { ModuleType } from '@prisma/client';
 
-const DEFAULT_TEMPLATES: Partial<Record<ModuleType, { name: string; prefix: string; digitCount: number }>> = {
+type DefaultTemplateConfig = {
+  name: string;
+  prefix: string;
+  digitCount: number;
+  includeYear?: boolean;
+};
+
+const DEFAULT_TEMPLATES: Record<ModuleType, DefaultTemplateConfig> = {
   [ModuleType.WAREHOUSE]: { name: 'Depo Kodu', prefix: 'D', digitCount: 3 },
   [ModuleType.CASHBOX]: { name: 'Kasa Kodu', prefix: 'K', digitCount: 3 },
   [ModuleType.PERSONNEL]: { name: 'Personel Kodu', prefix: 'P', digitCount: 4 },
   [ModuleType.PRODUCT]: { name: 'Ürün Kodu', prefix: 'ST', digitCount: 4 },
   [ModuleType.CUSTOMER]: { name: 'Cari Kodu', prefix: 'C', digitCount: 4 },
-  [ModuleType.INVOICE_SALES]: { name: 'Satış Faturası No', prefix: 'SF', digitCount: 5 },
+  [ModuleType.INVOICE_SALES]: {
+    name: 'Satış Faturası No',
+    prefix: 'SF',
+    digitCount: 9,
+    includeYear: true,
+  },
   [ModuleType.INVOICE_PURCHASE]: { name: 'Alış Faturası No', prefix: 'AF', digitCount: 5 },
   [ModuleType.ORDER_SALES]: { name: 'Satış Siparişi No', prefix: 'SS', digitCount: 5 },
   [ModuleType.ORDER_PURCHASE]: { name: 'Satın Alma Siparişi No', prefix: 'SA', digitCount: 5 },
   [ModuleType.INVENTORY_COUNT]: { name: 'Sayım No', prefix: 'SY', digitCount: 5 },
   [ModuleType.TEKLIF]: { name: 'Teklif No', prefix: 'TK', digitCount: 5 },
-  [ModuleType.DELIVERY_NOTE_SALES]: { name: 'Satış İrsaliyesi No', prefix: 'Sİ', digitCount: 5 },
-  [ModuleType.DELIVERY_NOTE_PURCHASE]: { name: 'Alış İrsaliyesi No', prefix: 'Aİ', digitCount: 5 },
+  [ModuleType.DELIVERY_NOTE_SALES]: { name: 'Satış İrsaliyesi No', prefix: 'SI', digitCount: 5 },
+  [ModuleType.DELIVERY_NOTE_PURCHASE]: { name: 'Alış İrsaliyesi No', prefix: 'AI', digitCount: 5 },
+  [ModuleType.WAREHOUSE_TRANSFER]: { name: 'Depo Transfer Fişi No', prefix: 'TRF', digitCount: 6 },
   [ModuleType.TECHNICIAN]: { name: 'Teknisyen Kodu', prefix: 'T', digitCount: 3 },
   [ModuleType.WORK_ORDER]: { name: 'İş Emri No', prefix: 'IE', digitCount: 5 },
-  [ModuleType.SERVICE_INVOICE]: { name: 'Servis Faturası No', prefix: 'SF', digitCount: 5 },
+  [ModuleType.SERVICE_INVOICE]: { name: 'Servis Faturası No', prefix: 'SRV', digitCount: 5 },
+  [ModuleType.TAHSILAT]: { name: 'Tahsilat Belge No', prefix: 'TH', digitCount: 6 },
+  [ModuleType.ODEME]: { name: 'Ödeme Belge No', prefix: 'OD', digitCount: 6 },
+  [ModuleType.CAPRAZ_ODEME]: { name: 'Çapraz Ödeme Belge No', prefix: 'CAP', digitCount: 6 },
 };
 
 @Injectable()
@@ -74,6 +90,48 @@ export class CodeTemplateService {
       where: { tenantId } as any,
       orderBy: { module: 'asc' },
     });
+  }
+
+  /** Eksik modül şablonlarını varsayılan ayarlarla oluşturur (mevcut şablonlara dokunmaz). */
+  async ensureDefaultTemplates(): Promise<{
+    created: ModuleType[];
+    existing: ModuleType[];
+  }> {
+    const tenantId = await this.tenantResolver.resolveForCreate();
+    const existingRows = await (this.prisma.codeTemplate as any).findMany({
+      where: { tenantId } as any,
+      select: { module: true },
+    });
+    const existingModules = new Set<ModuleType>(
+      existingRows.map((r: { module: ModuleType }) => r.module),
+    );
+
+    const created: ModuleType[] = [];
+    const existing: ModuleType[] = [];
+
+    for (const module of Object.values(ModuleType)) {
+      if (existingModules.has(module)) {
+        existing.push(module);
+        continue;
+      }
+
+      const defaults = DEFAULT_TEMPLATES[module];
+      await (this.prisma.codeTemplate as any).create({
+        data: {
+          tenantId,
+          module,
+          name: defaults.name,
+          prefix: defaults.prefix,
+          digitCount: defaults.digitCount,
+          currentValue: 0,
+          includeYear: defaults.includeYear ?? false,
+          isActive: true,
+        } as any,
+      });
+      created.push(module);
+    }
+
+    return { created, existing };
   }
 
   async findOne(id: string) {
@@ -128,24 +186,18 @@ export class CodeTemplateService {
 
       if (!template) {
         const defaults = DEFAULT_TEMPLATES[module];
-        if (defaults) {
-          template = await (this.prisma.codeTemplate as any).create({
-            data: {
-              tenantId,
-              module,
-              name: defaults.name,
-              prefix: defaults.prefix,
-              digitCount: defaults.digitCount,
-              currentValue: 0,
-              includeYear: false,
-              isActive: true,
-            } as any,
-          });
-        } else {
-          throw new NotFoundException(
-            `Bu modül için şablon tanımlanmamış: ${module}`,
-          );
-        }
+        template = await (this.prisma.codeTemplate as any).create({
+          data: {
+            tenantId,
+            module,
+            name: defaults.name,
+            prefix: defaults.prefix,
+            digitCount: defaults.digitCount,
+            currentValue: 0,
+            includeYear: defaults.includeYear ?? false,
+            isActive: true,
+          } as any,
+        });
       }
 
       if (!template.isActive) {
@@ -243,6 +295,17 @@ export class CodeTemplateService {
       case 'TEKLIF': {
         return !(await this.prisma.teklif.findFirst({
           where: { teklifNo: code, ...tenantWhere } as any,
+        }));
+      }
+      case 'TAHSILAT':
+      case 'ODEME':
+      case 'CAPRAZ_ODEME': {
+        return !(await this.prisma.tahsilat.findFirst({
+          where: {
+            deletedAt: null,
+            OR: [{ belgeNo: code }, { caprazBelgeNo: code }],
+            ...tenantWhere,
+          } as any,
         }));
       }
       default:
