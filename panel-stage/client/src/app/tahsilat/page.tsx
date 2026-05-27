@@ -83,7 +83,10 @@ import axios from '@/lib/axios';
 import CaprazOdemeDialog from './components/CaprazOdemeDialog';
 import TahsilatFormDialog from './components/TahsilatFormDialog';
 import PremiumStatCard from './components/PremiumStatCard';
+import { eventHub } from '@/lib/eventHub';
 import PremiumWidget from './components/PremiumWidget';
+import MinimalistStatCard from './components/MinimalistStatCard';
+import MinimalistWidget from './components/MinimalistWidget';
 import { ChartContainer } from '@/components/common';
 import { TahsilatFormData, CaprazOdemeFormData, Cari, Kasa, BankaHesap, SatisElemani } from './types';
 
@@ -464,11 +467,7 @@ const DataGridNoRowsOverlay = () => (
     }}
   >
     <Payments sx={{ fontSize: 80, opacity: 0.3 }} />
-    <Typography variant="h6" fontWeight={600} sx={{
-      background: 'linear-gradient(135deg, #6b7280 0%, #9ca3af 100%)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-    }}>
+    <Typography variant="h6" fontWeight={600} color="text.secondary">
       Kayıt Bulunamadı
     </Typography>
     <Typography variant="body2" color="text.secondary">
@@ -922,6 +921,8 @@ export default function TahsilatPage() {
           queryClient.invalidateQueries({ queryKey: ['cari', 'tahsilat'] }),
           queryClient.invalidateQueries({ queryKey: ['kasa', 'tahsilat'] }),
         ]);
+        // Bakiye guncellemesi icin cari listesini tetikle
+        eventHub.emit('cari:updated');
       } catch (error: any) {
         showSnackbar(error?.response?.data?.message || 'İşlem başarısız', 'error');
       } finally {
@@ -946,6 +947,8 @@ export default function TahsilatPage() {
         queryClient.invalidateQueries({ queryKey: ['cari', 'tahsilat'] }),
         queryClient.invalidateQueries({ queryKey: ['kasa', 'tahsilat'] }),
       ]);
+      // Bakiye guncellemesi icin cari listesini tetikle
+      eventHub.emit('cari:updated');
     } catch (error: any) {
       showSnackbar(error?.response?.data?.message || 'Silme başarısız', 'error');
     } finally {
@@ -975,12 +978,6 @@ export default function TahsilatPage() {
         return;
       }
 
-      // Kasa seçimi çapraz ödemede opsiyonel (para kasaya girmez)
-      // if (!caprazOdemeFormData.kasaId) {
-      //   showSnackbar('Kasa seçilmelidir', 'error');
-      //   return;
-      // }
-
       setActionLoading(true);
 
       const tahsilatCari = cariler.find(c => c.id === caprazOdemeFormData.tahsilatCariId);
@@ -991,12 +988,13 @@ export default function TahsilatPage() {
         odemeCariId: caprazOdemeFormData.odemeCariId,
         tutar: caprazOdemeFormData.tutar,
         tarih: caprazOdemeFormData.tarih,
-        // odemeTipi ve kasaId gönderilmez - Çapraz ödemede para kasaya girmez
         aciklama: caprazOdemeFormData.aciklama || `Çapraz ödeme: ${tahsilatCari?.unvan || ''} -> ${odemeCari?.unvan || ''}`,
       });
 
       showSnackbar('Çapraz ödeme tahsilat başarıyla oluşturuldu', 'success');
       setOpenCaprazOdemeDialog(false);
+      // Bakiye guncellemesi icin cari listesini tetikle
+      eventHub.emit('cari:updated');
 
       setCaprazOdemeFormData({
         tahsilatCariId: '',
@@ -1446,33 +1444,29 @@ export default function TahsilatPage() {
     {
       title: 'Toplam Tahsilat',
       value: stats.toplamTahsilat,
-      icon: <AccountBalance sx={{ fontSize: isMobile ? 32 : 40, opacity: 0.8 }} />,
-      gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-      shadowColor: '37, 99, 235',
+      icon: AccountBalance,
+      color: '#3b82f6',
       id: 'toplam-tahsilat'
     },
     {
       title: 'Toplam Ödeme',
       value: stats.toplamOdeme,
-      icon: <Payments sx={{ fontSize: isMobile ? 32 : 40, opacity: 0.8 }} />,
-      gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-      shadowColor: '239, 68, 68',
+      icon: Payments,
+      color: '#ef4444',
       id: 'toplam-odeme'
     },
     {
       title: 'Nakit Tahsilat',
       value: stats.nakitTahsilat,
-      icon: <AttachMoney sx={{ fontSize: isMobile ? 32 : 40, opacity: 0.8 }} />,
-      gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-      shadowColor: '16, 185, 129',
+      icon: AttachMoney,
+      color: '#10b981',
       id: 'nakit-tahsilat'
     },
     {
       title: 'K.Kartı Tahsilat',
       value: stats.krediKartiTahsilat,
-      icon: <CreditCard sx={{ fontSize: isMobile ? 32 : 40, opacity: 0.8 }} />,
-      gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-      shadowColor: '139, 92, 246',
+      icon: CreditCard,
+      color: '#8b5cf6',
       id: 'kk-tahsilat'
     },
   ];
@@ -1594,9 +1588,7 @@ export default function TahsilatPage() {
           }}
         >
           <Typography variant="h4" fontWeight="bold" sx={{
-            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+            color: 'text.primary',
             fontSize: isMobile ? '1.75rem' : '2.125rem',
           }}>
             Tahsilat & Ödeme
@@ -1617,16 +1609,11 @@ export default function TahsilatPage() {
           ) : (
             statCards.map((card) => (
               <Grid key={card.id} item xs={12} sm={6} lg={3}>
-                <PremiumStatCard
+                <MinimalistStatCard
                   title={card.title}
                   value={card.value}
-                  icon={
-                    card.id === 'toplam-tahsilat' ? AccountBalance :
-                      card.id === 'toplam-odeme' ? Payments :
-                        card.id === 'nakit-tahsilat' ? AttachMoney :
-                          CreditCard
-                  }
-                  color={card.id === 'toplam-odeme' ? '#f43f5e' : card.id === 'toplam-tahsilat' ? '#3b82f6' : card.id === 'nakit-tahsilat' ? '#10b981' : '#8b5cf6'}
+                  icon={card.icon}
+                  color={card.color}
                   formatValue={formatCurrency}
                 />
               </Grid>
@@ -1639,7 +1626,7 @@ export default function TahsilatPage() {
           <Grid container spacing={2} sx={{ mb: 3 }}>
             {/* Pay Chart */}
             <Grid item xs={12} md={12} lg={4}>
-              <PremiumWidget
+              <MinimalistWidget
                 title={chartTab === 0 ? 'Ödeme Yöntemi Dağılımı' : 'Kasa/Banka Dağılımı'}
                 headerAction={
                   <Tabs
@@ -1708,12 +1695,12 @@ export default function TahsilatPage() {
                     />
                   </PieChart>
                 </ChartContainer>
-              </PremiumWidget>
+              </MinimalistWidget>
             </Grid>
 
             {/* Trend Chart */}
             <Grid item xs={12} md={12} lg={8}>
-              <PremiumWidget
+              <MinimalistWidget
                 title="İşlem Trendi"
                 subtitle="Periyodik giriş ve çıkış dengesi"
                 headerAction={
@@ -1784,7 +1771,7 @@ export default function TahsilatPage() {
                     </BarChart>
                   </ChartContainer>
                 </Box>
-              </PremiumWidget>
+              </MinimalistWidget>
             </Grid>
           </Grid>
         )}
@@ -1964,8 +1951,8 @@ export default function TahsilatPage() {
                   size="large"
                   onClick={() => setOpenFilterDrawer(false)}
                   sx={{
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                    bgcolor: 'success.main',
+                    boxShadow: 'none',
                     fontWeight: 600
                   }}
                 >
@@ -2084,11 +2071,13 @@ export default function TahsilatPage() {
             disabled={actionLoading}
             fullWidth={isMobile}
             sx={{
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              bgcolor: 'success.main',
               '&:hover': {
-                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                bgcolor: 'success.dark',
               },
               fontSize: isMobile ? '0.875rem' : '1rem',
+              boxShadow: 'none',
+              borderRadius: '8px',
             }}
           >
             Tahsilat Ekle
@@ -2100,11 +2089,13 @@ export default function TahsilatPage() {
             disabled={actionLoading}
             fullWidth={isMobile}
             sx={{
-              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+              bgcolor: 'error.main',
               '&:hover': {
-                background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                bgcolor: 'error.dark',
               },
               fontSize: isMobile ? '0.875rem' : '1rem',
+              boxShadow: 'none',
+              borderRadius: '8px',
             }}
           >
             Ödeme Ekle
@@ -2116,10 +2107,12 @@ export default function TahsilatPage() {
             disabled={actionLoading}
             fullWidth={isMobile}
             sx={{
-              background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+              bgcolor: 'primary.main',
               '&:hover': {
-                background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
-              }
+                bgcolor: 'primary.dark',
+              },
+              boxShadow: 'none',
+              borderRadius: '8px',
             }}
           >
             Çapraz Ödeme Tahsilat
@@ -2145,7 +2138,7 @@ export default function TahsilatPage() {
               {denseMode ? "Normal" : "Kompakt"}
             </Button>
           </Tooltip>
-        </Box>
+        </Box >
 
         {/* Tablo / Mobil Kart Görünümü */}
         {
@@ -2293,11 +2286,11 @@ export default function TahsilatPage() {
                 sx={{
                   border: 'none',
                   '& .MuiDataGrid-columnHeaders': {
-                    background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+                    bgcolor: 'grey.50',
                     fontWeight: 600,
                     fontSize: '0.875rem',
-                    borderRadius: '8px 8px 0 0',
-                    borderBottom: '2px solid #dee2e6',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
                   },
                   '& .MuiDataGrid-columnHeaderTitle': {
                     fontWeight: 700,
@@ -2346,8 +2339,8 @@ export default function TahsilatPage() {
               bottom: 16,
               right: 16,
               zIndex: 1000,
-              background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.4)',
+              bgcolor: 'primary.main',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
             }}
             onClick={() => setOpenDialog(true)}
           >

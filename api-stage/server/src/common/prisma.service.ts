@@ -82,6 +82,24 @@ const createExtendedClient = (client: PrismaClient) => {
                 // Safe inject into where, but don't override if explicitly querying for null (global)
                 if (args.where && (args.where as any).tenantId === null) {
                   // Keep it as null (e.g. for global SystemParameters)
+                } else if (
+                  model === 'StokHareket' &&
+                  ['findMany', 'findFirst', 'findUnique', 'count', 'groupBy', 'aggregate'].includes(operation)
+                ) {
+                  // Legacy: stok_hareketleri.tenant_id NULL; scope via stok.tenant_id
+                  const incoming = (args.where || {}) as Record<string, unknown>;
+                  const { tenantId: _dropServiceTenant, ...rest } = incoming;
+                  args.where = {
+                    AND: [
+                      rest,
+                      {
+                        OR: [
+                          { tenantId: context.tenantId },
+                          { tenantId: null, stok: { tenantId: context.tenantId } },
+                        ],
+                      },
+                    ],
+                  };
                 } else {
                   args.where = { ...(args.where as any), tenantId: context.tenantId };
                 }
@@ -92,7 +110,7 @@ const createExtendedClient = (client: PrismaClient) => {
           // 4. Soft Delete Guard (Global)
           // Models that support soft delete (convention: has deletedAt field)
           const SOFT_DELETE_MODELS = [
-            'User', 'Tenant', 'Stok', 'StokHareket', 'Cari', 'CariHareket', 'Fatura',
+            'User', 'Tenant', 'Stok', 'Cari', 'CariHareket', 'Fatura',
             'Tahsilat', 'Siparis', 'Teklif', 'Personel', 'Warehouse', 'Banka', 'CekSenet',
             'SatisIrsaliyesi', 'SatınAlmaIrsaliyesi', 'Arac', 'WorkOrder', 'ServiceInvoice',
             'PurchaseOrder', 'BasitSiparis', 'SatınAlmaSiparisi', 'Masraf', 'CompanyVehicle', 'VehicleExpense'
@@ -154,12 +172,14 @@ export class PrismaService
   private _extendedClient: ExtendedPrismaClient;
 
   constructor() {
-    // Basic connection optimization
+    // Basic connection optimization (tune via PRISMA_CONNECTION_LIMIT / PRISMA_POOL_TIMEOUT_MS)
     const databaseUrl = process.env.DATABASE_URL || '';
     let optimizedUrl = databaseUrl;
     if (databaseUrl && !databaseUrl.includes('connection_limit')) {
       const separator = databaseUrl.includes('?') ? '&' : '?';
-      optimizedUrl = `${databaseUrl}${separator}connection_limit=10&pool_timeout=20`;
+      const limit = process.env.PRISMA_CONNECTION_LIMIT || '15';
+      const poolTimeout = process.env.PRISMA_POOL_TIMEOUT_MS || '30';
+      optimizedUrl = `${databaseUrl}${separator}connection_limit=${limit}&pool_timeout=${poolTimeout}`;
     }
 
     super({

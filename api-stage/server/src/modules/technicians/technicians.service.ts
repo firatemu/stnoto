@@ -3,7 +3,7 @@ import * as crypto from 'crypto';
 import { PrismaService } from '../../common/prisma.service';
 import { TenantResolverService } from '../../common/services/tenant-resolver.service';
 import { CreateTechnicianDto } from './dto/create-technician.dto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class TechniciansService {

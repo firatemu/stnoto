@@ -45,6 +45,7 @@ import {
 } from '@mui/icons-material';
 import MainLayout from '@/components/Layout/MainLayout';
 import axios from '@/lib/axios';
+import { eventHub } from '@/lib/eventHub';
 import { getBankLogo } from '@/constants/bankalar';
 
 interface BankaHesabi {
@@ -555,6 +556,7 @@ export default function GelenHavalePage() {
         showSnackbar('Gelen havale kaydı oluşturuldu', 'success');
       }
 
+      eventHub.emit('cari:updated');
       handleCloseDialog();
       fetchHavaleler();
       fetchStats();
@@ -573,6 +575,7 @@ export default function GelenHavalePage() {
       const params = deleteReason ? { reason: deleteReason } : {};
       await axios.delete(`/banka-havale/${selectedHavale.id}`, { params });
       showSnackbar('Gelen havale kaydı silindi', 'success');
+      eventHub.emit('cari:updated');
       setOpenDelete(false);
       setSelectedHavale(null);
       setDeleteReason('');

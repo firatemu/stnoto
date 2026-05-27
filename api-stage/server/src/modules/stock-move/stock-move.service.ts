@@ -9,6 +9,7 @@ import { PutAwayDto } from './dto/put-away.dto';
 import { BulkPutAwayDto } from './dto/bulk-put-away.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { StockMoveType } from '@prisma/client';
+import { computeMiktarFromStokHareketler } from '../../common/utils/stok-miktar.util';
 
 @Injectable()
 export class StockMoveService {
@@ -187,25 +188,7 @@ export class StockMoveService {
       include: { faturaKalemi: { include: { fatura: { select: { durum: true } } } } },
     });
 
-    let toplamStok = 0;
-    stokHareketler.forEach((hareket) => {
-      if ((hareket as any).faturaKalemi?.fatura?.durum === 'IPTAL') return;
-      if (
-        hareket.hareketTipi === 'GIRIS' ||
-        hareket.hareketTipi === 'SAYIM_FAZLA' ||
-        hareket.hareketTipi === 'IADE' ||
-        hareket.hareketTipi === 'IPTAL_GIRIS'
-      ) {
-        toplamStok += hareket.miktar;
-      } else if (
-        hareket.hareketTipi === 'CIKIS' ||
-        hareket.hareketTipi === 'SATIS' ||
-        hareket.hareketTipi === 'SAYIM_EKSIK' ||
-        hareket.hareketTipi === 'IPTAL_CIKIS'
-      ) {
-        toplamStok -= hareket.miktar;
-      }
-    });
+    const toplamStok = computeMiktarFromStokHareketler(stokHareketler);
 
     // Raflardaki toplam stok
     const rafToplamStok = await this.prisma.productLocationStock.aggregate({

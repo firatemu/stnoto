@@ -11,7 +11,7 @@ import { buildTenantWhereClause } from '../../common/utils/staging.util';
 import { CreateStokDto, UpdateStokDto } from './dto';
 import { CodeTemplateService } from '../code-template/code-template.service';
 import { DeletionProtectionService } from '../../common/services/deletion-protection.service';
-import { HareketTipi } from '@prisma/client';
+import { computeMiktarFromStokHareketler } from '../../common/utils/stok-miktar.util';
 
 @Injectable()
 export class StokService {
@@ -147,34 +147,25 @@ export class StokService {
         console.log('ℹ️ [findAll] No groups found in current page data');
       }
 
-      // Eğer raf field'ı boşsa, productLocationStocks'ten al ve miktar hesapla
+      const pageStokIds = initialData.map((s) => s.id);
+      const allHareketlerPage = await this.prisma.stokHareket.findMany({
+        where: { stokId: { in: pageStokIds } },
+        include: {
+          faturaKalemi: { include: { fatura: { select: { durum: true } } } },
+        },
+      });
+      const hareketlerByStokId = new Map<string, typeof allHareketlerPage>();
+      for (const h of allHareketlerPage) {
+        const list = hareketlerByStokId.get(h.stokId) ?? [];
+        list.push(h);
+        hareketlerByStokId.set(h.stokId, list);
+      }
+
+      // Miktar: yalnızca malzeme hareketlerinden (tek kaynak)
       const dataWithDetails = await Promise.all(
         initialData.map(async (stok) => {
-          // Stok hareketlerinden toplam miktarı hesapla (iptal faturalara ait hareketler hariç - sadece onaylı faturalar dikkate alınır)
-          const stokHareketler = await this.prisma.stokHareket.findMany({
-            where: { stokId: stok.id },
-            include: { faturaKalemi: { include: { fatura: { select: { durum: true } } } } },
-          });
-
-          let miktar = 0;
-          stokHareketler.forEach((hareket) => {
-            if ((hareket as any).faturaKalemi?.fatura?.durum === 'IPTAL') return;
-            if (
-              hareket.hareketTipi === 'GIRIS' ||
-              hareket.hareketTipi === 'SAYIM_FAZLA' ||
-              hareket.hareketTipi === 'IADE' ||
-              hareket.hareketTipi === 'IPTAL_GIRIS'
-            ) {
-              miktar += hareket.miktar;
-            } else if (
-              hareket.hareketTipi === 'CIKIS' ||
-              hareket.hareketTipi === 'SATIS' ||
-              hareket.hareketTipi === 'SAYIM_EKSIK' ||
-              hareket.hareketTipi === 'IPTAL_CIKIS'
-            ) {
-              miktar -= hareket.miktar;
-            }
-          });
+          const stokHareketler = hareketlerByStokId.get(stok.id) ?? [];
+          const miktar = computeMiktarFromStokHareketler(stokHareketler);
 
           // Eşleşik ürünleri hazırla
           const esdegerGrupId = stok.esdegerGrupId;
@@ -275,72 +266,50 @@ export class StokService {
       throw new NotFoundException('Bu kayıt sadece kategori veya marka tanımı içindir; malzeme kartı olarak açılamaz.');
     }
 
-    const [productLocationStocks, girisAggregate, cikisAggregate] =
-      await Promise.all([
-        this.prisma.productLocationStock.findMany({
-          where: { productId: id },
-          include: {
-            warehouse: true,
+    const [productLocationStocks, allHareketlerForMiktar] = await Promise.all([
+      this.prisma.productLocationStock.findMany({
+        where: { productId: id },
+        include: {
+          warehouse: true,
+          location: {
+            include: {
+              warehouse: true,
+            },
+          },
+        },
+        orderBy: [
+          {
+            warehouse: {
+              code: 'asc',
+            },
+          },
+          {
             location: {
-              include: {
-                warehouse: true,
-              },
+              code: 'asc',
             },
           },
-          orderBy: [
-            {
-              warehouse: {
-                code: 'asc',
-              },
-            },
-            {
-              location: {
-                code: 'asc',
-              },
-            },
-          ],
-        }),
-        this.prisma.stokHareket.aggregate({
-          where: {
-            stokId: id,
-            hareketTipi: {
-              in: [
-                HareketTipi.GIRIS,
-                HareketTipi.IADE,
-                HareketTipi.SAYIM_FAZLA,
-              ],
-            },
-          },
-          _sum: { miktar: true },
-        }),
-        this.prisma.stokHareket.aggregate({
-          where: {
-            stokId: id,
-            hareketTipi: {
-              in: [
-                HareketTipi.CIKIS,
-                HareketTipi.SATIS,
-                HareketTipi.SAYIM_EKSIK,
-              ],
-            },
-          },
-          _sum: { miktar: true },
-        }),
-      ]);
+        ],
+      }),
+      this.prisma.stokHareket.findMany({
+        where: { stokId: id },
+        include: {
+          faturaKalemi: { include: { fatura: { select: { durum: true } } } },
+        },
+      }),
+    ]);
 
-    const productLocationStockTotal = productLocationStocks.reduce(
-      (total, stock) => total + (stock.qtyOnHand ?? 0),
-      0,
-    );
-
-    const totalStock =
-      (girisAggregate._sum.miktar ?? 0) - (cikisAggregate._sum.miktar ?? 0);
+    const miktarHareket = computeMiktarFromStokHareketler(allHareketlerForMiktar);
 
     return {
       ...stok,
       productLocationStocks,
-      productLocationStockTotal,
-      totalStock,
+      /** Depo satırlarının toplamı (bilgi); kanonik stok = miktar / totalStock */
+      productLocationStockTotal: productLocationStocks.reduce(
+        (total, stock) => total + (stock.qtyOnHand ?? 0),
+        0,
+      ),
+      miktar: miktarHareket,
+      totalStock: miktarHareket,
     };
   }
 
@@ -669,39 +638,22 @@ export class StokService {
     }
 
     // Her eşdeğer ürün için miktar hesapla
-    const esdegerlerWithMiktar = await Promise.all(
-      esdegerler.map(async (urun) => {
-        const stokHareketler = await this.prisma.stokHareket.findMany({
-          where: { stokId: urun.id },
-          include: { faturaKalemi: { include: { fatura: { select: { durum: true } } } } },
-        });
+    const esUrunIdsList = esdegerler.map((u) => u.id);
+    const esHareketler = await this.prisma.stokHareket.findMany({
+      where: { stokId: { in: esUrunIdsList } },
+      include: { faturaKalemi: { include: { fatura: { select: { durum: true } } } } },
+    });
+    const esHareketByStok = new Map<string, typeof esHareketler>();
+    for (const h of esHareketler) {
+      const list = esHareketByStok.get(h.stokId) ?? [];
+      list.push(h);
+      esHareketByStok.set(h.stokId, list);
+    }
 
-        let miktar = 0;
-        stokHareketler.forEach((hareket) => {
-          if ((hareket as any).faturaKalemi?.fatura?.durum === 'IPTAL') return;
-          if (
-            hareket.hareketTipi === 'GIRIS' ||
-            hareket.hareketTipi === 'SAYIM_FAZLA' ||
-            hareket.hareketTipi === 'IADE' ||
-            hareket.hareketTipi === 'IPTAL_GIRIS'
-          ) {
-            miktar += hareket.miktar;
-          } else if (
-            hareket.hareketTipi === 'CIKIS' ||
-            hareket.hareketTipi === 'SATIS' ||
-            hareket.hareketTipi === 'SAYIM_EKSIK' ||
-            hareket.hareketTipi === 'IPTAL_CIKIS'
-          ) {
-            miktar -= hareket.miktar;
-          }
-        });
-
-        return {
-          ...urun,
-          miktar,
-        };
-      }),
-    );
+    const esdegerlerWithMiktar = esdegerler.map((urun) => ({
+      ...urun,
+      miktar: computeMiktarFromStokHareketler(esHareketByStok.get(urun.id) ?? []),
+    }));
 
     return {
       message: 'Eşdeğer ürünler getirildi',

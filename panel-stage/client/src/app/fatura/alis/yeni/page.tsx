@@ -39,6 +39,7 @@ import axios from '@/lib/axios';
 import MainLayout from '@/components/Layout/MainLayout';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTabStore } from '@/stores/tabStore';
+import { eventHub } from '@/lib/eventHub';
 
 interface Cari {
   id: string;
@@ -120,6 +121,19 @@ export function AlisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?: 
     }
   }, [irsaliyeId, editFaturaId, isEdit]);
 
+  useEffect(() => {
+    if (!warehousesFetched || warehouses.length === 0) return;
+    if (loadingFatura || loadingIrsaliye) return;
+    setFormData((prev) => {
+      const ids = new Set(warehouses.map((w: any) => w.id));
+      const cur = prev.warehouseId;
+      if (cur && ids.has(cur)) return prev;
+      const def = warehouses.find((w: any) => w.isDefault) ?? warehouses[0];
+      if (!def) return prev;
+      return { ...prev, warehouseId: def.id };
+    });
+  }, [warehousesFetched, loadingFatura, loadingIrsaliye, warehouses]);
+
   const fetchCariler = async () => {
     try {
       const response = await axios.get('/cari', {
@@ -155,14 +169,6 @@ export function AlisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?: 
         showSnackbar('Sistemde tanımlı ambar bulunamadı! Lütfen önce bir ambar tanımlayın.', 'error');
         return;
       }
-
-      // Varsayılan ambarı seç
-      const defaultWarehouse = data.find((w: any) => w.isDefault);
-      if (defaultWarehouse && !formData.warehouseId) {
-        setFormData(prev => ({ ...prev, warehouseId: defaultWarehouse.id }));
-      } else if (data.length === 1 && !formData.warehouseId) {
-        setFormData(prev => ({ ...prev, warehouseId: data[0].id }));
-      }
     } catch (error) {
       console.error('Ambarlar yüklenirken hata:', error);
       setWarehousesFetched(true);
@@ -183,6 +189,8 @@ export function AlisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?: 
       setLoadingFatura(true);
       const response = await axios.get(`/fatura/${editFaturaId}`);
       const fatura = response.data;
+      const warehouseId =
+        fatura.warehouseId ?? fatura.satinAlmaIrsaliye?.depoId ?? '';
 
       setFormData({
         faturaNo: fatura.faturaNo,
@@ -194,7 +202,7 @@ export function AlisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?: 
         genelIskontoOran: 0,
         genelIskontoTutar: toNumEdit(fatura.iskonto),
         aciklama: fatura.aciklama || '',
-        warehouseId: fatura.warehouseId || '',
+        warehouseId: String(warehouseId || ''),
         kalemler: (fatura.kalemler || []).map((k: any) => ({
           stokId: k.stokId,
           stok: k.stok ? {
@@ -266,6 +274,10 @@ export function AlisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?: 
             : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           aciklama: irsaliye.aciklama || prev.aciklama,
         }));
+      }
+
+      if (irsaliye.depoId) {
+        setFormData(prev => ({ ...prev, warehouseId: irsaliye.depoId }));
       }
 
       // Kalemleri set et
@@ -537,6 +549,7 @@ export function AlisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?: 
           })),
         });
         showSnackbar('Fatura başarıyla güncellendi', 'success');
+        eventHub.emit('cari:updated');
       } else {
         await axios.post('/fatura', {
           faturaNo: formData.faturaNo,
@@ -560,6 +573,7 @@ export function AlisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?: 
           })),
         });
         showSnackbar('Fatura başarıyla oluşturuldu', 'success');
+        eventHub.emit('cari:updated');
       }
 
       setTimeout(() => {

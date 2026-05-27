@@ -10,6 +10,7 @@ import { CreateSayimDto } from './dto/create-sayim.dto';
 import { UpdateSayimDto } from './dto/update-sayim.dto';
 import { AddKalemDto } from './dto/add-kalem.dto';
 import { SayimTipi, SayimDurum, Prisma } from '@prisma/client';
+import { computeMiktarFromStokHareketler } from '../../common/utils/stok-miktar.util';
 
 @Injectable()
 export class SayimService {
@@ -150,30 +151,11 @@ export class SayimService {
             });
           sistemMiktari = locationStock?.qtyOnHand || 0;
         } else {
-          // Ürün bazlı: Toplam stok (iptal faturalar hariç)
           const stokHareketler = await this.prisma.stokHareket.findMany({
             where: { stokId: kalem.stokId },
             include: { faturaKalemi: { include: { fatura: { select: { durum: true } } } } },
           });
-
-          stokHareketler.forEach((hareket) => {
-            if ((hareket as any).faturaKalemi?.fatura?.durum === 'IPTAL') return;
-            if (
-              hareket.hareketTipi === 'GIRIS' ||
-              hareket.hareketTipi === 'SAYIM_FAZLA' ||
-              hareket.hareketTipi === 'IADE' ||
-              hareket.hareketTipi === 'IPTAL_GIRIS'
-            ) {
-              sistemMiktari += hareket.miktar;
-            } else if (
-              hareket.hareketTipi === 'CIKIS' ||
-              hareket.hareketTipi === 'SATIS' ||
-              hareket.hareketTipi === 'SAYIM_EKSIK' ||
-              hareket.hareketTipi === 'IPTAL_CIKIS'
-            ) {
-              sistemMiktari -= hareket.miktar;
-            }
-          });
+          sistemMiktari = computeMiktarFromStokHareketler(stokHareketler);
         }
 
         const farkMiktari = kalem.sayilanMiktar - sistemMiktari;
@@ -271,25 +253,7 @@ export class SayimService {
               where: { stokId: kalem.stokId },
               include: { faturaKalemi: { include: { fatura: { select: { durum: true } } } } },
             });
-
-            stokHareketler.forEach((hareket) => {
-              if ((hareket as any).faturaKalemi?.fatura?.durum === 'IPTAL') return;
-              if (
-                hareket.hareketTipi === 'GIRIS' ||
-                hareket.hareketTipi === 'SAYIM_FAZLA' ||
-                hareket.hareketTipi === 'IADE' ||
-                hareket.hareketTipi === 'IPTAL_GIRIS'
-              ) {
-                sistemMiktari += hareket.miktar;
-              } else if (
-                hareket.hareketTipi === 'CIKIS' ||
-                hareket.hareketTipi === 'SATIS' ||
-                hareket.hareketTipi === 'SAYIM_EKSIK' ||
-                hareket.hareketTipi === 'IPTAL_CIKIS'
-              ) {
-                sistemMiktari -= hareket.miktar;
-              }
-            });
+            sistemMiktari = computeMiktarFromStokHareketler(stokHareketler);
           }
 
           const farkMiktari = kalem.sayilanMiktar - sistemMiktari;
@@ -546,30 +510,11 @@ export class SayimService {
 
       sistemMiktari = locationStock?.qtyOnHand || 0;
     } else {
-      // Ürün bazlı: Toplam stok (iptal faturalar hariç)
       const stokHareketler = await this.prisma.stokHareket.findMany({
         where: { stokId: addKalemDto.stokId },
         include: { faturaKalemi: { include: { fatura: { select: { durum: true } } } } },
       });
-
-      stokHareketler.forEach((hareket) => {
-        if ((hareket as any).faturaKalemi?.fatura?.durum === 'IPTAL') return;
-        if (
-          hareket.hareketTipi === 'GIRIS' ||
-          hareket.hareketTipi === 'SAYIM_FAZLA' ||
-          hareket.hareketTipi === 'IADE' ||
-          hareket.hareketTipi === 'IPTAL_GIRIS'
-        ) {
-          sistemMiktari += hareket.miktar;
-        } else if (
-          hareket.hareketTipi === 'CIKIS' ||
-          hareket.hareketTipi === 'SATIS' ||
-          hareket.hareketTipi === 'SAYIM_EKSIK' ||
-          hareket.hareketTipi === 'IPTAL_CIKIS'
-        ) {
-          sistemMiktari -= hareket.miktar;
-        }
-      });
+      sistemMiktari = computeMiktarFromStokHareketler(stokHareketler);
     }
 
     const farkMiktari = addKalemDto.sayilanMiktar - sistemMiktari;

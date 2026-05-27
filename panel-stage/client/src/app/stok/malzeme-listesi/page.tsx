@@ -1903,6 +1903,7 @@ export default function MalzemeListesiPage() {
                   <TableHead sx={{ bgcolor: 'var(--muted)' }}>
                     <TableRow>
                       <TableCell sx={{ color: 'var(--foreground)' }}><strong>Tarih</strong></TableCell>
+                      <TableCell sx={{ color: 'var(--foreground)' }}><strong>Fatura No</strong></TableCell>
                       <TableCell sx={{ color: 'var(--foreground)' }}><strong>İşlem Türü</strong></TableCell>
                       <TableCell sx={{ color: 'var(--foreground)' }}><strong>Fatura Durumu</strong></TableCell>
                       <TableCell sx={{ color: 'var(--foreground)' }}><strong>Ambar</strong></TableCell>
@@ -1918,7 +1919,7 @@ export default function MalzemeListesiPage() {
                       <TableSkeleton rows={5} columns={6} />
                     ) : hareketler.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={9} align="center" sx={{ py: 6 }}>
+                        <TableCell colSpan={10} align="center" sx={{ py: 6 }}>
                           <Typography variant="body2" sx={{ color: 'var(--muted-foreground)' }}>
                             Bu ürün için hareket kaydı bulunamadı.
                           </Typography>
@@ -1935,6 +1936,11 @@ export default function MalzemeListesiPage() {
                             <TableCell>
                               <Typography variant="caption" sx={{ color: 'var(--foreground)' }}>
                                 {formatHareketDate(hareket.createdAt)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2" sx={{ color: 'var(--foreground)' }}>
+                                {hareket.faturaKalemi?.fatura?.faturaNo || '-'}
                               </Typography>
                             </TableCell>
                             <TableCell>

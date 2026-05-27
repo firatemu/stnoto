@@ -26,6 +26,7 @@ import {
 import { AccountBalance, TrendingUp, TrendingDown, Receipt, CheckCircle, Warning } from '@mui/icons-material';
 import MainLayout from '@/components/Layout/MainLayout';
 import axios from '@/lib/axios';
+import { eventHub } from '@/lib/eventHub';
 
 interface Cari {
   id: string;
@@ -71,6 +72,19 @@ export default function FaturaKapatmaPage() {
     if (selectedCari) {
       fetchCariFaturalar(selectedCari.id);
     }
+  }, [selectedCari]);
+
+  useEffect(() => {
+    const unsubscribe = eventHub.on('cari:updated', () => {
+      fetchCariler();
+      if (selectedCari) {
+        fetchCariFaturalar(selectedCari.id);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, [selectedCari]);
 
   const fetchCariler = async () => {

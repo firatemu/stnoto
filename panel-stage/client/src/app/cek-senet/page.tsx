@@ -39,6 +39,7 @@ import * as XLSX from 'xlsx';
 import { useRouter } from 'next/navigation';
 import { useSnackbar } from 'notistack';
 import MainLayout from '@/components/Layout/MainLayout';
+import { eventHub } from '@/lib/eventHub';
 
 export default function CekSenetPage() {
     const router = useRouter();
@@ -175,6 +176,8 @@ export default function CekSenetPage() {
             setOpenDelete(false);
             setCekToDelete(null);
             fetchCekSenet();
+            // Bakiye guncellemesi icin cari listesini tetikle
+            eventHub.emit('cari:updated');
         } catch (error: any) {
             enqueueSnackbar(error.response?.data?.message || 'Silme hatası', { variant: 'error' });
         } finally {
@@ -206,6 +209,8 @@ export default function CekSenetPage() {
             enqueueSnackbar('Tahsilat başarılı', { variant: 'success' });
             setOpenTahsilat(false);
             fetchCekSenet(); // Listeyi yenile
+            // Bakiye guncellemesi icin cari listesini tetikle
+            eventHub.emit('cari:updated');
         } catch (error: any) {
             enqueueSnackbar(error.response?.data?.message || 'Hata oluştu', { variant: 'error' });
         }

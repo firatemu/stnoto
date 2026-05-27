@@ -50,6 +50,7 @@ import {
 import axios from '@/lib/axios';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSnackbar } from 'notistack';
+import { eventHub } from '@/lib/eventHub';
 import MainLayout from '@/components/Layout/MainLayout';
 
 interface CekFormData {
@@ -234,6 +235,7 @@ function YeniBordroContent() {
 
             await axios.post('/bordro', payload);
             enqueueSnackbar('Bordro başarıyla kaydedildi', { variant: 'success' });
+            eventHub.emit('cari:updated');
             router.push('/bordro');
         } catch (error: any) {
             enqueueSnackbar(error.response?.data?.message || 'Hata oluştu', { variant: 'error' });

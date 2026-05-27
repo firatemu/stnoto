@@ -1,13 +1,54 @@
-version: '3.8'
-
 # otomuhasebe core stack for stnoto.com production environment
 # Includes database, storage, cache and automatic SSL via Caddy
+#
+# Resource limits: `deploy.resources` is only honored by Swarm; `docker compose up`
+# uses `cpus` / `mem_limit` (see Compose spec). Tune *_MB to match host RAM.
 
 services:
   postgres:
     image: postgres:16-alpine
     container_name: otomuhasebe-postgres
     restart: always
+    # Query parallelism + shared buffers (align with mem_limit; ~8GB host → 2.5G DB)
+    shm_size: 768mb
+    cpus: ${POSTGRES_CPUS:-0.7}
+    mem_limit: ${POSTGRES_MEMORY_MB:-2560m}
+    command:
+      - postgres
+      - -c
+      - max_connections=80
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - effective_cache_size=1792MB
+      - -c
+      - maintenance_work_mem=128MB
+      - -c
+      - work_mem=8MB
+      - -c
+      - temp_buffers=8MB
+      - -c
+      - checkpoint_completion_target=0.9
+      - -c
+      - wal_buffers=16MB
+      - -c
+      - min_wal_size=256MB
+      - -c
+      - max_wal_size=1GB
+      - -c
+      - random_page_cost=1.1
+      - -c
+      - effective_io_concurrency=200
+      - -c
+      - max_worker_processes=2
+      - -c
+      - max_parallel_workers_per_gather=1
+      - -c
+      - max_parallel_workers=2
+      - -c
+      - default_statistics_target=100
+      - -c
+      - jit=off
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -16,18 +57,40 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-otomuhasebe}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
     container_name: otomuhasebe-redis
     restart: always
+    cpus: ${REDIS_CPUS:-0.25}
+    mem_limit: ${REDIS_MEMORY_MB:-768m}
+    command:
+      - redis-server
+      - --maxmemory
+      - ${REDIS_MAXMEMORY:-640mb}
+      - --maxmemory-policy
+      - noeviction
+      - --tcp-keepalive
+      - "60"
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   minio:
     image: minio/minio
     container_name: otomuhasebe-minio
     restart: always
+    cpus: ${MINIO_CPUS:-0.15}
+    mem_limit: ${MINIO_MEMORY_MB:-512m}
     command: server /data --console-address ":9001"
     environment:
       - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
@@ -38,58 +101,63 @@ services:
       - app-network
 
   backend:
-    image: ghcr.io/firatemu/stnoto-backend:latest
+    image: stnoto-backend:latest
     container_name: stnoto-api
+    build:
+      context: ./api-stage
+      dockerfile: server/Dockerfile.staging.prod
     restart: always
     working_dir: /app/server
     command: ["node", "dist/main.js"]
+    cpus: ${BACKEND_CPUS:-0.55}
+    mem_limit: ${BACKEND_MEMORY_MB:-1536m}
     environment:
       - NODE_ENV=production
       - PORT=3000
+      # Leave headroom for native buffers + Prisma inside mem_limit
+      - NODE_OPTIONS=--max-old-space-size=${BACKEND_NODE_HEAP_MB:-1024}
+      - UV_THREADPOOL_SIZE=${UV_THREADPOOL_SIZE:-16}
+      - PRISMA_CONNECTION_LIMIT=${PRISMA_CONNECTION_LIMIT:-15}
+      - PRISMA_POOL_TIMEOUT_MS=${PRISMA_POOL_TIMEOUT_MS:-30}
     env_file:
       - .env
     depends_on:
-      - postgres
-      - redis
-      - minio
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
     networks:
       - app-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-        reservations:
-          cpus: '0.10'
-          memory: 128M
 
   frontend:
-    image: ghcr.io/firatemu/stnoto-frontend:latest
+    image: stnoto-frontend:latest
     container_name: stnoto-client
+    build:
+      context: ./panel-stage/client
+      dockerfile: Dockerfile.staging.prod
     restart: always
+    cpus: ${FRONTEND_CPUS:-0.55}
+    mem_limit: ${FRONTEND_MEMORY_MB:-2048m}
     environment:
       - NODE_ENV=production
       - PORT=3000
       - HOSTNAME=0.0.0.0
+      - NODE_OPTIONS=--max-old-space-size=${FRONTEND_NODE_HEAP_MB:-1536}
     env_file:
       - .env
     depends_on:
       - backend
     networks:
       - app-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.75'
-          memory: 1024M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
 
   caddy:
     image: caddy:2-alpine
     container_name: otomuhasebe-caddy
     restart: always
+    cpus: ${CADDY_CPUS:-0.1}
+    mem_limit: ${CADDY_MEMORY_MB:-256m}
     ports:
       - "80:80"
       - "443:443"

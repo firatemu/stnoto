@@ -50,17 +50,25 @@ interface FaturaInfo {
   faturaNo?: string;
   faturaTipi?: string;
   durum?: string;
+  cari?: { unvan?: string; cariKodu?: string } | null;
+}
+
+interface WarehouseInfo {
+  id?: string;
+  name?: string;
+  code?: string;
 }
 
 interface StokHareket {
   id: string;
   stokId: string;
-  hareketTipi: 'GIRIS' | 'CIKIS' | 'SATIS' | 'IADE' | 'SAYIM' | 'IPTAL_GIRIS' | 'IPTAL_CIKIS';
+  hareketTipi: 'GIRIS' | 'CIKIS' | 'SATIS' | 'IADE' | 'SAYIM' | 'IPTAL_GIRIS' | 'IPTAL_CIKIS' | 'SAYIM_FAZLA' | 'SAYIM_EKSIK';
   miktar: number;
   birimFiyat: number;
   aciklama?: string;
   createdAt: string;
   stok: Stok;
+  warehouse?: WarehouseInfo | null;
   faturaKalemi?: (FaturaKalemi & { fatura?: FaturaInfo }) | null;
 }
 
@@ -71,26 +79,25 @@ interface Stats {
   toplamIade: number;
 }
 
+const TABLE_COL_COUNT = 11;
+
 export default function MalzemeHareketleriPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStok, setSelectedStok] = useState<Stok | null>(null);
   const [hareketTipi, setHareketTipi] = useState<string>('');
 
-  // Debounced search
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  // React Query hooks
   const { data: stoklar = [], isLoading: stoklarLoading } = useStoklar(debouncedSearch, 1000);
   const { data: hareketData, isLoading: hareketlerLoading } = useStokHareketler(
     selectedStok?.id,
     hareketTipi || undefined,
-    100,
-    true
+    500,
+    true,
   );
 
   const hareketler = hareketData || [];
 
-  // İstatistikleri hesapla
   const stats: Stats = {
     toplamGiris: hareketler.filter((h: StokHareket) => h.hareketTipi === 'GIRIS').reduce((sum: number, h: StokHareket) => sum + h.miktar, 0),
     toplamCikis: hareketler.filter((h: StokHareket) => h.hareketTipi === 'CIKIS').reduce((sum: number, h: StokHareket) => sum + h.miktar, 0),
@@ -153,10 +160,12 @@ export default function MalzemeHareketleriPage() {
       case 'GIRIS': return faturaTipi === 'ALIS' ? 'Satınalma faturası' : 'Giriş';
       case 'CIKIS': return 'Çıkış';
       case 'SATIS': return 'Satış faturası';
-      case 'IADE': return faturaTipi === 'ALIS_IADE' ? 'Alış iadesi' : faturaTipi === 'SATIS_IADE' ? 'Satış iadesi' : 'Giriş';
+      case 'IADE': return faturaTipi === 'ALIS_IADE' ? 'Alış iadesi' : faturaTipi === 'SATIS_IADE' ? 'Satış iadesi' : 'İade';
       case 'IPTAL_GIRIS':
       case 'IPTAL_CIKIS': return 'İptal';
       case 'SAYIM': return 'Sayım';
+      case 'SAYIM_FAZLA': return 'Sayım fazlası';
+      case 'SAYIM_EKSIK': return 'Sayım eksiği';
       default: return tip;
     }
   };
@@ -164,7 +173,6 @@ export default function MalzemeHareketleriPage() {
   const getFaturaDurumLabel = (hareket: StokHareket) => {
     const durum = hareket.faturaKalemi?.fatura?.durum;
     if (!durum) {
-      // IPTAL_* hareketleri faturaKalemi olmadan oluşturulur - hareket tipinden anlaşılır
       if (hareket.hareketTipi === 'IPTAL_GIRIS' || hareket.hareketTipi === 'IPTAL_CIKIS') return 'İptal';
       return '-';
     }
@@ -190,6 +198,30 @@ export default function MalzemeHareketleriPage() {
     return 'default';
   };
 
+  const ambarLabel = (hareket: StokHareket) => {
+    const w = hareket.warehouse;
+    if (!w) return '-';
+    const code = w.code ? `${w.code}` : '';
+    const name = w.name || '';
+    if (code && name) return `${code} — ${name}`;
+    return name || code || '-';
+  };
+
+  const cariLabel = (hareket: StokHareket) => {
+    const c = hareket.faturaKalemi?.fatura?.cari;
+    if (!c) return '-';
+    const kod = c.cariKodu ? `${c.cariKodu} ` : '';
+    const unvan = c.unvan || '';
+    return `${kod}${unvan}`.trim() || '-';
+  };
+
+  const satirToplam = (hareket: StokHareket) => {
+    if (hareket.faturaKalemi) {
+      return Number(hareket.faturaKalemi.tutar);
+    }
+    return hareket.miktar * Number(hareket.birimFiyat);
+  };
+
   return (
     <MainLayout>
       <Box sx={{ mb: 3 }}>
@@ -201,7 +233,6 @@ export default function MalzemeHareketleriPage() {
         </Typography>
       </Box>
 
-      {/* İstatistik Kartları */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ bgcolor: 'color-mix(in srgb, var(--chart-3) 15%, transparent)', borderLeft: '4px solid var(--chart-3)' }}>
@@ -292,7 +323,6 @@ export default function MalzemeHareketleriPage() {
         </Grid>
       </Grid>
 
-      {/* Filtreler */}
       <Paper sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
@@ -368,30 +398,29 @@ export default function MalzemeHareketleriPage() {
         </Grid>
       </Paper>
 
-      {/* Hareketler Tablosu */}
       <TableContainer component={Paper}>
-        <Table>
+        <Table size="small">
           <TableHead sx={{ bgcolor: 'var(--muted)' }}>
             <TableRow>
+              <TableCell><strong>Malzeme</strong></TableCell>
               <TableCell><strong>Tarih</strong></TableCell>
-              <TableCell><strong>Ürün Kodu</strong></TableCell>
-              <TableCell><strong>Ürün Adı</strong></TableCell>
-              <TableCell><strong>Hareket Tipi</strong></TableCell>
+              <TableCell><strong>Fatura No</strong></TableCell>
+              <TableCell><strong>İşlem Türü</strong></TableCell>
               <TableCell><strong>Fatura Durumu</strong></TableCell>
+              <TableCell><strong>Ambar</strong></TableCell>
+              <TableCell><strong>Cari</strong></TableCell>
               <TableCell align="right"><strong>Miktar</strong></TableCell>
               <TableCell align="right"><strong>Birim Fiyat</strong></TableCell>
-              <TableCell align="right"><strong>İndirim</strong></TableCell>
-              <TableCell align="right"><strong>Birim Net</strong></TableCell>
               <TableCell align="right"><strong>Toplam</strong></TableCell>
               <TableCell><strong>Açıklama</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {hareketlerLoading ? (
-              <TableSkeleton rows={5} columns={10} />
+              <TableSkeleton rows={5} columns={TABLE_COL_COUNT} />
             ) : hareketler.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={11} align="center" sx={{ py: 8 }}>
+                <TableCell colSpan={TABLE_COL_COUNT} align="center" sx={{ py: 8 }}>
                   <Typography variant="body1" color="text.secondary">
                     Hareket bulunamadı
                   </Typography>
@@ -408,24 +437,23 @@ export default function MalzemeHareketleriPage() {
                   sx={{ '&:hover': { bgcolor: 'var(--muted)' } }}
                 >
                   <TableCell>
+                    <Typography variant="body2" fontWeight="600" color="#191970">
+                      {hareket.stok.stokKodu}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {hareket.stok.stokAdi}
+                      {hareket.stok.marka ? ` • ${hareket.stok.marka}` : ''}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
                     <Typography variant="caption" color="text.secondary">
                       {formatDate(hareket.createdAt)}
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" fontWeight="600" color="#191970">
-                      {hareket.stok.stokKodu}
+                    <Typography variant="body2" sx={{ color: 'var(--foreground)' }}>
+                      {hareket.faturaKalemi?.fatura?.faturaNo || '-'}
                     </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {hareket.stok.stokAdi}
-                    </Typography>
-                    {hareket.stok.marka && (
-                      <Typography variant="caption" color="text.secondary" display="block">
-                        {hareket.stok.marka}
-                      </Typography>
-                    )}
                   </TableCell>
                   <TableCell>
                     <Chip
@@ -443,6 +471,14 @@ export default function MalzemeHareketleriPage() {
                       variant="outlined"
                     />
                   </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{ambarLabel(hareket)}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ maxWidth: 220 }} noWrap title={cariLabel(hareket)}>
+                      {cariLabel(hareket)}
+                    </Typography>
+                  </TableCell>
                   <TableCell align="right">
                     <Typography variant="body2" fontWeight="600">
                       {hareket.miktar.toLocaleString()}
@@ -450,54 +486,13 @@ export default function MalzemeHareketleriPage() {
                   </TableCell>
                   <TableCell align="right">
                     <Typography variant="body2">
-                      {formatMoney(hareket.birimFiyat)}
+                      {formatMoney(Number(hareket.birimFiyat))}
                     </Typography>
                   </TableCell>
                   <TableCell align="right">
-                    {hareket.faturaKalemi ? (
-                      <Box>
-                        {hareket.faturaKalemi.iskontoTutari && Number(hareket.faturaKalemi.iskontoTutari) > 0 ? (
-                          <Box>
-                            <Typography variant="body2" color="error" fontWeight="600">
-                              {formatMoney(Number(hareket.faturaKalemi.iskontoTutari) / hareket.miktar)}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" display="block">
-                              Toplam: {formatMoney(Number(hareket.faturaKalemi.iskontoTutari))}
-                            </Typography>
-                          </Box>
-                        ) : hareket.faturaKalemi.iskontoOrani && Number(hareket.faturaKalemi.iskontoOrani) > 0 ? (
-                          <Typography variant="body2" color="error" fontWeight="600">
-                            %{Number(hareket.faturaKalemi.iskontoOrani).toFixed(2)}
-                          </Typography>
-                        ) : (
-                          <Typography variant="body2" color="text.secondary">-</Typography>
-                        )}
-                      </Box>
-                    ) : (
-                      <Typography variant="body2" color="text.secondary">-</Typography>
-                    )}
-                  </TableCell>
-                  <TableCell align="right">
-                    {hareket.faturaKalemi ? (
-                      <Typography variant="body2" fontWeight="600" color="primary">
-                        {formatMoney(Number(hareket.faturaKalemi.tutar) / hareket.miktar)}
-                      </Typography>
-                    ) : (
-                      <Typography variant="body2" color="text.secondary">
-                        {formatMoney(hareket.birimFiyat)}
-                      </Typography>
-                    )}
-                  </TableCell>
-                  <TableCell align="right">
-                    {hareket.faturaKalemi ? (
-                      <Typography variant="body2" fontWeight="600">
-                        {formatMoney(Number(hareket.faturaKalemi.tutar))}
-                      </Typography>
-                    ) : (
-                      <Typography variant="body2" fontWeight="600">
-                        {formatMoney(hareket.miktar * Number(hareket.birimFiyat))}
-                      </Typography>
-                    )}
+                    <Typography variant="body2" fontWeight="600">
+                      {formatMoney(satirToplam(hareket))}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography variant="caption" color="text.secondary">
@@ -513,10 +508,9 @@ export default function MalzemeHareketleriPage() {
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
         <Typography variant="body2" color="text.secondary">
-          Toplam {hareketler.length} hareket gösteriliyor
+          Toplam {hareketler.length} hareket gösteriliyor (en fazla 500)
         </Typography>
       </Box>
     </MainLayout>
   );
 }
-

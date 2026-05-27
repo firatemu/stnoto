@@ -32,6 +32,7 @@ import { Delete, Save, ArrowBack, ToggleOn, ToggleOff, ShoppingCart } from '@mui
 import MainLayout from '@/components/Layout/MainLayout';
 import axios from '@/lib/axios';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { eventHub } from '@/lib/eventHub';
 
 interface Cari {
   id: string;
@@ -633,6 +634,7 @@ function YeniAlisIadeFaturasiContent() {
       });
 
       showSnackbar('İade faturası başarıyla oluşturuldu', 'success');
+      eventHub.emit('cari:updated');
       setTimeout(() => {
         router.push('/fatura/iade/alis');
       }, 1500);

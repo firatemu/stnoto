@@ -3,7 +3,7 @@ import { AppModule } from '../../app.module';
 import { PrismaService } from '../../common/prisma.service';
 import { TenantContextService } from '../../common/services/tenant-context.service';
 import { Logger } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 async function bootstrap() {
     const logger = new Logger('Seeder');

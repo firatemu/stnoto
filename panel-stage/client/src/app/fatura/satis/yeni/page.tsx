@@ -39,6 +39,7 @@ import axios from '@/lib/axios';
 import MainLayout from '@/components/Layout/MainLayout';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTabStore } from '@/stores/tabStore';
+import { eventHub } from '@/lib/eventHub';
 
 interface Cari {
   id: string;
@@ -358,6 +359,19 @@ export function SatisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?:
     }
   }, [editFaturaId, isEdit]);
 
+  useEffect(() => {
+    if (!warehousesFetched || warehouses.length === 0) return;
+    if (loadingFatura || loadingSiparis) return;
+    setFormData((prev) => {
+      const ids = new Set(warehouses.map((w: any) => w.id));
+      const cur = prev.warehouseId;
+      if (cur && ids.has(cur)) return prev;
+      const def = warehouses.find((w: any) => w.isDefault) ?? warehouses[0];
+      if (!def) return prev;
+      return { ...prev, warehouseId: def.id };
+    });
+  }, [warehousesFetched, loadingFatura, loadingSiparis, warehouses]);
+
   const fetchCariler = async () => {
     try {
       const response = await axios.get('/cari', {
@@ -379,17 +393,6 @@ export function SatisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?:
       if (warehouseList.length === 0) {
         showSnackbar('Sistemde tanımlı ambar bulunamadı! Lütfen önce bir ambar tanımlayın.', 'error');
         return;
-      }
-
-      // Kopyala veya düzenle modunda ambarı başka yer set edecek; varsayılan atama yapma
-      const isCopyMode = kopyalaId || (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('kopyala'));
-      if (isCopyMode || isEdit) return;
-
-      const defaultWarehouse = warehouseList.find((w: any) => w.isDefault);
-      if (defaultWarehouse && !formData.warehouseId) {
-        setFormData(prev => ({ ...prev, warehouseId: defaultWarehouse.id }));
-      } else if (warehouseList.length === 1 && !formData.warehouseId) {
-        setFormData(prev => ({ ...prev, warehouseId: warehouseList[0].id }));
       }
     } catch (error) {
       console.error('Ambar listesi alınamadı:', error);
@@ -1130,6 +1133,7 @@ export function SatisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?:
           })),
         });
         showSnackbar('Fatura başarıyla güncellendi', 'success');
+        eventHub.emit('cari:updated');
         setTimeout(() => {
           const currentTabId = useTabStore.getState().activeTab;
           if (currentTabId) {
@@ -1170,6 +1174,7 @@ export function SatisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?:
         })),
       });
       showSnackbar('Fatura başarıyla oluşturuldu', 'success');
+      eventHub.emit('cari:updated');
       const { removeTab, activeTab } = useTabStore.getState();
       if (activeTab) removeTab(activeTab);
 
@@ -1221,18 +1226,6 @@ export function SatisFaturaForm({ faturaId: editFaturaId, onBack }: { faturaId?:
           gap: 2,
           mb: 2
         }}>
-          <IconButton
-            onClick={() => { if (isEdit && onBack) onBack(); else router.push('/fatura/satis'); }}
-            sx={{
-              bgcolor: 'var(--secondary)',
-              color: 'var(--secondary-foreground)',
-              '&:hover': { bgcolor: 'var(--secondary-hover)' },
-              width: isMobile ? 40 : 48,
-              height: isMobile ? 40 : 48
-            }}
-          >
-            <ArrowBack />
-          </IconButton>
           <Box>
             <Typography variant={isMobile ? "h5" : "h4"} fontWeight="800" sx={{
               color: 'var(--foreground)',

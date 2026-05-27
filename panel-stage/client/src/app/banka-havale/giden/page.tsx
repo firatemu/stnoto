@@ -45,6 +45,7 @@ import {
 } from '@mui/icons-material';
 import MainLayout from '@/components/Layout/MainLayout';
 import axios from '@/lib/axios';
+import { eventHub } from '@/lib/eventHub';
 import { getBankLogo } from '@/constants/bankalar';
 
 
@@ -543,6 +544,7 @@ export default function GidenHavalePage() {
         showSnackbar('Giden havale kaydı oluşturuldu', 'success');
       }
 
+      eventHub.emit('cari:updated');
       handleCloseDialog();
       fetchHavaleler();
       fetchStats();
@@ -561,6 +563,7 @@ export default function GidenHavalePage() {
       const params = deleteReason ? { reason: deleteReason } : {};
       await axios.delete(`/banka-havale/${selectedHavale.id}`, { params });
       showSnackbar('Giden havale kaydı silindi', 'success');
+      eventHub.emit('cari:updated');
       setOpenDelete(false);
       setSelectedHavale(null);
       setDeleteReason('');

@@ -21,9 +21,10 @@ ARG API_PROXY_TARGET=http://backend-staging:3000
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ENV API_PROXY_TARGET=$API_PROXY_TARGET
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Memory limit to prevent OOM during build on limited VPS resources
-RUN NODE_OPTIONS='--max-old-space-size=2048' npx next build
+# Next.js build needs ~4GB heap; on ~8GB hosts add swap (see deploy notes) so the OOM killer does not SIGKILL the build.
+RUN NODE_OPTIONS='--max-old-space-size=4096' pnpm exec next build
 
 FROM base AS runner
 WORKDIR /app/client

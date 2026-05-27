@@ -8,7 +8,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { EmailService } from '../../common/services/email.service';
 import { RedisService } from '../../common/services/redis.service';
 import { LicenseService } from '../../common/services/license.service';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { LoginDto, RegisterDto } from './dto';
 import { SubscriptionStatus, TenantStatus } from '@prisma/client';
 

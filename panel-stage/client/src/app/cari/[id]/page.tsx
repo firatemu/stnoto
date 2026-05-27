@@ -40,6 +40,7 @@ import {
   ListItemText,
   Avatar,
   ListItemIcon,
+  TablePagination,
 } from '@mui/material';
 import {
   ArrowBack,
@@ -67,6 +68,7 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import MainLayout from '@/components/Layout/MainLayout';
 import axios from '@/lib/axios';
+import { eventHub } from '@/lib/eventHub';
 
 interface CariYetkili {
   id: string;
@@ -163,6 +165,9 @@ export default function CariDetayPage() {
   const [selectedHareket, setSelectedHareket] = useState<CariHareket | null>(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as any });
   const [tabValue, setTabValue] = useState(0);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [total, setTotal] = useState(0);
 
   const [baslangicTarihi, setBaslangicTarihi] = useState('');
   const [bitisTarihi, setBitisTarihi] = useState('');
@@ -178,7 +183,21 @@ export default function CariDetayPage() {
 
   useEffect(() => {
     fetchCari();
+  }, [cariId]);
+
+  useEffect(() => {
     fetchHareketler();
+  }, [cariId, page, rowsPerPage]);
+
+  useEffect(() => {
+    const unsubscribe = eventHub.on('cari:updated', () => {
+      fetchCari();
+      fetchHareketler();
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, [cariId]);
 
   const fetchCari = async () => {
@@ -195,9 +214,14 @@ export default function CariDetayPage() {
     try {
       setLoading(true);
       const response = await axios.get('/cari-hareket', {
-        params: { cariId, take: 1000 },
+        params: {
+          cariId,
+          skip: page * rowsPerPage,
+          take: rowsPerPage
+        },
       });
       setHareketler(response.data.data || []);
+      setTotal(response.data.total || 0);
     } catch (error) {
       console.error('Hareketler alınamadı:', error);
       showSnackbar('Hareketler yüklenemedi', 'error');
@@ -206,8 +230,17 @@ export default function CariDetayPage() {
     }
   };
 
+  const handleChangePage = (event: unknown, nextPage: number) => {
+    setPage(nextPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   const totals = hareketler.reduce(
-    (acc, h) => {
+    (acc: { borc: number; alacak: number }, h: CariHareket) => {
       const val = parseFloat(h.tutar);
       if (h.tip === 'BORC') acc.borc += val;
       else if (h.tip === 'ALACAK') acc.alacak += val;
@@ -228,6 +261,8 @@ export default function CariDetayPage() {
       resetForm();
       fetchCari();
       fetchHareketler();
+      // Bakiye guncellemesi icin diger sayfalari tetikle
+      eventHub.emit('cari:updated');
     } catch (error: any) {
       showSnackbar(error.response?.data?.message || 'Hareket eklenemedi', 'error');
     }
@@ -347,7 +382,7 @@ export default function CariDetayPage() {
   };
 
   // Mobile movement card component
-  const MobileMovementCard = ({ hareket }: { hareket: CariHareket }) => (
+  const MobileMovementCard = ({ hareket }: { hareket: CariHareket; key?: string }) => (
     <Paper
       variant="outlined"
       sx={{
@@ -391,7 +426,7 @@ export default function CariDetayPage() {
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="body2" color="text.secondary">Bakiye:</Typography>
+          <Typography variant="body2" color="text.secondary">Yürüyen bakiye:</Typography>
           <Typography variant="body2" fontWeight="800">
             ₺{parseFloat(hareket.bakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
           </Typography>
@@ -582,7 +617,7 @@ export default function CariDetayPage() {
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="subtitle2" color="primary">Diğer Adresler</Typography>
                   <List dense>
-                    {cari.ekAdresler.map(adres => (
+                    {cari.ekAdresler.map((adres: CariAdres) => (
                       <ListItem key={adres.id} disablePadding sx={{ py: 0.5 }}>
                         <ListItemIcon sx={{ minWidth: 32 }}><LocationOn fontSize="small" color="action" /></ListItemIcon>
                         <ListItemText
@@ -623,7 +658,7 @@ export default function CariDetayPage() {
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
                 <List>
-                  {cari.yetkililer.map((yetkili) => (
+                  {cari.yetkililer.map((yetkili: CariYetkili) => (
                     <ListItem key={yetkili.id} alignItems="flex-start" sx={{ px: 0 }}>
                       <ListItemIcon>
                         <Avatar sx={{ width: 32, height: 32, bgcolor: yetkili.varsayilan ? 'primary.main' : 'grey.400' }}>
@@ -662,7 +697,7 @@ export default function CariDetayPage() {
               <Divider sx={{ mb: 2 }} />
               {cari.tedarikciBankalar && cari.tedarikciBankalar.length > 0 ? (
                 <List>
-                  {cari.tedarikciBankalar.map(banka => (
+                  {cari.tedarikciBankalar.map((banka: CariBanka) => (
                     <ListItem key={banka.id} sx={{ px: 0, borderBottom: '1px solid var(--border)' }}>
                       <ListItemText
                         primary={banka.bankaAdi}
@@ -727,7 +762,7 @@ export default function CariDetayPage() {
               type="date"
               label="Başlangıç"
               value={baslangicTarihi}
-              onChange={(e) => setBaslangicTarihi(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBaslangicTarihi(e.target.value)}
               InputLabelProps={{ shrink: true }}
               size="small"
               fullWidth={isMobile}
@@ -736,7 +771,7 @@ export default function CariDetayPage() {
               type="date"
               label="Bitiş"
               value={bitisTarihi}
-              onChange={(e) => setBitisTarihi(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBitisTarihi(e.target.value)}
               InputLabelProps={{ shrink: true }}
               size="small"
               fullWidth={isMobile}
@@ -773,6 +808,10 @@ export default function CariDetayPage() {
           </Stack>
         </Box>
 
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2, maxWidth: 720 }}>
+          Hareketler <strong>eskiden yeniye</strong> sıralanır (aynı günde kayıt oluşturma sırasına göre). Bakiye sütunu bu sıradaki <strong>yürüyen bakiyeyi</strong> gösterir; çok sayfalı listelerde her satır kümülatif bakiyedir.
+        </Typography>
+
         {/* Hareketler Listesi */}
         {
           isMobile ? (
@@ -804,7 +843,7 @@ export default function CariDetayPage() {
                     <TableCell sx={{ fontWeight: 700 }}>Açıklama</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700 }}>Borç</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 700 }}>Alacak</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 700 }}>Bakiye</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700 }}>Yürüyen bakiye</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 700 }}>İşlemler</TableCell>
                   </TableRow>
                 </TableHead>
@@ -824,7 +863,7 @@ export default function CariDetayPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    hareketler.map((hareket) => (
+                    hareketler.map((hareket: CariHareket) => (
                       <TableRow key={hareket.id} hover>
                         <TableCell>
                           {new Date(hareket.tarih).toLocaleDateString('tr-TR')}
@@ -863,6 +902,17 @@ export default function CariDetayPage() {
                   )}
                 </TableBody>
               </Table>
+              <TablePagination
+                rowsPerPageOptions={[25, 50, 75, 100]}
+                component="div"
+                count={total}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Kayıt:"
+                labelDisplayedRows={({ from, to, count }: { from: number; to: number; count: number }) => `${from}-${to} / ${count}`}
+              />
             </TableContainer>
           )
         }
@@ -890,7 +940,7 @@ export default function CariDetayPage() {
               <Select
                 value={formData.tip}
                 label="İşlem Tipi"
-                onChange={(e) => setFormData({ ...formData, tip: e.target.value as any })}
+                onChange={(e: any) => setFormData({ ...formData, tip: e.target.value as any })}
               >
                 <MenuItem value="BORC">Borç (Satış)</MenuItem>
                 <MenuItem value="ALACAK">Alacak (Tahsilat)</MenuItem>
@@ -904,7 +954,7 @@ export default function CariDetayPage() {
               fullWidth
               size="small"
               value={formData.tarih}
-              onChange={(e) => setFormData({ ...formData, tarih: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, tarih: e.target.value })}
               InputLabelProps={{ shrink: true }}
             />
 
@@ -914,7 +964,7 @@ export default function CariDetayPage() {
               fullWidth
               size="small"
               value={formData.tutar}
-              onChange={(e) => setFormData({ ...formData, tutar: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, tutar: e.target.value })}
               InputProps={{
                 startAdornment: <Typography sx={{ mr: 1, color: 'text.secondary' }}>₺</Typography>
               }}
@@ -925,7 +975,7 @@ export default function CariDetayPage() {
               fullWidth
               size="small"
               value={formData.belgeNo}
-              onChange={(e) => setFormData({ ...formData, belgeNo: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, belgeNo: e.target.value })}
             />
 
             <TextField
@@ -935,7 +985,7 @@ export default function CariDetayPage() {
               rows={3}
               size="small"
               value={formData.aciklama}
-              onChange={(e) => setFormData({ ...formData, aciklama: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, aciklama: e.target.value })}
             />
           </Box>
         </DialogContent>
@@ -974,6 +1024,12 @@ export default function CariDetayPage() {
               </ListItem>
               <ListItem>
                 <ListItemText primary="Belge No" secondary={selectedHareket.belgeNo || '-'} />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Yürüyen bakiye (işlem sonrası)"
+                  secondary={`₺${parseFloat(selectedHareket.bakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`}
+                />
               </ListItem>
             </List>
           )}

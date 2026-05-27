@@ -70,7 +70,8 @@ export class CariHareketService {
       this.prisma.cariHareket.findMany({
         where: { cariId },
         include: { cari: true },
-        orderBy: { tarih: 'desc' },
+        // Yürüyen bakiye alanı bu sırayla hesaplanır; listede de aynı kronoloji (eskiden yeniye)
+        orderBy: [{ tarih: 'asc' }, { createdAt: 'asc' }],
         skip,
         take,
       }),
@@ -99,7 +100,7 @@ export class CariHareketService {
       }),
       this.prisma.cariHareket.findMany({
         where,
-        orderBy: { tarih: 'asc' },
+        orderBy: [{ tarih: 'asc' }, { createdAt: 'asc' }],
       }),
     ]);
 

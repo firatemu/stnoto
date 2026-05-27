@@ -56,6 +56,7 @@ import MainLayout from '@/components/Layout/MainLayout';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useTabStore } from '@/stores/tabStore';
+import { eventHub } from '@/lib/eventHub';
 
 interface Cari {
     id: string;
@@ -427,6 +428,8 @@ export default function SatisFaturalariPage() {
                 showSnackbar('Fatura başarıyla silindi', 'success');
                 setOpenDelete(false);
                 fetchFaturalar();
+                // Bakiye guncellemesi icin cari listesini tetikle
+                eventHub.emit('cari:updated');
             }
         } catch (error: any) {
             showSnackbar(error.response?.data?.message || 'Silme işlemi başarısız', 'error');
@@ -478,6 +481,8 @@ export default function SatisFaturalariPage() {
                 setOpenIptal(false);
                 setIrsaliyeIptal(false);
                 fetchFaturalar();
+                // Bakiye guncellemesi icin cari listesini tetikle
+                eventHub.emit('cari:updated');
             }
         } catch (error: any) {
             showSnackbar(error.response?.data?.message || 'İptal işlemi başarısız', 'error');
@@ -521,6 +526,8 @@ export default function SatisFaturalariPage() {
             setOpenDurumOnay(false);
             setPendingDurum(null);
             fetchFaturalar();
+            // Bakiye guncellemesi icin cari listesini tetikle
+            eventHub.emit('cari:updated');
         } catch (error: any) {
             showSnackbar(error.response?.data?.message || 'Durum değiştirme başarısız', 'error');
             setOpenDurumOnay(false);

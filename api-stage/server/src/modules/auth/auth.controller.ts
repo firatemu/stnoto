@@ -16,7 +16,7 @@ import { GetCurrentUser } from '../../common/decorators/get-current-user.decorat
 import { Public } from '../../common/decorators/public.decorator';
 import { EmailService } from '../../common/services/email.service';
 import { InvitationService } from '../../common/services/invitation.service';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Controller('auth')
 export class AuthController {

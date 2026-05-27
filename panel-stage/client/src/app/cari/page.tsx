@@ -40,6 +40,7 @@ import TableSkeleton from '@/components/Loading/TableSkeleton';
 import { useTabStore } from '@/stores/tabStore';
 import { CariFormData, initialCariFormData } from '@/components/cari/types';
 import NewCariDialog from '@/components/cari/NewCariDialog';
+import { eventHub } from '@/lib/eventHub';
 
 export default function CariPage() {
   const router = useRouter();
@@ -83,6 +84,14 @@ export default function CariPage() {
   useEffect(() => {
     fetchCariler();
   }, [debouncedSearch, page, pageSize, showInactive]);
+
+  // Listen for global refresh events (Cari bakiye gunclleme vb.)
+  useEffect(() => {
+    const unbind = eventHub.on('cari:updated', () => {
+      fetchCariler();
+    });
+    return () => unbind();
+  }, []);
 
   useEffect(() => {
     const fetchSatisElemanlari = async () => {

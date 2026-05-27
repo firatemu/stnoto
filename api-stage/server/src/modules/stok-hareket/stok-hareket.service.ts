@@ -15,21 +15,22 @@ export class StokHareketService {
   ) {
     const skip = (page - 1) * limit;
 
-    const where: Prisma.StokHareketWhereInput = {};
-
+    // Eski kayıtlar: tenant_id NULL olabilir; stok.tenant_id ile kiracıya bağlıdır.
+    const parts: Prisma.StokHareketWhereInput[] = [];
     if (stokId) {
-      where.stokId = stokId;
+      parts.push({ stokId });
     }
-
-    // SaaS: Sadece bu tenant'a ait hareketler (StokHareket.tenantId = kullanıcı tenantId)
-    // tenantId boş hareketler listelenmez; satış faturalarına tenantId atanmalı
-    if (tenantId) {
-      where.tenantId = tenantId;
-    }
-
     if (hareketTipi) {
-      where.hareketTipi = hareketTipi;
+      parts.push({ hareketTipi });
     }
+    if (tenantId) {
+      parts.push({
+        OR: [{ tenantId }, { tenantId: null, stok: { tenantId } }],
+      });
+    }
+
+    const where: Prisma.StokHareketWhereInput =
+      parts.length === 0 ? {} : parts.length === 1 ? parts[0]! : { AND: parts };
 
     const [data, total] = await Promise.all([
       this.prisma.stokHareket.findMany({

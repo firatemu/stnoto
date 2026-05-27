@@ -8,6 +8,15 @@
   # acme_ca https://acme-v02.api.letsencrypt.org/directory
 }
 
+# Upstream (Node) bağlantıları: keep-alive ile TLS el sıkışma maliyetini azaltır
+(common_upstream_http) {
+  transport http {
+    keepalive 32s
+    read_timeout 300s
+    write_timeout 300s
+  }
+}
+
 # ---- Ortak güvenlik ve performans ayarları (snippet) ----
 (common_security) {
   header {
@@ -42,10 +51,14 @@
 stnoto.com, www.stnoto.com {
   import common_security
   handle /api/* {
-    reverse_proxy stnoto-api:3000
+    reverse_proxy stnoto-api:3000 {
+      import common_upstream_http
+    }
   }
   handle {
-    reverse_proxy stnoto-client:3000
+    reverse_proxy stnoto-client:3000 {
+      import common_upstream_http
+    }
   }
 }
 
@@ -53,7 +66,9 @@ api.stnoto.com {
   import common_security
   @root path /
   redir @root /api/health temporary
-  reverse_proxy stnoto-api:3000
+  reverse_proxy stnoto-api:3000 {
+    import common_upstream_http
+  }
 }
 
 # ==========================

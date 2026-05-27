@@ -337,7 +337,7 @@ export class CariService {
         where: { cariId },
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ tarih: 'asc' }, { createdAt: 'asc' }],
       }),
       this.prisma.cariHareket.count({ where: { cariId } }),
     ]);

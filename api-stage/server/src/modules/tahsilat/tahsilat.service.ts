@@ -7,12 +7,17 @@ import { PrismaService } from '../../common/prisma.service';
 import { CreateTahsilatDto } from './dto/create-tahsilat.dto';
 import { CreateCaprazOdemeDto } from './dto/create-capraz-odeme.dto';
 import { TahsilatTip, OdemeTipi, KasaHareketTipi } from '@prisma/client';
+import { TenantResolverService } from '../../common/services/tenant-resolver.service';
 
 @Injectable()
 export class TahsilatService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private tenantResolver: TenantResolverService,
+  ) { }
 
   async create(createDto: CreateTahsilatDto, userId: string) {
+    const tenantId = await this.tenantResolver.resolveForCreate();
     console.log('Tahsilat Create DTO:', JSON.stringify(createDto));
 
     // Relation ID sanitization
@@ -75,6 +80,7 @@ export class TahsilatService {
       const tahsilat = await tx.tahsilat.create({
         data: {
           cariId: createDto.cariId,
+          tenantId: tenantId,
           faturaId: createDto.faturaId,
           serviceInvoiceId: createDto.serviceInvoiceId,
           tip: createDto.tip,
@@ -124,6 +130,7 @@ export class TahsilatService {
       await tx.cariHareket.create({
         data: {
           cariId: createDto.cariId,
+          tenantId: tenantId,
           tip: createDto.tip === 'TAHSILAT' ? 'ALACAK' : 'BORC',
           tutar: createDto.tutar,
           bakiye: yeniCariBakiye,
@@ -186,6 +193,7 @@ export class TahsilatService {
   }
 
   async createCaprazOdeme(createDto: CreateCaprazOdemeDto, userId: string) {
+    const tenantId = await this.tenantResolver.resolveForCreate();
     // Cariler farklı olmalı
     if (createDto.tahsilatCariId === createDto.odemeCariId) {
       throw new BadRequestException(
@@ -225,6 +233,7 @@ export class TahsilatService {
       const tahsilat = await tx.tahsilat.create({
         data: {
           cariId: createDto.tahsilatCariId,
+          tenantId: tenantId,
           tip: 'TAHSILAT',
           tutar: createDto.tutar,
           tarih,
@@ -243,6 +252,7 @@ export class TahsilatService {
       const odeme = await tx.tahsilat.create({
         data: {
           cariId: createDto.odemeCariId,
+          tenantId: tenantId,
           tip: 'ODEME',
           tutar: createDto.tutar,
           tarih,
@@ -309,6 +319,7 @@ export class TahsilatService {
       await tx.cariHareket.create({
         data: {
           cariId: createDto.tahsilatCariId,
+          tenantId: tenantId,
           tip: 'ALACAK',
           tutar: createDto.tutar,
           bakiye: tahsilatCariYeniBakiye,
@@ -322,6 +333,7 @@ export class TahsilatService {
       await tx.cariHareket.create({
         data: {
           cariId: createDto.odemeCariId,
+          tenantId: tenantId,
           tip: 'BORC',
           tutar: createDto.tutar,
           bakiye: odemeCariYeniBakiye,
@@ -354,6 +366,7 @@ export class TahsilatService {
     bankaHesapId?: string,
     firmaKrediKartiId?: string,
   ) {
+    const tenantId = await this.tenantResolver.resolveForQuery();
     const skip = (page - 1) * limit;
     const where: any = {
       deletedAt: null,
@@ -362,6 +375,19 @@ export class TahsilatService {
         { fatura: { deletedAt: null } }
       ]
     };
+
+    // Legacy uyumluluk: eski kayıtlarda tenantId null olabilir.
+    // Tenant context varsa hem mevcut tenant hem de legacy null kayıtlarını göster.
+    if (tenantId) {
+      where.AND = [
+        ...(where.AND || []),
+        {
+          OR: [{ tenantId }, { tenantId: null }],
+        },
+      ];
+    } else {
+      where.tenantId = null;
+    }
 
     if (tip) {
       where.tip = tip;
@@ -393,7 +419,9 @@ export class TahsilatService {
         where.tarih.gte = new Date(baslangicTarihi);
       }
       if (bitisTarihi) {
-        where.tarih.lte = new Date(bitisTarihi);
+        const endOfDay = new Date(bitisTarihi);
+        endOfDay.setHours(23, 59, 59, 999);
+        where.tarih.lte = endOfDay;
       }
     }
 
@@ -494,17 +522,28 @@ export class TahsilatService {
   }
 
   async getStats() {
+    const tenantId = await this.tenantResolver.resolveForQuery();
     const today = new Date();
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
     // Temel filtre: Silinmemiş tahsilatlar ve (faturası yoksa veya faturası silinmemişse)
-    const baseWhere = {
+    const baseWhere: any = {
       deletedAt: null,
       OR: [
         { faturaId: null },
         { fatura: { deletedAt: null } }
       ]
     };
+
+    if (tenantId) {
+      baseWhere.AND = [
+        {
+          OR: [{ tenantId }, { tenantId: null }],
+        },
+      ];
+    } else {
+      baseWhere.tenantId = null;
+    }
 
     const [
       toplamTahsilat,
@@ -563,12 +602,12 @@ export class TahsilatService {
     ]);
 
     const result = {
-      toplamTahsilat: toplamTahsilat._sum.tutar || 0,
-      toplamOdeme: toplamOdeme._sum.tutar || 0,
-      aylikTahsilat: aylikTahsilat._sum.tutar || 0,
-      aylikOdeme: aylikOdeme._sum.tutar || 0,
-      nakitTahsilat: nakitTahsilat._sum.tutar || 0,
-      krediKartiTahsilat: krediKartiTahsilat._sum.tutar || 0,
+      toplamTahsilat: Number(toplamTahsilat._sum.tutar || 0),
+      toplamOdeme: Number(toplamOdeme._sum.tutar || 0),
+      aylikTahsilat: Number(aylikTahsilat._sum.tutar || 0),
+      aylikOdeme: Number(aylikOdeme._sum.tutar || 0),
+      nakitTahsilat: Number(nakitTahsilat._sum.tutar || 0),
+      krediKartiTahsilat: Number(krediKartiTahsilat._sum.tutar || 0),
     };
 
     console.log('[TahsilatService] getStats result:', result);
@@ -699,6 +738,7 @@ export class TahsilatService {
           faturaId: fatura.id,
           tahsilatId: tahsilatId,
           tutar: odenecekTutar,
+          tenantId: fatura.tenantId,
         },
       });
 

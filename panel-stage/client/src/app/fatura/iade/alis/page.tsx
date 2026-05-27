@@ -32,6 +32,7 @@ import MainLayout from '@/components/Layout/MainLayout';
 import axios from '@/lib/axios';
 import { useRouter } from 'next/navigation';
 import { useTabStore } from '@/stores/tabStore';
+import { eventHub } from '@/lib/eventHub';
 
 interface Cari {
   id: string;
@@ -190,6 +191,8 @@ export default function AlisIadeFaturalariPage() {
       showSnackbar('İade faturası başarıyla silindi', 'success');
       setOpenDelete(false);
       fetchFaturalar();
+      // Bakiye guncellemesi icin cari listesini tetikle
+      eventHub.emit('cari:updated');
     } catch (error: any) {
       showSnackbar(error.response?.data?.message || 'İade faturası silinirken hata oluştu', 'error');
     } finally {
@@ -210,6 +213,8 @@ export default function AlisIadeFaturalariPage() {
         setOpenIptal(false);
         setIrsaliyeIptal(false);
         fetchFaturalar();
+        // Bakiye guncellemesi icin cari listesini tetikle
+        eventHub.emit('cari:updated');
       }
     } catch (error: any) {
       showSnackbar(error.response?.data?.message || 'İptal işlemi başarısız', 'error');
@@ -245,6 +250,8 @@ export default function AlisIadeFaturalariPage() {
       setOpenDurumOnay(false);
       setPendingDurum(null);
       fetchFaturalar();
+      // Bakiye guncellemesi icin cari listesini tetikle
+      eventHub.emit('cari:updated');
     } catch (error: any) {
       showSnackbar(error.response?.data?.message || 'Durum değiştirme başarısız', 'error');
       setOpenDurumOnay(false);

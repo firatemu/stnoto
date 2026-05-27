@@ -968,8 +968,8 @@ export class FaturaService {
         });
       }
 
-      // Sadece ONAYLANDI durumunda cari ve stok güncellemesi yap
-      if (faturaData.durum === 'ONAYLANDI') {
+      // Sadece finansal durumlarda (ONAYLANDI, KAPALI, KISMEN_ODENDI) cari ve stok güncellemesi yap
+      if (['ONAYLANDI', 'KISMEN_ODENDI', 'KAPALI'].includes(faturaData.durum as string)) {
         const currentCari = await prisma.cari.findUnique({
           where: { id: faturaData.cariId },
           select: { bakiye: true }
@@ -1240,8 +1240,11 @@ export class FaturaService {
         updateData.durum &&
         updateData.durum !== fatura.durum
       ) {
-        // Eğer durum ONAYLANDI'ya geçiyorsa
-        if (updateData.durum === 'ONAYLANDI') {
+        const eskiDurumFinansal = ['ONAYLANDI', 'KISMEN_ODENDI', 'KAPALI'].includes(fatura.durum as string);
+        const yeniDurumFinansal = ['ONAYLANDI', 'KISMEN_ODENDI', 'KAPALI'].includes(updateData.durum as string);
+
+        // Eğer durum ONAYLANDI vb finansal duruma geçiyorsa
+        if (!eskiDurumFinansal && yeniDurumFinansal) {
           // Transaction içinde işlemleri yap
           await this.prisma.$transaction(async (tx) => {
             // 1. YENİ CARİ HAREKET OLUŞTUR VE BAKİYEYİ GÜNCELLE
@@ -1288,7 +1291,7 @@ export class FaturaService {
 
             // 3. Stok Hareketlerini Oluştur
             for (const kalem of updated.kalemler) {
-              await prisma.stokHareket.create({
+              await tx.stokHareket.create({
                 data: {
                   stokId: kalem.stokId,
                   hareketTipi: 'GIRIS',
@@ -1454,7 +1457,7 @@ export class FaturaService {
       const eskiDurumIrsaliyeId = fatura.deliveryNoteId || fatura.satinAlmaIrsaliyeId;
       const eskiDurumSiparisId = fatura.siparisId; // Eğer fatura siparişten oluştuysa
 
-      if (fatura.durum === 'ONAYLANDI' && !eskiDurumIrsaliyeId && !eskiDurumSiparisId) {
+      if (['ONAYLANDI', 'KISMEN_ODENDI', 'KAPALI'].includes(fatura.durum as string) && !eskiDurumIrsaliyeId && !eskiDurumSiparisId) {
         for (const kalem of fatura.kalemler) {
           const depoId = fatura.warehouseId; // Faturanın kendi depo ID'si veya varsayılan
 
@@ -1508,9 +1511,10 @@ export class FaturaService {
         },
       });
 
-      // 2. YENİ ETKİLERİ UYGULAMA (Eğer yeni durum ONAYLANDI ise)
+      // 2. YENİ ETKİLERİ UYGULAMA (Eğer yeni durum ONAYLANDI vb finansal ise)
       const yeniDurum = faturaData.durum || fatura.durum;
-      if (yeniDurum === 'ONAYLANDI') {
+      const yeniDurumFinansal = ['ONAYLANDI', 'KISMEN_ODENDI', 'KAPALI'].includes(yeniDurum as string);
+      if (yeniDurumFinansal) {
         const currentCari = await tx.cari.findUnique({
           where: { id: updated.cariId },
           select: { bakiye: true }
@@ -1641,8 +1645,10 @@ export class FaturaService {
       // Maliyetlendirme (sadece ALIS faturaları için ve parametre açıksa)
       // Kalemler güncellendiğinde veya durum değiştiğinde maliyetlendirme yap
       if (fatura.faturaTipi === 'ALIS') {
+        const updateDurumFin = updateFaturaDto.durum && ['ONAYLANDI', 'KISMEN_ODENDI', 'KAPALI'].includes(updateFaturaDto.durum as string);
+        const eskiDurumFin = ['ONAYLANDI', 'KISMEN_ODENDI', 'KAPALI'].includes(fatura.durum as string);
         // Eğer durum ONAYLANDI'ya geçiyorsa ve eski durum ONAYLANDI değilse
-        if (updateFaturaDto.durum === 'ONAYLANDI' && fatura.durum !== 'ONAYLANDI') {
+        if (updateDurumFin && !eskiDurumFin) {
           // 1. Cari Hareket Oluştur
           await tx.cariHareket.create({
             data: {
@@ -1681,7 +1687,7 @@ export class FaturaService {
         }
 
         const shouldCalculateCosts =
-          fatura.durum !== 'ONAYLANDI' || updateFaturaDto.kalemler || updateFaturaDto.durum;
+          !['ONAYLANDI', 'KISMEN_ODENDI', 'KAPALI'].includes(fatura.durum as string) || updateFaturaDto.kalemler || updateFaturaDto.durum;
 
         if (shouldCalculateCosts) {
           try {
@@ -2232,8 +2238,11 @@ export class FaturaService {
     return this.prisma.$transaction(async (prisma) => {
       // Durum değişikliğine göre işlemler
 
-      // Eski durum ONAYLANDI ise, işlemleri geri al
-      if (eskiDurum === 'ONAYLANDI') {
+      const eskiDurumFinansal = ['ONAYLANDI', 'KISMEN_ODENDI', 'KAPALI'].includes(eskiDurum as string);
+      const yeniDurumFinansal = ['ONAYLANDI', 'KISMEN_ODENDI', 'KAPALI'].includes(yeniDurum as string);
+
+      // Eski durum finansal ise, işlemleri geri al
+      if (eskiDurumFinansal && (!yeniDurumFinansal || yeniDurum === 'IPTAL')) {
         // Cari hareket kaydını sil
         await prisma.cariHareket.deleteMany({
           where: {
@@ -2285,8 +2294,8 @@ export class FaturaService {
         }
       }
 
-      // Yeni durum ONAYLANDI ise, işlemleri uygula
-      if (yeniDurum === 'ONAYLANDI') {
+      // Yeni durum finansal ise, işlemleri uygula
+      if (!eskiDurumFinansal && yeniDurumFinansal) {
         // Kar hesaplamasını güncelle (maliyet değişmiş olabilir)
         if (fatura.faturaTipi === 'SATIS') {
           try {
@@ -2365,11 +2374,11 @@ export class FaturaService {
 
       // Yeni durum IPTAL ise, iptal işlemlerini yap
       if (yeniDurum === 'IPTAL') {
-        // Eğer eski durum ONAYLANDI değilse, sadece durumu değiştir
-        // ONAYLANDI ise yukarıda zaten geri alındı
+        // Eğer eski durum finansal değilse, sadece durumu değiştir
+        // Finansal ise yukarıda zaten geri alındı
 
-        // İptal hareket kaydı oluştur (sadece ONAYLANDI'dan geliyorsa)
-        if (eskiDurum === 'ONAYLANDI') {
+        // İptal hareket kaydı oluştur (sadece finansaldan geliyorsa)
+        if (eskiDurumFinansal) {
           const cari = await prisma.cari.findUnique({
             where: { id: fatura.cariId },
           });

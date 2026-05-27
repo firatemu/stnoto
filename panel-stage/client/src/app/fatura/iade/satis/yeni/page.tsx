@@ -32,6 +32,7 @@ import { Delete, Save, ArrowBack, ToggleOn, ToggleOff, Add as AddIcon } from '@m
 import MainLayout from '@/components/Layout/MainLayout';
 import axios from '@/lib/axios';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { eventHub } from '@/lib/eventHub';
 
 interface Cari {
   id: string;
@@ -642,6 +643,7 @@ function YeniSatisIadeFaturasiContent() {
       });
 
       showSnackbar('İade faturası başarıyla oluşturuldu', 'success');
+      eventHub.emit('cari:updated');
       setTimeout(() => {
         router.push('/fatura/iade/satis');
       }, 1500);
